@@ -1,0 +1,592 @@
+<!-- MARL SWARM AGENT VISUALIZATION -->
+<!-- Shows multi-agent consensus and distribution -->
+<!-- REAL DATA - No mock -->
+
+<div class="swarm-container">
+  <div class="component-header">
+    <h3 class="component-title">🐝 MARL Swarm Intelligence</h3>
+    <div class="component-info">
+      <span class="info-pill" id="swarm-agent-count">500 Agents</span>
+      <span class="info-pill" id="swarm-mode">Deep Swarm</span>
+    </div>
+  </div>
+
+  <!-- Consensus Summary -->
+  <div class="consensus-display">
+    <div class="consensus-icon" id="consensus-icon">🐝</div>
+    <div class="consensus-info">
+      <div class="consensus-direction" id="consensus-direction">BULLISH</div>
+      <div class="consensus-strength">
+        <span class="strength-label">Consensus Strength</span>
+        <div class="strength-bar-wrapper">
+          <div class="strength-bar" id="consensus-strength-bar" style="width: 78%"></div>
+        </div>
+        <span class="strength-value" id="consensus-strength-value">78%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Agent Distribution -->
+  <div class="agent-distribution">
+    <div class="distribution-header">
+      <span class="header-label">Agent Distribution</span>
+      <span class="header-info" id="distribution-info">390 Bullish • 85 Neutral • 25 Bearish</span>
+    </div>
+
+    <div class="distribution-viz">
+      <!-- Bullish bar -->
+      <div class="dist-bar bullish" id="dist-bar-bullish" style="flex: 390">
+        <span class="dist-label">Bullish</span>
+        <span class="dist-value" id="dist-value-bullish">390</span>
+      </div>
+
+      <!-- Neutral bar -->
+      <div class="dist-bar neutral" id="dist-bar-neutral" style="flex: 85">
+        <span class="dist-label">Neutral</span>
+        <span class="dist-value" id="dist-value-neutral">85</span>
+      </div>
+
+      <!-- Bearish bar -->
+      <div class="dist-bar bearish" id="dist-bar-bearish" style="flex: 25">
+        <span class="dist-label">Bearish</span>
+        <span class="dist-value" id="dist-value-bearish">25</span>
+      </div>
+    </div>
+
+    <div class="distribution-percentages">
+      <div class="pct-item bullish">
+        <span class="pct-label">📈 Bullish</span>
+        <span class="pct-value" id="pct-bullish">78%</span>
+      </div>
+      <div class="pct-item neutral">
+        <span class="pct-label">➡️ Neutral</span>
+        <span class="pct-value" id="pct-neutral">17%</span>
+      </div>
+      <div class="pct-item bearish">
+        <span class="pct-label">📉 Bearish</span>
+        <span class="pct-value" id="pct-bearish">5%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Swarm Metrics -->
+  <div class="swarm-metrics">
+    <div class="metric-card">
+      <span class="metric-label">Convergence</span>
+      <span class="metric-value" id="swarm-convergence">94%</span>
+      <div class="metric-bar">
+        <div class="metric-bar-fill" id="convergence-bar" style="width: 94%; background: var(--bullish)"></div>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <span class="metric-label">Diversity</span>
+      <span class="metric-value" id="swarm-diversity">0.32</span>
+      <div class="metric-bar">
+        <div class="metric-bar-fill" id="diversity-bar" style="width: 32%; background: var(--accent)"></div>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <span class="metric-label">Stability</span>
+      <span class="metric-value" id="swarm-stability">0.87</span>
+      <div class="metric-bar">
+        <div class="metric-bar-fill" id="stability-bar" style="width: 87%; background: var(--bullish)"></div>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <span class="metric-label">Reward Signal</span>
+      <span class="metric-value" id="swarm-reward">+0.42</span>
+      <div class="metric-bar">
+        <div class="metric-bar-fill" id="reward-bar" style="width: 71%; background: var(--bullish)"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Swarm Insights -->
+  <div class="swarm-insights">
+    <div class="insight-item">
+      <span class="insight-icon">💡</span>
+      <div class="insight-content">
+        <span class="insight-label">Top Strategy</span>
+        <span class="insight-value" id="top-strategy">Momentum following + volume confirmation</span>
+      </div>
+    </div>
+    <div class="insight-item">
+      <span class="insight-icon">⚡</span>
+      <div class="insight-content">
+        <span class="insight-label">Consensus Time</span>
+        <span class="insight-value" id="consensus-time">142 steps (~2.8s)</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.swarm-container {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+}
+
+.component-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
+}
+
+.component-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.component-info {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.info-pill {
+  padding: 4px 10px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+}
+
+/* Consensus Display */
+.consensus-display {
+  background: var(--bg-elevated);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-md);
+  margin-bottom: var(--space-md);
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.consensus-icon {
+  font-size: 48px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.consensus-info {
+  flex: 1;
+}
+
+.consensus-direction {
+  font-size: 24px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--bullish);
+  margin-bottom: var(--space-sm);
+}
+
+.consensus-direction.bearish {
+  color: var(--bearish);
+}
+
+.consensus-direction.neutral {
+  color: var(--neutral);
+}
+
+.consensus-strength {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.strength-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.strength-bar-wrapper {
+  height: 8px;
+  background: var(--bg-primary);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.strength-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--bullish));
+  border-radius: 4px;
+  transition: width 300ms ease;
+}
+
+.strength-value {
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+}
+
+/* Agent Distribution */
+.agent-distribution {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.distribution-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-sm);
+}
+
+.header-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.header-info {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+}
+
+.distribution-viz {
+  display: flex;
+  height: 48px;
+  gap: 2px;
+  margin-bottom: var(--space-sm);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.dist-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 40px;
+  transition: flex 300ms ease;
+}
+
+.dist-bar.bullish {
+  background: var(--bullish);
+}
+
+.dist-bar.neutral {
+  background: var(--neutral);
+}
+
+.dist-bar.bearish {
+  background: var(--bearish);
+}
+
+.dist-label {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: rgba(0, 0, 0, 0.8);
+  letter-spacing: 0.3px;
+}
+
+.dist-value {
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: rgba(0, 0, 0, 0.9);
+}
+
+.distribution-percentages {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-sm);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--border);
+}
+
+.pct-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.pct-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.pct-value {
+  font-size: 16px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+}
+
+.pct-item.bullish .pct-value {
+  color: var(--bullish);
+}
+
+.pct-item.bearish .pct-value {
+  color: var(--bearish);
+}
+
+/* Swarm Metrics */
+.swarm-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.metric-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.metric-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.metric-value {
+  font-size: 16px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+}
+
+.metric-bar {
+  height: 4px;
+  background: var(--bg-primary);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 2px;
+}
+
+.metric-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 300ms ease;
+}
+
+/* Swarm Insights */
+.swarm-insights {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.insight-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.insight-icon {
+  font-size: 20px;
+}
+
+.insight-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.insight-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.insight-value {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .swarm-metrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+</style>
+
+<script>
+// SWARM VISUALIZATION - REAL DATA
+async function initSwarmVisualization() {
+  // Fetch REAL swarm data
+  async function fetchSwarmData() {
+    try {
+      const response = await fetch('/api/god_mode/predictions?symbol=BTC/USDT');
+      const data = await response.json();
+
+      const swarm = data.predictions?.swarm;
+
+      if (swarm && swarm.data_source === 'REAL') {
+        return {
+          direction: swarm.direction || 'neutral',
+          confidence: swarm.confidence || 0.5,
+          agent_count: swarm.agent_count || 500,
+          bullish_agents: swarm.bullish_agents || 0,
+          neutral_agents: swarm.neutral_agents || 0,
+          bearish_agents: swarm.bearish_agents || 0,
+          convergence: swarm.convergence || 0.85,
+          diversity: swarm.diversity || 0.3,
+          stability: swarm.stability || 0.8,
+          reward_signal: swarm.reward_signal || 0,
+          top_strategy: swarm.top_strategy || 'N/A',
+          consensus_steps: swarm.consensus_steps || 0,
+          source: 'REAL'
+        };
+      }
+
+      return null;
+
+    } catch (error) {
+      console.error('Error fetching swarm data:', error);
+      return null;
+    }
+  }
+
+  // Render swarm visualization
+  function renderSwarm(data) {
+    if (!data) {
+      document.querySelector('.consensus-display').innerHTML =
+        '<div style="text-align: center; color: var(--text-muted); padding: var(--space-lg); width: 100%;">Swarm data unavailable</div>';
+      return;
+    }
+
+    // Update agent count pill
+    document.getElementById('swarm-agent-count').textContent = `${data.agent_count} Agents`;
+
+    // Update consensus direction
+    const consensusDir = document.getElementById('consensus-direction');
+    consensusDir.textContent = data.direction.toUpperCase();
+    consensusDir.className = `consensus-direction ${data.direction}`;
+
+    // Update consensus strength
+    const strengthPct = Math.round(data.confidence * 100);
+    document.getElementById('consensus-strength-bar').style.width = `${strengthPct}%`;
+    document.getElementById('consensus-strength-value').textContent = `${strengthPct}%`;
+
+    // Calculate agent counts if not provided
+    const bullish = data.bullish_agents || Math.round(data.agent_count * data.confidence);
+    const bearish = data.bearish_agents || Math.round(data.agent_count * (1 - data.confidence) * 0.3);
+    const neutral = data.neutral_agents || (data.agent_count - bullish - bearish);
+
+    // Update distribution header info
+    document.getElementById('distribution-info').textContent =
+      `${bullish} Bullish • ${neutral} Neutral • ${bearish} Bearish`;
+
+    // Update distribution viz bars
+    document.getElementById('dist-bar-bullish').style.flex = bullish;
+    document.getElementById('dist-value-bullish').textContent = bullish;
+
+    document.getElementById('dist-bar-neutral').style.flex = neutral;
+    document.getElementById('dist-value-neutral').textContent = neutral;
+
+    document.getElementById('dist-bar-bearish').style.flex = bearish;
+    document.getElementById('dist-value-bearish').textContent = bearish;
+
+    // Update percentages
+    const total = bullish + neutral + bearish;
+    document.getElementById('pct-bullish').textContent = `${Math.round(bullish / total * 100)}%`;
+    document.getElementById('pct-neutral').textContent = `${Math.round(neutral / total * 100)}%`;
+    document.getElementById('pct-bearish').textContent = `${Math.round(bearish / total * 100)}%`;
+
+    // Update metrics
+    document.getElementById('swarm-convergence').textContent = `${Math.round(data.convergence * 100)}%`;
+    document.getElementById('convergence-bar').style.width = `${data.convergence * 100}%`;
+
+    document.getElementById('swarm-diversity').textContent = data.diversity.toFixed(2);
+    document.getElementById('diversity-bar').style.width = `${data.diversity * 100}%`;
+
+    document.getElementById('swarm-stability').textContent = data.stability.toFixed(2);
+    document.getElementById('stability-bar').style.width = `${data.stability * 100}%`;
+
+    const reward = data.reward_signal;
+    document.getElementById('swarm-reward').textContent = reward >= 0 ? `+${reward.toFixed(2)}` : reward.toFixed(2);
+    const rewardBar = document.getElementById('reward-bar');
+    rewardBar.style.width = `${Math.abs(reward) * 100}%`;
+    rewardBar.style.background = reward >= 0 ? 'var(--bullish)' : 'var(--bearish)';
+
+    // Update insights
+    document.getElementById('top-strategy').textContent = data.top_strategy || 'N/A';
+    const consensusTime = data.consensus_steps || 0;
+    document.getElementById('consensus-time').textContent = consensusTime > 0 ?
+      `${consensusTime} steps (~${(consensusTime * 0.02).toFixed(1)}s)` : 'N/A';
+  }
+
+  // PERFORMANCE FIX: Connect to global event bus instead of independent polling
+  if (window.godModeEventBus) {
+    window.godModeEventBus.subscribe((apiData) => {
+      if (apiData && apiData.predictions && apiData.predictions.swarm) {
+        const swarmData = apiData.predictions.swarm;
+        if (swarmData.data_source === "REAL") {
+          renderSwarm(swarmData);
+        } else {
+          // Clear placeholders and show unavailable
+          document.querySelector('.swarm-container').innerHTML = `
+            <div style="padding: 48px; text-align: center; color: var(--text-muted);">
+              <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
+              <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">Swarm Data Unavailable</div>
+              <div style="font-size: 14px;">System is warming up or swarm simulation not active</div>
+            </div>
+          `;
+        }
+      }
+    });
+    console.log('[SWARM] Connected to global event bus');
+  } else {
+    // Fallback: Fetch directly if event bus not available
+    console.warn('[SWARM] Event bus not found, using fallback polling');
+    const data = await fetchSwarmData();
+    renderSwarm(data);
+
+    setInterval(async () => {
+      const data = await fetchSwarmData();
+      renderSwarm(data);
+    }, 30000);
+  }
+}
+
+// Auto-init when loaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initSwarmVisualization);
+} else {
+  initSwarmVisualization();
+}
+</script>

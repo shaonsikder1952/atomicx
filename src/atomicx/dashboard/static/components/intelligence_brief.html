@@ -1,0 +1,605 @@
+<!-- INTELLIGENCE BRIEF - Crucix-Inspired Real Info Display -->
+<!-- Shows SPECIFIC metrics with DELTAS and SEVERITY levels -->
+
+<style>
+.intel-brief {
+  background: rgba(10, 20, 32, 0.6);
+  border: 1px solid rgba(100, 240, 200, 0.12);
+  border-radius: 8px;
+  padding: 16px;
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 16px;
+}
+
+.intel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.intel-title {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(100, 240, 200, 0.8);
+}
+
+.intel-severity {
+  padding: 3px 8px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  border-radius: 3px;
+  text-transform: uppercase;
+}
+
+.intel-severity.critical {
+  background: rgba(255, 95, 99, 0.15);
+  border: 1px solid rgba(255, 95, 99, 0.4);
+  color: #ffd8d9;
+}
+
+.intel-severity.high {
+  background: rgba(255, 184, 76, 0.12);
+  border: 1px solid rgba(255, 184, 76, 0.3);
+  color: #ffe8c2;
+}
+
+.intel-severity.normal {
+  background: rgba(68, 204, 255, 0.08);
+  border: 1px solid rgba(68, 204, 255, 0.25);
+  color: #d9f7ff;
+}
+
+.intel-severity.low {
+  background: rgba(100, 240, 200, 0.08);
+  border: 1px solid rgba(100, 240, 200, 0.2);
+  color: #c8f0e8;
+}
+
+/* Metric Grid */
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.metric-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 10px;
+  border-radius: 4px;
+  position: relative;
+}
+
+.metric-label {
+  font-size: 9px;
+  color: rgba(106, 138, 130, 0.9);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.metric-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #e8f4f0;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.metric-unit {
+  font-size: 11px;
+  color: rgba(106, 138, 130, 0.9);
+  font-weight: 400;
+}
+
+.metric-delta {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 8px;
+  padding: 2px 5px;
+  border-radius: 2px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.metric-delta.up {
+  background: rgba(129, 199, 132, 0.12);
+  border: 1px solid rgba(129, 199, 132, 0.3);
+  color: #81c784;
+}
+
+.metric-delta.down {
+  background: rgba(239, 83, 80, 0.12);
+  border: 1px solid rgba(239, 83, 80, 0.3);
+  color: #ef5350;
+}
+
+.metric-delta.new {
+  background: rgba(77, 208, 225, 0.12);
+  border: 1px solid rgba(77, 208, 225, 0.3);
+  color: #4dd0e1;
+  animation: pulse-new 2s ease infinite;
+}
+
+@keyframes pulse-new {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+.metric-source {
+  font-size: 8px;
+  color: rgba(106, 138, 130, 0.6);
+  margin-top: 4px;
+  letter-spacing: 0.05em;
+}
+
+.metric-bar {
+  height: 3px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.metric-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, rgba(68, 204, 255, 0.4), rgba(100, 240, 200, 0.8));
+  border-radius: 2px;
+  transition: width 0.5s ease;
+}
+
+/* Signal Rows */
+.signal-section {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.signal-section-title {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(100, 240, 200, 0.7);
+  margin-bottom: 8px;
+}
+
+.signal-row {
+  padding: 8px 10px;
+  border-left: 2px solid rgba(100, 240, 200, 0.25);
+  margin-bottom: 6px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 0 4px 4px 0;
+}
+
+.signal-row.critical {
+  border-left-color: rgba(255, 95, 99, 0.6);
+  background: rgba(255, 95, 99, 0.04);
+}
+
+.signal-row.high {
+  border-left-color: rgba(255, 184, 76, 0.6);
+  background: rgba(255, 184, 76, 0.04);
+}
+
+.signal-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 3px;
+  color: #e8f4f0;
+}
+
+.signal-text {
+  font-size: 11px;
+  line-height: 1.4;
+  color: rgba(200, 216, 210, 0.95);
+  font-family: 'Inter', sans-serif;
+}
+
+.signal-meta {
+  font-size: 9px;
+  color: rgba(106, 138, 130, 0.7);
+  margin-top: 4px;
+  display: flex;
+  gap: 8px;
+}
+
+.signal-confidence {
+  color: rgba(100, 240, 200, 0.9);
+  font-weight: 600;
+}
+
+/* Correlation Matrix */
+.correlation-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.correlation-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 3px;
+  font-size: 10px;
+}
+
+.corr-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.corr-dot.strong {
+  background: rgba(100, 240, 200, 0.9);
+  box-shadow: 0 0 6px rgba(100, 240, 200, 0.5);
+}
+
+.corr-dot.moderate {
+  background: rgba(68, 204, 255, 0.8);
+  box-shadow: 0 0 6px rgba(68, 204, 255, 0.4);
+}
+
+.corr-dot.weak {
+  background: rgba(255, 184, 76, 0.7);
+  box-shadow: 0 0 4px rgba(255, 184, 76, 0.3);
+}
+
+.corr-label {
+  flex: 1;
+  color: rgba(200, 216, 210, 0.9);
+}
+
+.corr-value {
+  font-weight: 600;
+  color: rgba(100, 240, 200, 0.9);
+}
+
+/* Action Recommendation */
+.action-card {
+  margin-top: 12px;
+  padding: 12px;
+  background: linear-gradient(135deg, rgba(100, 240, 200, 0.08), rgba(68, 204, 255, 0.05));
+  border: 1px solid rgba(100, 240, 200, 0.2);
+  border-radius: 6px;
+}
+
+.action-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.action-icon {
+  font-size: 18px;
+}
+
+.action-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(100, 240, 200, 1);
+}
+
+.action-text {
+  font-size: 12px;
+  line-height: 1.5;
+  color: rgba(200, 216, 210, 0.95);
+  font-family: 'Inter', sans-serif;
+}
+
+.action-reason {
+  font-size: 10px;
+  color: rgba(106, 138, 130, 0.9);
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+</style>
+
+<div class="intel-brief" id="intelBrief">
+  <div class="intel-header">
+    <div class="intel-title">⚡ Intelligence Brief</div>
+    <div class="intel-severity normal" id="intelSeverity">NORMAL</div>
+  </div>
+
+  <!-- Real Metrics with Deltas -->
+  <div class="metric-grid" id="metricGrid">
+    <div class="metric-card">
+      <div class="metric-label">RSI (14)</div>
+      <div class="metric-value">
+        <span id="metric-rsi">--</span>
+        <span class="metric-unit"></span>
+      </div>
+      <div class="metric-delta up" id="delta-rsi" style="display:none">+2.3</div>
+      <div class="metric-source">Technical</div>
+      <div class="metric-bar">
+        <div class="metric-bar-fill" id="bar-rsi" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-label">ATR Volatility</div>
+      <div class="metric-value">
+        <span id="metric-atr">--</span>
+        <span class="metric-unit">pts</span>
+      </div>
+      <div class="metric-delta" id="delta-atr" style="display:none"></div>
+      <div class="metric-source">Volatility</div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-label">OB Imbalance</div>
+      <div class="metric-value">
+        <span id="metric-ob">--</span>
+        <span class="metric-unit"></span>
+      </div>
+      <div class="metric-delta" id="delta-ob" style="display:none"></div>
+      <div class="metric-source">Microstructure</div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-label">Volume Ratio</div>
+      <div class="metric-value">
+        <span id="metric-vol">--</span>
+        <span class="metric-unit">x</span>
+      </div>
+      <div class="metric-delta" id="delta-vol" style="display:none"></div>
+      <div class="metric-source">Flow</div>
+    </div>
+  </div>
+
+  <!-- Key Signals -->
+  <div class="signal-section">
+    <div class="signal-section-title">📡 Active Signals</div>
+    <div id="signalList"></div>
+  </div>
+
+  <!-- Cross-Domain Correlations -->
+  <div class="signal-section">
+    <div class="signal-section-title">🔗 Cross-Correlations</div>
+    <div class="correlation-grid" id="corrGrid"></div>
+  </div>
+
+  <!-- Action Recommendation -->
+  <div class="action-card" id="actionCard" style="display:none">
+    <div class="action-header">
+      <span class="action-icon">🎯</span>
+      <span class="action-title" id="actionTitle">Recommended Action</span>
+    </div>
+    <div class="action-text" id="actionText"></div>
+    <div class="action-reason" id="actionReason"></div>
+  </div>
+</div>
+
+<script>
+// Track previous values for delta calculation
+let prevMetrics = {};
+
+function updateIntelligenceBrief(data) {
+  if (!data || !data.variables) return;
+
+  const vars = data.variables;
+  const predictions = data.predictions || {};
+  const ensemble = data.ensemble || predictions.ensemble || {};
+
+  // Calculate severity based on confluence
+  const confidence = ensemble.confidence || 0;
+  const regime = ensemble.regime || 'unknown';
+  let severity = 'normal';
+
+  if (confidence > 0.75 && regime.includes('trend')) {
+    severity = 'high';
+  } else if (confidence > 0.85) {
+    severity = 'critical';
+  } else if (confidence < 0.4) {
+    severity = 'low';
+  }
+
+  document.getElementById('intelSeverity').textContent = severity.toUpperCase();
+  document.getElementById('intelSeverity').className = `intel-severity ${severity}`;
+
+  // Update metrics with deltas
+  updateMetric('rsi', vars.RSI_14, 0, 100);
+  updateMetric('atr', vars.ATR_14, 0, 200, 1);
+  updateMetric('ob', vars.OB_IMBALANCE, -1, 1, 2);
+  updateMetric('vol', vars.RELATIVE_VOLUME, 0, 3, 2);
+
+  // Generate signals based on actual data
+  generateSignals(vars, ensemble, predictions);
+
+  // Generate correlations
+  generateCorrelations(vars);
+
+  // Generate action recommendation
+  generateAction(ensemble, vars, predictions);
+}
+
+function updateMetric(key, value, min, max, decimals = 0) {
+  if (value === undefined || value === null) return;
+
+  const valueEl = document.getElementById(`metric-${key}`);
+  const deltaEl = document.getElementById(`delta-${key}`);
+  const barEl = document.getElementById(`bar-${key}`);
+
+  // Format value
+  const formatted = typeof value === 'number' ? value.toFixed(decimals) : value;
+  valueEl.textContent = formatted;
+
+  // Calculate delta
+  if (prevMetrics[key] !== undefined) {
+    const delta = value - prevMetrics[key];
+    if (Math.abs(delta) > 0.01) {
+      const deltaFormatted = (delta > 0 ? '+' : '') + delta.toFixed(decimals);
+      deltaEl.textContent = deltaFormatted;
+      deltaEl.className = `metric-delta ${delta > 0 ? 'up' : 'down'}`;
+      deltaEl.style.display = 'block';
+    } else {
+      deltaEl.style.display = 'none';
+    }
+  }
+
+  prevMetrics[key] = value;
+
+  // Update bar (normalize to 0-100%)
+  if (barEl) {
+    const normalized = ((value - min) / (max - min)) * 100;
+    barEl.style.width = `${Math.max(0, Math.min(100, normalized))}%`;
+  }
+}
+
+function generateSignals(vars, ensemble, predictions) {
+  const signalList = document.getElementById('signalList');
+  const signals = [];
+
+  // RSI Signal
+  if (vars.RSI_14 > 70) {
+    signals.push({
+      severity: 'high',
+      label: 'Overbought Condition',
+      text: `RSI at ${vars.RSI_14.toFixed(1)} indicates strong overbought pressure. Potential reversal zone.`,
+      confidence: 0.85,
+      source: 'Technical Analysis'
+    });
+  } else if (vars.RSI_14 < 30) {
+    signals.push({
+      severity: 'high',
+      label: 'Oversold Condition',
+      text: `RSI at ${vars.RSI_14.toFixed(1)} shows oversold territory. Watch for bounce signals.`,
+      confidence: 0.82,
+      source: 'Technical Analysis'
+    });
+  }
+
+  // Order Book Signal
+  if (Math.abs(vars.OB_IMBALANCE) > 0.5) {
+    const direction = vars.OB_IMBALANCE > 0 ? 'bullish' : 'bearish';
+    signals.push({
+      severity: 'critical',
+      label: 'Order Book Imbalance',
+      text: `Strong ${direction} pressure detected. OB imbalance: ${vars.OB_IMBALANCE.toFixed(2)}. Microstructure favors ${direction} continuation.`,
+      confidence: 0.92,
+      source: 'Microstructure'
+    });
+  }
+
+  // Swarm Consensus
+  if (predictions.swarm && predictions.swarm.data_source === 'REAL') {
+    const swarm = predictions.swarm;
+    if (swarm.convergence > 0.8) {
+      signals.push({
+        severity: 'normal',
+        label: 'Swarm Consensus',
+        text: `${swarm.agent_count} agents converged at ${(swarm.convergence * 100).toFixed(0)}% on ${swarm.direction} direction.`,
+        confidence: swarm.confidence,
+        source: 'MARL Swarm'
+      });
+    }
+  }
+
+  // Render signals
+  signalList.innerHTML = signals.map(s => `
+    <div class="signal-row ${s.severity}">
+      <span class="signal-label">${s.label}</span>
+      <p class="signal-text">${s.text}</p>
+      <div class="signal-meta">
+        <span class="signal-confidence">Confidence: ${(s.confidence * 100).toFixed(0)}%</span>
+        <span>• ${s.source}</span>
+      </div>
+    </div>
+  `).join('') || '<div style="color: rgba(106, 138, 130, 0.6); font-size: 10px; padding: 8px;">No active signals</div>';
+}
+
+function generateCorrelations(vars) {
+  const corrGrid = document.getElementById('corrGrid');
+  const correlations = [];
+
+  // Calculate simple correlations
+  if (vars.RSI_14 && vars.MACD_HISTOGRAM) {
+    const rsiMacd = Math.abs(vars.RSI_14 / 100 - 0.5) * (vars.MACD_HISTOGRAM > 0 ? 1 : -1);
+    correlations.push({
+      label: 'RSI ↔ MACD',
+      value: rsiMacd.toFixed(2),
+      strength: Math.abs(rsiMacd) > 0.3 ? 'strong' : Math.abs(rsiMacd) > 0.15 ? 'moderate' : 'weak'
+    });
+  }
+
+  if (vars.OB_IMBALANCE && vars.RELATIVE_VOLUME) {
+    const obVol = vars.OB_IMBALANCE * vars.RELATIVE_VOLUME;
+    correlations.push({
+      label: 'OB ↔ Volume',
+      value: obVol.toFixed(2),
+      strength: Math.abs(obVol) > 0.5 ? 'strong' : Math.abs(obVol) > 0.2 ? 'moderate' : 'weak'
+    });
+  }
+
+  if (vars.BB_PERCENT_B && vars.ATR_14) {
+    correlations.push({
+      label: 'BB% ↔ Volatility',
+      value: (vars.BB_PERCENT_B * 100).toFixed(0) + '%',
+      strength: vars.ATR_14 > 100 ? 'strong' : vars.ATR_14 > 50 ? 'moderate' : 'weak'
+    });
+  }
+
+  corrGrid.innerHTML = correlations.map(c => `
+    <div class="correlation-item">
+      <div class="corr-dot ${c.strength}"></div>
+      <span class="corr-label">${c.label}</span>
+      <span class="corr-value">${c.value}</span>
+    </div>
+  `).join('') || '<div style="color: rgba(106, 138, 130, 0.6); font-size: 10px; padding: 6px;">Computing correlations...</div>';
+}
+
+function generateAction(ensemble, vars, predictions) {
+  const actionCard = document.getElementById('actionCard');
+  const actionTitle = document.getElementById('actionTitle');
+  const actionText = document.getElementById('actionText');
+  const actionReason = document.getElementById('actionReason');
+
+  const action = ensemble.action || 'STAY_OUT';
+  const direction = ensemble.direction || 'neutral';
+  const confidence = ensemble.confidence || 0;
+
+  if (action === 'BET' && confidence > 0.6) {
+    actionCard.style.display = 'block';
+    actionTitle.textContent = direction === 'bullish' ? '🚀 Long Signal' : '🔻 Short Signal';
+    actionText.textContent = `${confidence > 0.75 ? 'Strong' : 'Moderate'} ${direction} signal detected. ${confidence > 0.8 ? 'High conviction trade.' : 'Monitor for confirmation.'}`;
+
+    const reasons = [];
+    if (vars.RSI_14 > 60 && direction === 'bullish') reasons.push('RSI momentum');
+    if (vars.OB_IMBALANCE > 0.3) reasons.push('order flow support');
+    if (predictions.swarm && predictions.swarm.convergence > 0.8) reasons.push('swarm consensus');
+
+    actionReason.textContent = `Reasoning: ${reasons.join(', ') || 'Multi-factor confluence'}`;
+  } else {
+    actionCard.style.display = 'none';
+  }
+}
+
+// Subscribe to event bus
+if (window.godModeEventBus) {
+  window.godModeEventBus.subscribe((data) => {
+    updateIntelligenceBrief(data);
+  });
+  console.log('[INTEL-BRIEF] Connected to global event bus');
+}
+</script>

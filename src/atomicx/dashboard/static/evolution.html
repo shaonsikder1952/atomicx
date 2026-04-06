@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AtomicX Evolution Panel</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <link rel="stylesheet" href="/static/styles/core.css">
+    <style>
+        /* Page-specific styles */
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .evolution-container {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: var(--space-5);
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-elevated) 100%);
+            padding: var(--space-8);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--space-8);
+            border: 1px solid var(--border-medium);
+        }
+
+        .header h1 {
+            font-size: var(--text-4xl);
+            font-weight: var(--font-bold);
+            color: var(--text-primary);
+            margin-bottom: var(--space-3);
+        }
+
+        .header .subtitle {
+            color: var(--text-secondary);
+            font-size: var(--text-base);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: var(--space-5);
+            margin-bottom: var(--space-8);
+        }
+
+        .card {
+            background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-elevated) 100%);
+            border-radius: var(--radius-lg);
+            padding: var(--space-6);
+            border: 1px solid var(--border-medium);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+        }
+
+        .card-title {
+            font-size: var(--text-lg);
+            font-weight: var(--font-semibold);
+            color: var(--text-primary);
+            margin-bottom: var(--space-4);
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+        }
+
+        .health-score {
+            text-align: center;
+            padding: var(--space-5);
+        }
+
+        .health-circle {
+            width: 180px;
+            height: 180px;
+            margin: 0 auto var(--space-5);
+            position: relative;
+        }
+
+        .health-value {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: var(--text-4xl);
+            font-weight: var(--font-bold);
+        }
+
+        .health-label {
+            font-size: var(--text-sm);
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .trend {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--space-1) var(--space-3);
+            border-radius: var(--radius);
+            font-size: var(--text-sm);
+            font-weight: var(--font-semibold);
+            margin-top: var(--space-2);
+        }
+
+        .trend-improving { background: var(--success-dim); color: var(--success); }
+        .trend-declining { background: var(--error-dim); color: var(--error); }
+        .trend-stable { background: rgba(148, 163, 184, 0.2); color: var(--text-secondary); }
+
+        .config-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .config-table th {
+            text-align: left;
+            padding: 12px 8px;
+            border-bottom: 2px solid var(--border-medium);
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+        }
+
+        .config-table td {
+            padding: 12px 8px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .config-table tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .changed {
+            color: var(--warning);
+            font-weight: 600;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-pending { background: rgba(148, 163, 184, 0.2); color: var(--text-secondary); }
+        .badge-shadow_testing { background: rgba(59, 130, 246, 0.2); color: var(--accent); }
+        .badge-approved { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+        .badge-deployed { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+        .badge-rejected { background: rgba(239, 68, 68, 0.2); color: var(--error); }
+
+        .proposal-item {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 3px solid var(--border-medium);
+        }
+
+        .proposal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 10px;
+        }
+
+        .proposal-action {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .proposal-confidence {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .proposal-evidence {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 8px;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+
+        .ab-test-item {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .ab-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 12px 0;
+        }
+
+        .ab-metric {
+            text-align: center;
+        }
+
+        .ab-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .ab-value {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .ab-delta {
+            margin-top: 8px;
+            padding: 8px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .ab-delta.positive {
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--success);
+        }
+
+        .ab-delta.negative {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--error);
+        }
+
+        .agent-leaderboard {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .agent-leaderboard th {
+            text-align: left;
+            padding: 12px 8px;
+            border-bottom: 2px solid var(--border-medium);
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 11px;
+        }
+
+        .agent-leaderboard td {
+            padding: 12px 8px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .agent-leaderboard tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-positive { background: var(--success); }
+        .progress-negative { background: var(--error); }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 16px;
+        }
+
+        .meta-insight {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 3px solid var(--accent);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .insight-type {
+            font-size: 11px;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .insight-content {
+            color: #e0e7ff;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .insight-confidence {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .refresh-button {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .refresh-button:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        .tab-nav {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid var(--border-subtle);
+            padding-bottom: 0;
+        }
+
+        .tab-button {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            position: relative;
+            bottom: -2px;
+        }
+
+        .tab-button:hover {
+            color: #e0e7ff;
+        }
+
+        .tab-button.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        .scrollable {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .scrollable::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .scrollable::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        .scrollable::-webkit-scrollbar-thumb {
+            background: var(--border-medium);
+            border-radius: 4px;
+        }
+
+        .scrollable::-webkit-scrollbar-thumb:hover {
+            background: var(--border-medium);
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="evolution-container">
+        <div class="header">
+            <h1>⚡ Autonomous Evolution System</h1>
+            <p class="subtitle">Real-time system self-improvement dashboard — fully autonomous parameter optimization and code evolution</p>
+        </div>
+
+        <div class="tab-nav">
+            <button class="tab-button" :class="{active: activeTab === 'overview'}" @click="activeTab = 'overview'">
+                Overview
+            </button>
+            <button class="tab-button" :class="{active: activeTab === 'proposals'}" @click="activeTab = 'proposals'">
+                Proposals
+            </button>
+            <button class="tab-button" :class="{active: activeTab === 'testing'}" @click="activeTab = 'testing'">
+                A/B Testing
+            </button>
+            <button class="tab-button" :class="{active: activeTab === 'agents'}" @click="activeTab = 'agents'">
+                Agent Leaderboard
+            </button>
+            <button class="tab-button" :class="{active: activeTab === 'config'}" @click="activeTab = 'config'">
+                Live Config
+            </button>
+            <button class="tab-button" :class="{active: activeTab === 'meta'}" @click="activeTab = 'meta'">
+                Meta-Learning
+            </button>
+        </div>
+
+        <!-- Overview Tab -->
+        <div v-if="activeTab === 'overview'">
+            <div class="grid">
+                <div class="card">
+                    <div class="card-title">System Health Score</div>
+                    <div class="health-score">
+                        <div class="health-circle">
+                            <svg width="180" height="180" viewBox="0 0 180 180">
+                                <circle cx="90" cy="90" r="85" fill="none" stroke="var(--border-subtle)" stroke-width="10"/>
+                                <circle cx="90" cy="90" r="85" fill="none" :stroke="healthColor" stroke-width="10"
+                                    stroke-dasharray="534" :stroke-dashoffset="534 - (534 * health.health_score / 100)"
+                                    transform="rotate(-90 90 90)" stroke-linecap="round"/>
+                            </svg>
+                            <div class="health-value" :style="{color: healthColor}">
+                                {{ health.health_score?.toFixed(0) || '--' }}
+                            </div>
+                        </div>
+                        <div class="health-label">Health Score</div>
+                        <div class="trend" :class="`trend-${health.trend || 'stable'}`">
+                            <span v-if="health.trend === 'improving'">↗</span>
+                            <span v-else-if="health.trend === 'declining'">↘</span>
+                            <span v-else>→</span>
+                            {{ health.trend || 'stable' }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">Recent Evolution Reports</div>
+                    <div class="scrollable" style="max-height: 280px;">
+                        <div v-if="reports.length === 0" class="empty-state">
+                            <div class="spinner"></div>
+                            <p>Loading reports...</p>
+                        </div>
+                        <div v-for="report in reports.slice(0, 3)" :key="report.report_id" class="proposal-item">
+                            <div class="proposal-header">
+                                <div>
+                                    <div class="proposal-action">Health: {{ report.health_score }}/100</div>
+                                    <div class="proposal-confidence">{{ new Date(report.generated_at).toLocaleString() }}</div>
+                                </div>
+                            </div>
+                            <div class="proposal-evidence">
+                                <strong>Changes Made:</strong> {{ report.changes_made.length }}<br>
+                                <strong>Top Improvements:</strong> {{ report.top_improvements.join(', ') || 'None yet' }}<br>
+                                <strong>Top Weaknesses:</strong> {{ report.top_weaknesses.join(', ') || 'None detected' }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">Win Rate Trend</div>
+                    <div class="chart-container">
+                        <canvas ref="winRateChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Proposals Tab -->
+        <div v-if="activeTab === 'proposals'">
+            <div class="card">
+                <div class="card-title">Evolution Proposals ({{ proposals.length }})</div>
+                <button class="refresh-button" @click="fetchData" style="float: right; margin-top: -40px;">Refresh</button>
+                <div class="scrollable">
+                    <div v-if="proposals.length === 0" class="empty-state">
+                        <p>No proposals yet. System will generate proposals after first diagnosis (cycle 50+)</p>
+                    </div>
+                    <div v-for="proposal in proposals" :key="proposal.proposal_id" class="proposal-item">
+                        <div class="proposal-header">
+                            <div>
+                                <div class="proposal-action">{{ proposal.action_type }}: {{ proposal.parameter_path }}</div>
+                                <div class="proposal-confidence">
+                                    Confidence: {{ (proposal.confidence * 100).toFixed(1) }}% |
+                                    Expected: {{ proposal.expected_improvement ? `+${(proposal.expected_improvement * 100).toFixed(1)}%` : 'N/A' }}
+                                </div>
+                            </div>
+                            <span class="badge" :class="`badge-${proposal.status}`">{{ proposal.status }}</span>
+                        </div>
+                        <div class="proposal-evidence">
+                            <strong>Evidence:</strong> {{ JSON.stringify(proposal.evidence).substring(0, 200) }}...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- A/B Testing Tab -->
+        <div v-if="activeTab === 'testing'">
+            <div class="card">
+                <div class="card-title">A/B Test Results ({{ abTests.length }})</div>
+                <div class="scrollable">
+                    <div v-if="abTests.length === 0" class="empty-state">
+                        <p>No A/B tests completed yet. Tests run automatically for approved proposals.</p>
+                    </div>
+                    <div v-for="test in abTests" :key="test.test_id" class="ab-test-item">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                            <div>
+                                <strong>Test ID:</strong> {{ test.test_id }}<br>
+                                <small style="color: var(--text-secondary);">{{ new Date(test.decided_at).toLocaleString() }}</small>
+                            </div>
+                            <span class="badge" :class="test.decision === 'promote' ? 'badge-approved' : 'badge-rejected'">
+                                {{ test.decision }}
+                            </span>
+                        </div>
+                        <div class="ab-comparison">
+                            <div class="ab-metric">
+                                <div class="ab-label">Shadow Win Rate</div>
+                                <div class="ab-value" style="color: var(--accent);">{{ (test.shadow_win_rate * 100).toFixed(1) }}%</div>
+                            </div>
+                            <div class="ab-metric">
+                                <div class="ab-label">Live Win Rate</div>
+                                <div class="ab-value" style="color: var(--text-muted);">{{ (test.live_win_rate * 100).toFixed(1) }}%</div>
+                            </div>
+                        </div>
+                        <div class="ab-delta" :class="test.delta > 0 ? 'positive' : 'negative'">
+                            Delta: {{ (test.delta * 100).toFixed(2) }}% over {{ test.cycles_tested }} cycles
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Agent Leaderboard Tab -->
+        <div v-if="activeTab === 'agents'">
+            <div class="card">
+                <div class="card-title">Agent Performance Leaderboard ({{ agents.length }})</div>
+                <table class="agent-leaderboard">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Agent ID</th>
+                            <th>Win Rate</th>
+                            <th>Edge</th>
+                            <th>Predictions</th>
+                            <th>Weight</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(agent, index) in agents" :key="agent.agent_id">
+                            <td><strong>#{{ index + 1 }}</strong></td>
+                            <td>{{ agent.agent_id }}</td>
+                            <td>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" :class="agent.win_rate > 0.5 ? 'progress-positive' : 'progress-negative'"
+                                        :style="{width: (agent.win_rate * 100) + '%'}"></div>
+                                </div>
+                                {{ (agent.win_rate * 100).toFixed(1) }}%
+                            </td>
+                            <td :style="{color: agent.edge > 0 ? 'var(--success)' : 'var(--error)'}">{{ (agent.edge * 100).toFixed(2) }}%</td>
+                            <td>{{ agent.total_predictions }}</td>
+                            <td>{{ agent.weight.toFixed(2) }}</td>
+                            <td><span class="badge" :class="agent.is_active ? 'badge-approved' : 'badge-rejected'">
+                                {{ agent.is_active ? 'active' : 'disabled' }}
+                            </span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Live Config Tab -->
+        <div v-if="activeTab === 'config'">
+            <div class="card">
+                <div class="card-title">Live Configuration ({{ configs.filter(c => c.changed).length }} changed)</div>
+                <table class="config-table">
+                    <thead>
+                        <tr>
+                            <th>Config Key</th>
+                            <th>Regime</th>
+                            <th>Current Value</th>
+                            <th>Default Value</th>
+                            <th>Performance Δ</th>
+                            <th>Updated By</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="config in configs" :key="config.key + '_' + config.regime" :class="{changed: config.changed}">
+                            <td>{{ config.key }}</td>
+                            <td>{{ config.regime || 'global' }}</td>
+                            <td :class="{changed: config.changed}">{{ JSON.stringify(config.current_value) }}</td>
+                            <td>{{ JSON.stringify(config.default_value) }}</td>
+                            <td :style="{color: config.performance_delta > 0 ? 'var(--success)' : config.performance_delta < 0 ? 'var(--error)' : 'var(--text-secondary)'}">
+                                {{ config.performance_delta ? (config.performance_delta * 100).toFixed(2) + '%' : '--' }}
+                            </td>
+                            <td><span class="badge badge-pending">{{ config.updated_by }}</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Meta-Learning Tab -->
+        <div v-if="activeTab === 'meta'">
+            <div class="card">
+                <div class="card-title">Meta-Learning Insights ({{ insights.length }})</div>
+                <div class="scrollable">
+                    <div v-if="insights.length === 0" class="empty-state">
+                        <p>No meta-learning insights yet. System analyzes its own learning patterns every 200 cycles.</p>
+                    </div>
+                    <div v-for="insight in insights" :key="insight.insight_type + '_' + insight.created_at" class="meta-insight">
+                        <div class="insight-type">{{ insight.insight_type.replace(/_/g, ' ') }}</div>
+                        <div class="insight-content">{{ insight.content }}</div>
+                        <div class="insight-confidence">
+                            Confidence: {{ (insight.confidence * 100).toFixed(0) }}% |
+                            {{ new Date(insight.created_at).toLocaleString() }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    activeTab: 'overview',
+                    health: {},
+                    proposals: [],
+                    abTests: [],
+                    reports: [],
+                    agents: [],
+                    configs: [],
+                    insights: [],
+                    winRateChart: null
+                };
+            },
+            computed: {
+                healthColor() {
+                    const score = this.health.health_score || 50;
+                    if (score >= 70) return 'var(--success)';
+                    if (score >= 50) return 'var(--warning)';
+                    return 'var(--error)';
+                }
+            },
+            mounted() {
+                this.fetchData();
+                setInterval(() => this.fetchData(), 10000); // Refresh every 10 seconds
+            },
+            methods: {
+                async fetchData() {
+                    try {
+                        // Fetch all evolution data
+                        const [healthRes, proposalsRes, testsRes, reportsRes, agentsRes, configsRes, insightsRes] = await Promise.all([
+                            fetch('/api/evolution/health'),
+                            fetch('/api/evolution/proposals'),
+                            fetch('/api/evolution/ab_tests'),
+                            fetch('/api/evolution/reports'),
+                            fetch('/api/evolution/agent_leaderboard'),
+                            fetch('/api/evolution/config'),
+                            fetch('/api/evolution/meta_insights')
+                        ]);
+
+                        this.health = await healthRes.json();
+                        this.proposals = (await proposalsRes.json()).proposals || [];
+                        this.abTests = (await testsRes.json()).ab_tests || [];
+                        this.reports = (await reportsRes.json()).reports || [];
+                        this.agents = (await agentsRes.json()).agents || [];
+                        this.configs = (await configsRes.json()).configs || [];
+                        this.insights = (await insightsRes.json()).insights || [];
+
+                        // Update win rate chart
+                        this.updateChart();
+                    } catch (error) {
+                        console.error('Failed to fetch evolution data:', error);
+                    }
+                },
+                updateChart() {
+                    if (!this.$refs.winRateChart) return;
+
+                    const ctx = this.$refs.winRateChart.getContext('2d');
+
+                    if (this.winRateChart) {
+                        this.winRateChart.destroy();
+                    }
+
+                    // Extract win rate trend from reports
+                    const labels = this.reports.map(r => new Date(r.generated_at).toLocaleDateString()).reverse();
+                    const data = this.reports.map(r => r.health_score).reverse();
+
+                    this.winRateChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: labels.length > 0 ? labels : ['No data'],
+                            datasets: [{
+                                label: 'System Health Score',
+                                data: data.length > 0 ? data : [50],
+                                borderColor: 'var(--accent)',
+                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                tension: 0.4,
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    max: 100,
+                                    grid: { color: 'var(--border-subtle)' },
+                                    ticks: { color: 'var(--text-secondary)' }
+                                },
+                                x: {
+                                    grid: { color: 'var(--border-subtle)' },
+                                    ticks: { color: 'var(--text-secondary)' }
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

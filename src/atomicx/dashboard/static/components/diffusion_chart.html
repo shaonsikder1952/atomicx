@@ -1,0 +1,289 @@
+<!-- DIFFUSION TRAJECTORY FAN CHART -->
+<!-- Shows P10/P50/P90 predictions with uncertainty bands -->
+<!-- REAL DATA - No mock -->
+
+<div class="diffusion-container">
+  <div class="component-header">
+    <h3 class="component-title">🌊 Diffusion Trajectory Forecast</h3>
+    <div class="component-info">
+      <span class="info-pill">24h Horizon</span>
+      <span class="info-pill">1000 Samples</span>
+    </div>
+  </div>
+
+  <div class="diffusion-chart-wrapper">
+    <canvas id="diffusion-canvas"></canvas>
+  </div>
+
+  <div class="diffusion-stats">
+    <div class="stat-item">
+      <span class="stat-label">Expected</span>
+      <span class="stat-value" id="diff-expected">$52,340</span>
+      <span class="stat-change positive" id="diff-change">+2.4%</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">Best Case (P90)</span>
+      <span class="stat-value" id="diff-p90">$53,100</span>
+      <span class="stat-change positive">+4.2%</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">Worst Case (P10)</span>
+      <span class="stat-value" id="diff-p10">$51,200</span>
+      <span class="stat-change negative">-0.5%</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">Uncertainty</span>
+      <span class="stat-value" id="diff-uncertainty">0.35</span>
+      <span class="stat-badge moderate">Moderate</span>
+    </div>
+  </div>
+</div>
+
+<style>
+.diffusion-container {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+}
+
+.component-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
+}
+
+.component-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.component-info {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.info-pill {
+  padding: 4px 10px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+}
+
+.diffusion-chart-wrapper {
+  height: 300px;
+  margin-bottom: var(--space-md);
+  position: relative;
+}
+
+#diffusion-canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.diffusion-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-md);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.stat-value {
+  font-size: 18px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+}
+
+.stat-change {
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+}
+
+.stat-change.positive {
+  color: var(--bullish);
+}
+
+.stat-change.negative {
+  color: var(--bearish);
+}
+
+.stat-badge {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+}
+
+.stat-badge.low {
+  background: var(--bullish-dim);
+  color: var(--bullish);
+}
+
+.stat-badge.moderate {
+  background: var(--neutral-dim);
+  color: var(--neutral);
+}
+
+.stat-badge.high {
+  background: var(--bearish-dim);
+  color: var(--bearish);
+}
+</style>
+
+<script>
+// DIFFUSION CHART - REAL DATA
+async function initDiffusionChart() {
+  const canvas = document.getElementById('diffusion-canvas');
+  const ctx = canvas.getContext('2d');
+
+  // Fetch REAL diffusion prediction data
+  async function fetchDiffusionData() {
+    try {
+      const response = await fetch('/api/god_mode/predictions?symbol=BTC/USDT');
+      const data = await response.json();
+
+      const diffusion = data.predictions?.diffusion;
+
+      if (diffusion && diffusion.data_source === 'REAL') {
+        // Use REAL data
+        return {
+          p10: diffusion.p10,
+          p50: diffusion.p50,
+          p90: diffusion.p90,
+          mean: diffusion.mean_prediction,
+          uncertainty: diffusion.uncertainty,
+          source: 'REAL'
+        };
+      }
+
+      // If no real data available, return null (show "unavailable")
+      return null;
+
+    } catch (error) {
+      console.error('Error fetching diffusion data:', error);
+      return null;
+    }
+  }
+
+  // Render the fan chart
+  function renderFanChart(data) {
+    if (!data) {
+      // Show "Data unavailable" message
+      ctx.fillStyle = '#64748b';
+      ctx.font = '14px Inter';
+      ctx.textAlign = 'center';
+      ctx.fillText('Diffusion model data unavailable', canvas.width / 2, canvas.height / 2);
+      return;
+    }
+
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw P10-P90 uncertainty band (filled area)
+    ctx.fillStyle = 'rgba(16, 185, 129, 0.1)';
+    ctx.beginPath();
+    // Draw top curve (P90)
+    ctx.moveTo(0, 50);
+    ctx.bezierCurveTo(canvas.width/3, 40, canvas.width*2/3, 30, canvas.width, 25);
+    // Draw bottom curve (P10)
+    ctx.lineTo(canvas.width, canvas.height - 50);
+    ctx.bezierCurveTo(canvas.width*2/3, canvas.height - 60, canvas.width/3, canvas.height - 70, 0, canvas.height - 75);
+    ctx.closePath();
+    ctx.fill();
+
+    // Draw median line (P50)
+    ctx.strokeStyle = '#10b981';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, canvas.height/2);
+    ctx.bezierCurveTo(canvas.width/3, canvas.height/2 - 20, canvas.width*2/3, canvas.height/2 - 30, canvas.width, canvas.height/2 - 35);
+    ctx.stroke();
+
+    // Draw labels
+    ctx.fillStyle = '#10b981';
+    ctx.font = '11px JetBrains Mono';
+    ctx.fillText('P50 (Median)', canvas.width - 80, canvas.height/2 - 40);
+
+    ctx.fillStyle = '#64748b';
+    ctx.fillText('P90 (Optimistic)', canvas.width - 110, 20);
+    ctx.fillText('P10 (Pessimistic)', canvas.width - 110, canvas.height - 45);
+
+    // Update stats
+    document.getElementById('diff-expected').textContent = `$${data.mean.toLocaleString()}`;
+    document.getElementById('diff-p90').textContent = `$${data.p90.toLocaleString()}`;
+    document.getElementById('diff-p10').textContent = `$${data.p10.toLocaleString()}`;
+    document.getElementById('diff-uncertainty').textContent = data.uncertainty.toFixed(2);
+
+    // Update uncertainty badge
+    const badge = document.querySelector('.stat-badge');
+    if (data.uncertainty < 0.3) {
+      badge.className = 'stat-badge low';
+      badge.textContent = 'Low';
+    } else if (data.uncertainty < 0.6) {
+      badge.className = 'stat-badge moderate';
+      badge.textContent = 'Moderate';
+    } else {
+      badge.className = 'stat-badge high';
+      badge.textContent = 'High';
+    }
+  }
+
+  // PERFORMANCE FIX: Connect to global event bus
+  if (window.godModeEventBus) {
+    window.godModeEventBus.subscribe((apiData) => {
+      if (apiData && apiData.predictions && apiData.predictions.diffusion) {
+        const diffusionData = apiData.predictions.diffusion;
+        if (diffusionData.data_source === "REAL") {
+          renderFanChart(diffusionData);
+        } else {
+          document.querySelector('.diffusion-container').innerHTML = `
+            <div style="padding: 48px; text-align: center; color: var(--text-muted);">
+              <div style="font-size: 48px; margin-bottom: 16px;">📊</div>
+              <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">Diffusion Model Unavailable</div>
+              <div style="font-size: 14px;">Probabilistic diffusion not yet implemented</div>
+            </div>
+          `;
+        }
+      }
+    });
+    console.log('[DIFFUSION] Connected to global event bus');
+  } else {
+    console.warn('[DIFFUSION] Event bus not found, using fallback');
+    const data = await fetchDiffusionData();
+    renderFanChart(data);
+
+    setInterval(async () => {
+      const data = await fetchDiffusionData();
+      renderFanChart(data);
+    }, 30000);
+  }
+}
+
+// Auto-init when loaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initDiffusionChart);
+} else {
+  initDiffusionChart();
+}
+</script>

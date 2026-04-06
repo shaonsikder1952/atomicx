@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Memory - AtomicX</title>
+    <link rel="stylesheet" href="/static/styles/core.css">
+    <style>
+        /* Page-specific styles */
+        header {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+            padding: var(--space-8);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--space-8);
+        }
+        h1 { font-size: var(--text-4xl); margin-bottom: var(--space-3); }
+        .subtitle { opacity: 0.9; font-size: var(--text-lg); }
+
+        .search-box {
+            width: 100%;
+            padding: var(--space-4);
+            background: var(--bg-elevated);
+            border: 2px solid var(--border-medium);
+            border-radius: var(--radius);
+            color: var(--text-primary);
+            font-size: var(--text-lg);
+            margin-bottom: var(--space-5);
+            font-family: var(--font-sans);
+        }
+        .search-box:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .section {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: var(--space-6);
+            margin-bottom: var(--space-6);
+            border: 1px solid var(--border-subtle);
+        }
+        h2 {
+            color: var(--accent);
+            margin-bottom: var(--space-5);
+            padding-bottom: var(--space-4);
+            border-bottom: 2px solid var(--border-subtle);
+        }
+
+        .memory-card {
+            background: var(--bg-primary);
+            border-left: 4px solid var(--accent);
+            border-radius: var(--radius);
+            padding: var(--space-5);
+            margin-bottom: var(--space-4);
+        }
+        .mem-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-3);
+            flex-wrap: wrap;
+            gap: var(--space-3);
+        }
+        .mem-meta {
+            color: var(--text-secondary);
+            font-size: var(--text-sm);
+        }
+        .mem-score {
+            background: var(--border-medium);
+            padding: var(--space-2) var(--space-4);
+            border-radius: var(--radius-full);
+            font-weight: var(--font-semibold);
+            color: var(--accent);
+        }
+        .mem-content {
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .loading {
+            text-align: center;
+            padding: var(--space-12);
+            color: var(--text-muted);
+            font-size: var(--text-lg);
+        }
+        .error {
+            background: var(--error-dim);
+            color: var(--error);
+            padding: var(--space-5);
+            border-radius: var(--radius);
+            margin: var(--space-5) 0;
+        }
+        .empty {
+            text-align: center;
+            padding: var(--space-10);
+            color: var(--text-muted);
+        }
+
+        .quick-searches {
+            display: flex;
+            gap: var(--space-3);
+            flex-wrap: wrap;
+            margin-top: var(--space-4);
+        }
+        .quick-search-btn {
+            padding: var(--space-2) var(--space-4);
+            background: var(--bg-elevated);
+            color: var(--accent);
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: var(--text-sm);
+            transition: all 150ms ease;
+        }
+        .quick-search-btn:hover {
+            background: var(--accent-dim);
+            border-color: var(--accent);
+        }
+
+        .nav {
+            display: flex;
+            gap: var(--space-3);
+            margin-bottom: var(--space-8);
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧠 Memory Viewer</h1>
+            <p class="subtitle">Qdrant Vector Store - Search & explore memories</p>
+        </header>
+
+        <div class="nav">
+            <a href="/" class="btn">← Main Dashboard</a>
+            <a href="/db.html" class="btn">📊 Database</a>
+            <a href="/mem.html" class="btn btn-primary">🧠 Memory</a>
+        </div>
+
+        <div class="section">
+            <h2>🔍 Search Memories</h2>
+            <input 
+                type="text" 
+                class="search-box" 
+                id="searchInput"
+                placeholder="Search: 'BTC prediction', 'news events', 'market regime', 'Fed Powell', etc..."
+                onkeypress="if(event.key==='Enter') searchMemories()"
+            >
+            <div class="quick-searches">
+                <button class="quick-search-btn" onclick="quickSearch('BTC prediction')">BTC prediction</button>
+                <button class="quick-search-btn" onclick="quickSearch('news events')">News events</button>
+                <button class="quick-search-btn" onclick="quickSearch('market regime')">Market regime</button>
+                <button class="quick-search-btn" onclick="quickSearch('Fed Powell inflation')">Fed Powell</button>
+                <button class="quick-search-btn" onclick="quickSearch('price movement')">Price movement</button>
+                <button class="btn" onclick="searchMemories()">🔍 Search</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📚 Search Results</h2>
+            <div id="memories">
+                <div class="loading">Enter a search query above...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentQuery = '';
+        
+        async function searchMemories() {
+            const query = document.getElementById('searchInput').value.trim() || 'BTC price trading';
+            currentQuery = query;
+            
+            document.getElementById('memories').innerHTML = '<div class="loading">Searching memory...</div>';
+            
+            try {
+                const res = await fetch(`/api/memory?query=${encodeURIComponent(query)}`);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                
+                const memories = data.memories || [];
+                
+                if (memories.length === 0) {
+                    document.getElementById('memories').innerHTML = `
+                        <div class="empty">
+                            No memories found for "${query}".<br>
+                            Try a different search query.
+                        </div>
+                    `;
+                    return;
+                }
+                
+                document.getElementById('memories').innerHTML = memories.map((m, i) => `
+                    <div class="memory-card">
+                        <div class="mem-header">
+                            <div class="mem-meta">
+                                <strong>#${i + 1}</strong> | 
+                                Type: ${m.type || 'unknown'} | 
+                                ${new Date(m.timestamp).toLocaleString()}
+                            </div>
+                            <div class="mem-score">Relevance: ${Math.round(m.score * 100)}%</div>
+                        </div>
+                        <div class="mem-content">${m.content}</div>
+                    </div>
+                `).join('');
+                
+            } catch (err) {
+                console.error('Error:', err);
+                document.getElementById('memories').innerHTML = `
+                    <div class="error">
+                        ⚠️ Error loading memories: ${err.message}<br>
+                        <small>The system might still be initializing. Wait a moment and try again.</small>
+                    </div>
+                `;
+            }
+        }
+        
+        function quickSearch(query) {
+            document.getElementById('searchInput').value = query;
+            searchMemories();
+        }
+        
+        // Auto-search on page load
+        window.addEventListener('load', () => {
+            document.getElementById('searchInput').value = 'BTC prediction market';
+            searchMemories();
+        });
+    </script>
+</body>
+</html>

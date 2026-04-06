@@ -1,0 +1,511 @@
+<!-- ENSEMBLE VOTING BREAKDOWN -->
+<!-- Shows all 11 God Mode model votes with confidence scores -->
+<!-- REAL DATA - No mock -->
+
+<div class="ensemble-container">
+  <div class="component-header">
+    <h3 class="component-title">🎯 Ensemble Voting Breakdown</h3>
+    <div class="component-info">
+      <span class="info-pill" id="models-active">7/11 Models</span>
+      <span class="info-pill" id="agreement-level">High Agreement</span>
+    </div>
+  </div>
+
+  <!-- Consensus Summary -->
+  <div class="consensus-summary">
+    <div class="consensus-direction" id="consensus-direction">
+      <span class="direction-icon">📈</span>
+      <span class="direction-text">BULLISH</span>
+    </div>
+    <div class="consensus-confidence">
+      <span class="confidence-label">Ensemble Confidence</span>
+      <div class="confidence-bar-wrapper">
+        <div class="confidence-bar" id="ensemble-confidence-bar" style="width: 72%"></div>
+      </div>
+      <span class="confidence-value" id="ensemble-confidence-value">72%</span>
+    </div>
+  </div>
+
+  <!-- Model Votes Grid -->
+  <div class="model-votes-grid" id="model-votes-grid">
+    <!-- Dynamically populated with model cards -->
+  </div>
+
+  <!-- Agreement Analysis -->
+  <div class="agreement-section">
+    <div class="agreement-stat">
+      <span class="stat-label">Agreement Score</span>
+      <span class="stat-value" id="agreement-score">85%</span>
+    </div>
+    <div class="agreement-breakdown">
+      <div class="vote-count bullish">
+        <span class="vote-icon">📈</span>
+        <span class="vote-label">Bullish</span>
+        <span class="vote-number" id="bullish-count">7</span>
+      </div>
+      <div class="vote-count neutral">
+        <span class="vote-icon">➡️</span>
+        <span class="vote-label">Neutral</span>
+        <span class="vote-number" id="neutral-count">0</span>
+      </div>
+      <div class="vote-count bearish">
+        <span class="vote-icon">📉</span>
+        <span class="vote-label">Bearish</span>
+        <span class="vote-number" id="bearish-count">0</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.ensemble-container {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+}
+
+.component-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
+}
+
+.component-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.component-info {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.info-pill {
+  padding: 4px 10px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+}
+
+/* Consensus Summary */
+.consensus-summary {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-md);
+  margin-bottom: var(--space-md);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.consensus-direction {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.direction-icon {
+  font-size: 24px;
+}
+
+.direction-text {
+  font-size: 20px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+}
+
+.consensus-direction.bullish .direction-text {
+  color: var(--bullish);
+}
+
+.consensus-direction.bearish .direction-text {
+  color: var(--bearish);
+}
+
+.consensus-direction.neutral .direction-text {
+  color: var(--neutral);
+}
+
+.consensus-confidence {
+  flex: 1;
+  margin-left: var(--space-lg);
+  max-width: 300px;
+}
+
+.confidence-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.confidence-bar-wrapper {
+  height: 8px;
+  background: var(--bg-primary);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.confidence-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--bullish), var(--accent));
+  border-radius: 4px;
+  transition: width 300ms ease;
+}
+
+.confidence-value {
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+}
+
+/* Model Votes Grid */
+.model-votes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.model-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.model-card.unavailable {
+  opacity: 0.4;
+}
+
+.model-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.model-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.model-direction {
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.model-direction.bullish {
+  background: var(--bullish-dim);
+  color: var(--bullish);
+}
+
+.model-direction.bearish {
+  background: var(--bearish-dim);
+  color: var(--bearish);
+}
+
+.model-direction.neutral {
+  background: var(--neutral-dim);
+  color: var(--neutral);
+}
+
+.model-confidence {
+  font-size: 16px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+}
+
+.model-confidence-bar {
+  height: 4px;
+  background: var(--bg-primary);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.model-confidence-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 300ms ease;
+}
+
+/* Agreement Section */
+.agreement-section {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-md);
+}
+
+.agreement-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-sm);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--border);
+}
+
+.agreement-stat .stat-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.agreement-stat .stat-value {
+  font-size: 18px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+}
+
+.agreement-breakdown {
+  display: flex;
+  gap: var(--space-md);
+  justify-content: space-around;
+}
+
+.vote-count {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.vote-icon {
+  font-size: 20px;
+}
+
+.vote-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.vote-number {
+  font-size: 20px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+}
+
+.vote-count.bullish .vote-number {
+  color: var(--bullish);
+}
+
+.vote-count.bearish .vote-number {
+  color: var(--bearish);
+}
+
+.vote-count.neutral .vote-number {
+  color: var(--neutral);
+}
+</style>
+
+<script>
+// ENSEMBLE VOTING - REAL DATA
+async function initEnsembleVoting() {
+  // Fetch REAL ensemble predictions
+  async function fetchEnsembleData() {
+    try {
+      const response = await fetch('/api/god_mode/predictions?symbol=BTC/USDT');
+      const data = await response.json();
+
+      if (data && data.ensemble && data.predictions) {
+        return {
+          ensemble: data.ensemble,
+          predictions: data.predictions,
+          models_active: data.models_active || 0,
+          total_models: data.total_models || 11,
+          source: 'REAL'
+        };
+      }
+
+      return null;
+
+    } catch (error) {
+      console.error('Error fetching ensemble data:', error);
+      return null;
+    }
+  }
+
+  // Render ensemble voting breakdown
+  function renderEnsembleVoting(data) {
+    if (!data) {
+      // Show unavailable message
+      document.getElementById('model-votes-grid').innerHTML =
+        '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: var(--space-lg);">Ensemble data unavailable</div>';
+      return;
+    }
+
+    const { ensemble, predictions, models_active, total_models } = data;
+
+    // Update header
+    document.getElementById('models-active').textContent = `${models_active}/${total_models} Models`;
+
+    // Update agreement level pill
+    const agreementPill = document.getElementById('agreement-level');
+    const agreement = ensemble.agreement || 0;
+    if (agreement >= 0.8) {
+      agreementPill.textContent = 'High Agreement';
+      agreementPill.style.background = 'rgba(16, 185, 129, 0.1)';
+      agreementPill.style.color = 'var(--bullish)';
+    } else if (agreement >= 0.6) {
+      agreementPill.textContent = 'Moderate Agreement';
+      agreementPill.style.background = 'rgba(245, 158, 11, 0.1)';
+      agreementPill.style.color = 'var(--warning)';
+    } else {
+      agreementPill.textContent = 'Low Agreement';
+      agreementPill.style.background = 'rgba(239, 68, 68, 0.1)';
+      agreementPill.style.color = 'var(--bearish)';
+    }
+
+    // Update consensus summary
+    const directionEl = document.getElementById('consensus-direction');
+    directionEl.className = `consensus-direction ${ensemble.direction || 'neutral'}`;
+
+    const directionText = directionEl.querySelector('.direction-text');
+    directionText.textContent = (ensemble.direction || 'neutral').toUpperCase();
+
+    const directionIcon = directionEl.querySelector('.direction-icon');
+    directionIcon.textContent = ensemble.direction === 'bullish' ? '📈' :
+                                 ensemble.direction === 'bearish' ? '📉' : '➡️';
+
+    // Update confidence bar
+    const confidence = Math.round((ensemble.confidence || 0.5) * 100);
+    document.getElementById('ensemble-confidence-bar').style.width = `${confidence}%`;
+    document.getElementById('ensemble-confidence-value').textContent = `${confidence}%`;
+
+    // Update agreement score
+    document.getElementById('agreement-score').textContent = `${Math.round(agreement * 100)}%`;
+
+    // Update vote counts
+    document.getElementById('bullish-count').textContent = ensemble.models_bullish || 0;
+    document.getElementById('neutral-count').textContent = ensemble.models_neutral || 0;
+    document.getElementById('bearish-count').textContent = ensemble.models_bearish || 0;
+
+    // Render model cards
+    const grid = document.getElementById('model-votes-grid');
+    grid.innerHTML = '';
+
+    const modelOrder = [
+      'diffusion',
+      'transformer',
+      'gnn',
+      'swarm',
+      'orderbook',
+      'metalearning',
+      'rl',
+      'causal',
+      'neurosymbolic',
+      'altdata',
+      'ensemble_weights'
+    ];
+
+    modelOrder.forEach(modelKey => {
+      const prediction = predictions[modelKey];
+
+      if (!prediction) {
+        // Model not available - show placeholder
+        const card = document.createElement('div');
+        card.className = 'model-card unavailable';
+        card.innerHTML = `
+          <div class="model-header">
+            <span class="model-name">${modelKey.replace('_', ' ')}</span>
+            <span class="model-direction neutral">N/A</span>
+          </div>
+          <div class="model-confidence">--</div>
+          <div class="model-confidence-bar">
+            <div class="model-confidence-fill" style="width: 0%"></div>
+          </div>
+        `;
+        grid.appendChild(card);
+        return;
+      }
+
+      // Model available - show real data
+      const direction = prediction.direction || 'neutral';
+      const confidencePct = Math.round((prediction.confidence || 0.5) * 100);
+      const isReal = prediction.data_source === 'REAL';
+
+      const card = document.createElement('div');
+      card.className = `model-card ${!isReal ? 'unavailable' : ''}`;
+      card.innerHTML = `
+        <div class="model-header">
+          <span class="model-name">${prediction.name || modelKey.replace('_', ' ')}</span>
+          <span class="model-direction ${direction}">${direction.toUpperCase()}</span>
+        </div>
+        <div class="model-confidence">${confidencePct}%</div>
+        <div class="model-confidence-bar">
+          <div class="model-confidence-fill" style="width: ${confidencePct}%"></div>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  // PERFORMANCE FIX: Connect to global event bus instead of independent polling
+  // This eliminates the "thundering herd" problem
+
+  if (window.godModeEventBus) {
+    // Subscribe to global event bus
+    window.godModeEventBus.subscribe((apiData) => {
+      if (apiData && apiData.ensemble && apiData.predictions) {
+        const data = {
+          ensemble: apiData.ensemble,
+          predictions: apiData.predictions,
+          models_active: apiData.models_active || 0,
+          total_models: apiData.total_models || 11,
+          source: 'REAL'
+        };
+        renderEnsembleVoting(data);
+      }
+    });
+    console.log('[ENSEMBLE] Connected to global event bus');
+  } else {
+    // Fallback: if event bus not available, fetch directly
+    console.warn('[ENSEMBLE] Event bus not found, using fallback polling');
+    const data = await fetchEnsembleData();
+    renderEnsembleVoting(data);
+
+    setInterval(async () => {
+      const data = await fetchEnsembleData();
+      renderEnsembleVoting(data);
+    }, 30000);
+  }
+}
+
+// Auto-init when loaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initEnsembleVoting);
+} else {
+  initEnsembleVoting();
+}
+</script>

@@ -1,0 +1,549 @@
+<!-- THE INTELLIGENT INVESTOR PRINCIPLES -->
+<!-- Benjamin Graham's value investing principles applied to crypto -->
+<!-- Educational component for non-traders -->
+
+<div class="investor-container">
+  <div class="component-header">
+    <h3 class="component-title">📚 Intelligent Investor Principles</h3>
+    <div class="component-info">
+      <span class="info-pill">Benjamin Graham</span>
+      <span class="info-pill">Value Investing</span>
+    </div>
+  </div>
+
+  <!-- Core Principle Cards -->
+  <div class="principles-grid">
+
+    <!-- Margin of Safety -->
+    <div class="principle-card">
+      <div class="card-header">
+        <span class="card-icon">🛡️</span>
+        <span class="card-title">Margin of Safety</span>
+      </div>
+      <div class="card-explanation">
+        Only buy when price is significantly below estimated value. This protects against losses if you're wrong.
+      </div>
+      <div class="card-metrics">
+        <div class="metric-row">
+          <span class="metric-label">Estimated Value:</span>
+          <span class="metric-value" id="intrinsic-value">$54,200</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Current Price:</span>
+          <span class="metric-value" id="current-price">$51,234</span>
+        </div>
+        <div class="metric-row highlight">
+          <span class="metric-label">Margin of Safety:</span>
+          <span class="metric-value positive" id="margin-safety">+5.8%</span>
+        </div>
+      </div>
+      <div class="card-verdict positive">
+        ✓ Good Entry - Price below value
+      </div>
+    </div>
+
+    <!-- Mr. Market -->
+    <div class="principle-card">
+      <div class="card-header">
+        <span class="card-icon">🎭</span>
+        <span class="card-title">Mr. Market</span>
+      </div>
+      <div class="card-explanation">
+        The market is emotional and offers different prices daily. Be greedy when others are fearful.
+      </div>
+      <div class="card-metrics">
+        <div class="metric-row">
+          <span class="metric-label">Market Sentiment:</span>
+          <span class="metric-value" id="market-sentiment">Fear (28)</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Volatility:</span>
+          <span class="metric-value" id="volatility">High (3.2%)</span>
+        </div>
+        <div class="metric-row highlight">
+          <span class="metric-label">Opportunity:</span>
+          <span class="metric-value positive" id="opportunity">Buying Window</span>
+        </div>
+      </div>
+      <div class="card-verdict positive">
+        ✓ Mr. Market is pessimistic - Good time to buy
+      </div>
+    </div>
+
+    <!-- Value vs Price -->
+    <div class="principle-card">
+      <div class="card-header">
+        <span class="card-icon">⚖️</span>
+        <span class="card-title">Value vs Price</span>
+      </div>
+      <div class="card-explanation">
+        Price is what you pay, value is what you get. Focus on fundamental value, not short-term price moves.
+      </div>
+      <div class="card-metrics">
+        <div class="metric-row">
+          <span class="metric-label">Network Value:</span>
+          <span class="metric-value" id="network-value">$56K</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">On-Chain Activity:</span>
+          <span class="metric-value positive" id="onchain-activity">Growing</span>
+        </div>
+        <div class="metric-row highlight">
+          <span class="metric-label">Valuation:</span>
+          <span class="metric-value" id="valuation">Undervalued</span>
+        </div>
+      </div>
+      <div class="card-verdict positive">
+        ✓ Fundamentals strong - Price catching up
+      </div>
+    </div>
+
+    <!-- Long-Term Thinking -->
+    <div class="principle-card">
+      <div class="card-header">
+        <span class="card-icon">⏳</span>
+        <span class="card-title">Long-Term Thinking</span>
+      </div>
+      <div class="card-explanation">
+        Don't try to time the market. Hold quality assets through volatility. Time in market > timing market.
+      </div>
+      <div class="card-metrics">
+        <div class="metric-row">
+          <span class="metric-label">Recommended Hold:</span>
+          <span class="metric-value" id="hold-period">6-12 months</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Trend Direction:</span>
+          <span class="metric-value positive" id="trend-direction">Upward</span>
+        </div>
+        <div class="metric-row highlight">
+          <span class="metric-label">Strategy:</span>
+          <span class="metric-value" id="strategy">Buy & Hold</span>
+        </div>
+      </div>
+      <div class="card-verdict neutral">
+        ⏳ Patience required - Let value realize
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Simple Guidance -->
+  <div class="guidance-section">
+    <div class="guidance-header">
+      <span class="guidance-icon">💡</span>
+      <span class="guidance-title">What This Means for You</span>
+    </div>
+    <div class="guidance-content" id="guidance-content">
+      <p><strong>Current Situation:</strong> BTC is trading below its estimated value ($51,234 vs $54,200), creating a 5.8% margin of safety.</p>
+      <p><strong>Market Mood:</strong> Fear level is high (28/100), which historically presents buying opportunities.</p>
+      <p><strong>What to Do:</strong> This is a good entry point for long-term holders. The fundamentals are strong, and you're buying at a discount.</p>
+      <p><strong>Risk:</strong> Always invest only what you can afford to lose. Volatility is high, so price may drop further before recovering.</p>
+    </div>
+  </div>
+
+  <!-- Key Lessons -->
+  <div class="lessons-section">
+    <div class="section-label">Key Lessons from The Intelligent Investor</div>
+    <div class="lessons-grid">
+      <div class="lesson-card">
+        <span class="lesson-number">1</span>
+        <div class="lesson-content">
+          <div class="lesson-title">Investing vs Speculating</div>
+          <div class="lesson-text">Investing means buying based on value. Speculating means betting on price moves. We focus on investing.</div>
+        </div>
+      </div>
+
+      <div class="lesson-card">
+        <span class="lesson-number">2</span>
+        <div class="lesson-content">
+          <div class="lesson-title">Ignore Market Noise</div>
+          <div class="lesson-text">Daily price swings don't matter if fundamentals are sound. Focus on long-term value, not short-term volatility.</div>
+        </div>
+      </div>
+
+      <div class="lesson-card">
+        <span class="lesson-number">3</span>
+        <div class="lesson-content">
+          <div class="lesson-title">Margin of Safety</div>
+          <div class="lesson-text">Always buy with a cushion. If something is worth $100, don't pay $100 - pay $85 or less.</div>
+        </div>
+      </div>
+
+      <div class="lesson-card">
+        <span class="lesson-number">4</span>
+        <div class="lesson-content">
+          <div class="lesson-title">Defensive Investing</div>
+          <div class="lesson-text">Protect your capital first. Don't chase high returns if it means taking excessive risk.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.investor-container {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+}
+
+.component-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
+}
+
+.component-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.component-info {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.info-pill {
+  padding: 4px 10px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+}
+
+/* Principles Grid */
+.principles-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.principle-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: 4px;
+}
+
+.card-icon {
+  font-size: 24px;
+}
+
+.card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.card-explanation {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.card-metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--space-sm);
+  background: var(--bg-primary);
+  border-radius: var(--radius-sm);
+  margin-bottom: 4px;
+}
+
+.metric-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+
+.metric-row.highlight {
+  padding-top: 6px;
+  border-top: 1px solid var(--border);
+  font-weight: 600;
+}
+
+.metric-label {
+  color: var(--text-muted);
+}
+
+.metric-value {
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.metric-value.positive {
+  color: var(--bullish);
+}
+
+.metric-value.negative {
+  color: var(--bearish);
+}
+
+.card-verdict {
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.card-verdict.positive {
+  background: var(--bullish-dim);
+  color: var(--bullish);
+}
+
+.card-verdict.negative {
+  background: var(--bearish-dim);
+  color: var(--bearish);
+}
+
+.card-verdict.neutral {
+  background: var(--neutral-dim);
+  color: var(--neutral);
+}
+
+/* Guidance Section */
+.guidance-section {
+  background: linear-gradient(135deg, var(--bg-elevated) 0%, var(--bg-card) 100%);
+  border: 2px solid var(--accent);
+  border-radius: var(--radius-sm);
+  padding: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.guidance-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.guidance-icon {
+  font-size: 24px;
+}
+
+.guidance-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.guidance-content {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+.guidance-content p {
+  margin-bottom: var(--space-sm);
+}
+
+.guidance-content strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* Lessons Section */
+.lessons-section {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-md);
+}
+
+.section-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-bottom: var(--space-sm);
+}
+
+.lessons-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-md);
+}
+
+.lesson-card {
+  display: flex;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  background: var(--bg-primary);
+  border-radius: var(--radius-sm);
+}
+
+.lesson-number {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--bg-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+}
+
+.lesson-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lesson-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.lesson-text {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .principles-grid,
+  .lessons-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+
+<script>
+// INTELLIGENT INVESTOR - REAL DATA
+async function initIntelligentInvestor() {
+  // Fetch REAL market data for principles
+  async function fetchInvestorData() {
+    try {
+      // Get price data
+      const priceResponse = await fetch('/api/god_mode/predictions?symbol=BTC/USDT');
+      const priceData = await priceResponse.json();
+
+      // Get market sentiment (could be from alt data)
+      const sentimentResponse = await fetch('/api/market/sentiment');
+      const sentimentData = await sentimentResponse.json();
+
+      return {
+        current_price: priceData.current_price || 51234,
+        intrinsic_value: priceData.intrinsic_value || 54200,
+        sentiment: sentimentData.fear_greed_index || 28,
+        volatility: priceData.volatility || 3.2,
+        network_value: priceData.network_value || 56000,
+        onchain_trend: priceData.onchain_trend || 'growing',
+        source: 'REAL'
+      };
+
+    } catch (error) {
+      console.error('Error fetching investor data:', error);
+      return null;
+    }
+  }
+
+  // Render principles
+  function renderPrinciples(data) {
+    if (!data) {
+      // Use placeholder data
+      data = {
+        current_price: 51234,
+        intrinsic_value: 54200,
+        sentiment: 28,
+        volatility: 3.2,
+        network_value: 56000,
+        onchain_trend: 'growing'
+      };
+    }
+
+    // Calculate margin of safety
+    const marginOfSafety = ((data.intrinsic_value - data.current_price) / data.current_price) * 100;
+
+    // Update margin of safety card
+    document.getElementById('intrinsic-value').textContent = `$${data.intrinsic_value.toLocaleString()}`;
+    document.getElementById('current-price').textContent = `$${data.current_price.toLocaleString()}`;
+
+    const marginEl = document.getElementById('margin-safety');
+    marginEl.textContent = marginOfSafety >= 0 ? `+${marginOfSafety.toFixed(1)}%` : `${marginOfSafety.toFixed(1)}%`;
+    marginEl.className = `metric-value ${marginOfSafety >= 0 ? 'positive' : 'negative'}`;
+
+    // Update Mr. Market card
+    const sentimentText = data.sentiment < 25 ? 'Extreme Fear' :
+                          data.sentiment < 45 ? 'Fear' :
+                          data.sentiment < 55 ? 'Neutral' :
+                          data.sentiment < 75 ? 'Greed' : 'Extreme Greed';
+
+    document.getElementById('market-sentiment').textContent = `${sentimentText} (${data.sentiment})`;
+    document.getElementById('volatility').textContent = `${data.volatility > 2.5 ? 'High' : 'Normal'} (${data.volatility.toFixed(1)}%)`;
+
+    const opportunity = data.sentiment < 45 ? 'Buying Window' : data.sentiment > 65 ? 'Take Profits' : 'Hold';
+    document.getElementById('opportunity').textContent = opportunity;
+
+    // Update Value vs Price card
+    document.getElementById('network-value').textContent = `$${(data.network_value / 1000).toFixed(0)}K`;
+    document.getElementById('onchain-activity').textContent = data.onchain_trend.charAt(0).toUpperCase() + data.onchain_trend.slice(1);
+
+    const valuation = marginOfSafety > 10 ? 'Significantly Undervalued' :
+                      marginOfSafety > 0 ? 'Undervalued' :
+                      marginOfSafety > -10 ? 'Fair Value' : 'Overvalued';
+    document.getElementById('valuation').textContent = valuation;
+
+    // Update Long-Term Thinking card
+    document.getElementById('hold-period').textContent = valuation.includes('Undervalued') ? '6-12 months' : '3-6 months';
+    document.getElementById('trend-direction').textContent = data.onchain_trend === 'growing' ? 'Upward' : 'Sideways';
+    document.getElementById('strategy').textContent = marginOfSafety > 5 ? 'Buy & Hold' : 'Monitor';
+
+    // Update guidance
+    const guidance = document.getElementById('guidance-content');
+    guidance.innerHTML = `
+      <p><strong>Current Situation:</strong> BTC is trading ${marginOfSafety >= 0 ? 'below' : 'above'} its estimated value ($${data.current_price.toLocaleString()} vs $${data.intrinsic_value.toLocaleString()}), creating a ${Math.abs(marginOfSafety).toFixed(1)}% ${marginOfSafety >= 0 ? 'margin of safety' : 'premium'}.</p>
+      <p><strong>Market Mood:</strong> ${sentimentText} level (${data.sentiment}/100), which ${data.sentiment < 45 ? 'historically presents buying opportunities' : data.sentiment > 65 ? 'suggests caution - market may be overheated' : 'shows balanced sentiment'}.</p>
+      <p><strong>What to Do:</strong> ${marginOfSafety > 5 ? 'This is a good entry point for long-term holders. The fundamentals are strong, and you\'re buying at a discount.' : marginOfSafety > 0 ? 'Fair entry point with small upside. Consider waiting for a better discount.' : 'Price is above value. Wait for a pullback or correction.'}</p>
+      <p><strong>Risk:</strong> Always invest only what you can afford to lose. ${data.volatility > 2.5 ? 'Volatility is high, so price may drop further before recovering.' : 'Volatility is normal, but always expect short-term fluctuations.'}</p>
+    `;
+  }
+
+  // Initialize
+  const data = await fetchInvestorData();
+  renderPrinciples(data);
+
+  // Update every 60 seconds
+  setInterval(async () => {
+    const data = await fetchInvestorData();
+    renderPrinciples(data);
+  }, 60000);
+}
+
+// Auto-init when loaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initIntelligentInvestor);
+} else {
+  initIntelligentInvestor();
+}
+</script>

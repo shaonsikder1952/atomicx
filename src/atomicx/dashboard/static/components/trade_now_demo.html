@@ -1,0 +1,80 @@
+<!-- TRADE NOW - DEMO MODE -->
+<!-- Shows what dashboard looks like with a REAL trade signal -->
+<!-- Copy from trade_now_unified.html but with mock data -->
+
+<script src="trade_now_unified.html"></script>
+
+<script>
+// Override with DEMO DATA
+(function() {
+  // Mock high-confidence trade signal
+  const DEMO_DATA = {
+    variables: {
+      PRICE: 69342.00,
+      RSI_14: 67.2,
+      MACD_HISTOGRAM: 0.42,
+      ATR_14: 89.4,
+      BB_PERCENT_B: 0.78,
+      OB_IMBALANCE: 0.68,
+      RELATIVE_VOLUME: 1.84
+    },
+    ensemble: {
+      direction: 'bullish',
+      action: 'BET',
+      confidence: 0.82,
+      models_bullish: 7,
+      models_neutral: 4,
+      models_bearish: 0
+    },
+    predictions: {
+      swarm: {
+        data_source: 'REAL',
+        direction: 'bullish',
+        confidence: 0.78,
+        agent_count: 500,
+        convergence: 0.94
+      }
+    },
+    models_active: 7,
+    total_models: 11
+  };
+
+  // Inject demo data after 100ms
+  setTimeout(() => {
+    console.log('[DEMO MODE] Injecting high-confidence trade signal...');
+
+    // Trigger update with demo data
+    if (window.updateTradeRecommendation) {
+      // Already loaded, update directly
+      window.demoData = DEMO_DATA;
+    } else {
+      // Wait for component to load
+      window.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+          window.demoData = DEMO_DATA;
+        }, 500);
+      });
+    }
+  }, 100);
+
+  console.log('[DEMO MODE] Trade Now with HIGH-CONFIDENCE signal');
+})();
+</script>
+
+<style>
+/* Demo mode indicator */
+body::before {
+  content: '🎭 DEMO MODE - High-Confidence Trade Signal';
+  position: fixed;
+  top: 70px;
+  right: 20px;
+  background: rgba(245, 158, 11, 0.9);
+  color: #000;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  z-index: 1000;
+  font-family: 'JetBrains Mono', monospace;
+}
+</style>

@@ -1,0 +1,3092 @@
+<!DOCTYPE html>
+<!-- DASHBOARD VERSION: 2026-04-06-06:21:00 - FIXED MODEL TEXT GENERATION -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <!-- DASHBOARD VERSION: 2.3.1 - FIXED PLACEHOLDERS & INTELLIGENCE DISPLAY - 2026-04-06 06:10:00 UTC -->
+  <title>AtomicX God Mode</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+
+  <style>
+    /* === RESET === */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* === ROOT VARIABLES === */
+    :root {
+      /* Colors */
+      --bg-page: #F8F7F4;
+      --bg-card: #FFFFFF;
+      --bg-inner: #F1F0ED;
+      --border-default: #E8E6E1;
+      --border-hover: #C9C5BC;
+      --accent: #5B6AF0;
+      --accent-bg: #EEF0FD;
+      --accent-border: #C7CBF9;
+      --bullish: #16A34A;
+      --bullish-bg: #F0FDF4;
+      --bullish-border: #BBF7D0;
+      --bearish: #DC2626;
+      --bearish-bg: #FEF2F2;
+      --bearish-border: #FECACA;
+      --neutral: #D97706;
+      --neutral-bg: #FFFBEB;
+      --neutral-border: #FDE68A;
+      --text-primary: #1A1917;
+      --text-secondary: #6B6860;
+      --text-muted: #A8A49E;
+
+      /* Typography */
+      --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+      /* Spacing */
+      --space-4: 4px;
+      --space-8: 8px;
+      --space-12: 12px;
+      --space-16: 16px;
+      --space-20: 20px;
+      --space-24: 24px;
+      --space-32: 32px;
+      --space-48: 48px;
+
+      /* Border Radius */
+      --radius-micro: 6px;
+      --radius-card: 12px;
+      --radius-large: 16px;
+      --radius-button: 8px;
+      --radius-pill: 999px;
+    }
+
+    /* === BASE === */
+    body {
+      font-family: var(--font-family);
+      background: var(--bg-page);
+      color: var(--text-primary);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* === LAYOUT === */
+    .page-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 var(--space-24);
+    }
+
+    @media (max-width: 768px) {
+      .page-container {
+        padding: 0 var(--space-16);
+      }
+    }
+
+    /* === HEADER === */
+    .header {
+      position: sticky;
+      top: 0;
+      height: 56px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border-default);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--space-24);
+      z-index: 100;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: var(--space-8);
+    }
+
+    .logo-icon {
+      width: 16px;
+      height: 16px;
+      color: var(--accent);
+    }
+
+    .logo-brand {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .logo-sub {
+      font-size: 15px;
+      font-weight: 400;
+      color: var(--text-secondary);
+    }
+
+    .header-badges {
+      display: flex;
+      align-items: center;
+      gap: var(--space-8);
+    }
+
+    .header-divider {
+      width: 1px;
+      height: 24px;
+      background: var(--border-default);
+    }
+
+    .header-badge {
+      display: flex;
+      align-items: center;
+      gap: var(--space-8);
+      background: var(--bg-inner);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-micro);
+      padding: 6px 12px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--bullish);
+    }
+
+    .status-dot.initializing {
+      background: var(--neutral);
+    }
+
+    .badge-text {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .badge-icon {
+      width: 14px;
+      height: 14px;
+      color: var(--text-secondary);
+    }
+
+    /* === TABS === */
+    .tabs-container {
+      height: 44px;
+      background: var(--bg-page);
+      border-bottom: 1px solid var(--border-default);
+      overflow-x: auto;
+      overflow-y: hidden;
+    }
+
+    .tabs {
+      display: flex;
+      align-items: center;
+      height: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 var(--space-24);
+    }
+
+    .tab {
+      display: flex;
+      align-items: center;
+      gap: var(--space-8);
+      height: 100%;
+      padding: 0 var(--space-16);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: all 120ms ease;
+      white-space: nowrap;
+    }
+
+    .tab-icon {
+      width: 15px;
+      height: 15px;
+    }
+
+    .tab:hover {
+      color: var(--text-primary);
+    }
+
+    .tab.active {
+      color: var(--text-primary);
+      border-bottom-color: var(--accent);
+    }
+
+    /* === DAILY SUMMARY (NEW) === */
+    .daily-summary {
+      background: linear-gradient(135deg, var(--accent-bg), var(--bg-card));
+      border: 1px solid var(--accent-border);
+      border-radius: var(--radius-card);
+      padding: var(--space-20);
+      margin: var(--space-24) 0 var(--space-16);
+    }
+
+    .daily-summary-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-8);
+      margin-bottom: var(--space-8);
+    }
+
+    .daily-summary-icon {
+      width: 16px;
+      height: 16px;
+      color: var(--accent);
+    }
+
+    .daily-summary-time {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+    }
+
+    .daily-summary-text {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-primary);
+      line-height: 1.6;
+    }
+
+    /* === PRICE BAR === */
+    .price-bar {
+      background: var(--bg-card);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-card);
+      padding: var(--space-16) var(--space-20);
+      margin-bottom: var(--space-24);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .price-main {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+
+    .price-label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .price-row {
+      display: flex;
+      align-items: baseline;
+      gap: var(--space-12);
+    }
+
+    .price-value {
+      font-size: 32px;
+      font-weight: 600;
+      line-height: 1.2;
+      color: var(--text-primary);
+    }
+
+    .price-change {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-4);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 3px 10px;
+      border-radius: var(--radius-micro);
+    }
+
+    .price-change.up {
+      background: var(--bullish-bg);
+      color: var(--bullish);
+      border: 1px solid var(--bullish-border);
+    }
+
+    .price-change.down {
+      background: var(--bearish-bg);
+      color: var(--bearish);
+      border: 1px solid var(--bearish-border);
+    }
+
+    .price-change-icon {
+      width: 12px;
+      height: 12px;
+    }
+
+    .price-updated {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 768px) {
+      .price-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-12);
+      }
+    }
+
+    /* === TAB SUMMARY (NEW) === */
+    .tab-summary {
+      background: var(--bg-inner);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius-card);
+      padding: var(--space-16) var(--space-20);
+      margin-bottom: var(--space-24);
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-primary);
+      line-height: 1.6;
+    }
+
+    /* === SIGNAL CARD === */
+    .signal-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-card);
+      padding: var(--space-24);
+      margin-bottom: var(--space-24);
+    }
+
+    .signal-card.no-signal {
+      border-left: 3px solid var(--neutral);
+      background: linear-gradient(to right, rgba(217, 119, 6, 0.03), var(--bg-card) 200px);
+    }
+
+    .signal-card.bullish {
+      border-left: 3px solid var(--bullish);
+      background: linear-gradient(to right, rgba(22, 163, 74, 0.03), var(--bg-card) 200px);
+    }
+
+    .signal-card.bearish {
+      border-left: 3px solid var(--bearish);
+      background: linear-gradient(to right, rgba(220, 38, 38, 0.03), var(--bg-card) 200px);
+    }
+
+    .signal-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-8);
+      margin-bottom: var(--space-12);
+    }
+
+    .signal-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .signal-dot.neutral {
+      background: var(--neutral);
+    }
+
+    .signal-dot.bullish {
+      background: var(--bullish);
+    }
+
+    .signal-dot.bearish {
+      background: var(--bearish);
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.7; }
+    }
+
+    .signal-title {
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    .signal-title.neutral {
+      color: var(--neutral);
+    }
+
+    .signal-title.bullish {
+      color: var(--bullish);
+    }
+
+    .signal-title.bearish {
+      color: var(--bearish);
+    }
+
+    .signal-description {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: var(--space-16);
+    }
+
+    /* === EXPLANATION SECTION (NEW) === */
+    .explanation-section {
+      background: var(--bg-inner);
+      border-radius: var(--radius-button);
+      padding: var(--space-16);
+      margin-bottom: var(--space-16);
+    }
+
+    .explanation-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: var(--space-8);
+      display: flex;
+      align-items: center;
+      gap: var(--space-8);
+    }
+
+    .explanation-icon {
+      width: 14px;
+      height: 14px;
+      color: var(--accent);
+    }
+
+    .explanation-text {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .reason-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .reason-list li {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      padding: var(--space-8) 0;
+      padding-left: var(--space-20);
+      position: relative;
+    }
+
+    .reason-list li:before {
+      content: '•';
+      position: absolute;
+      left: var(--space-8);
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .scenarios-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--space-12);
+    }
+
+    .scenario-card {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-button);
+      padding: var(--space-12);
+    }
+
+    .scenario-card.bullish {
+      border-color: var(--bullish-dim);
+    }
+
+    .scenario-card.bearish {
+      border-color: var(--bearish-dim);
+    }
+
+    .scenario-card.neutral {
+      border-color: var(--neutral-dim);
+    }
+
+    .scenario-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: var(--space-4);
+    }
+
+    .scenario-value {
+      font-size: 20px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      margin-bottom: var(--space-4);
+    }
+
+    .scenario-card.bullish .scenario-value {
+      color: var(--bullish);
+    }
+
+    .scenario-card.bearish .scenario-value {
+      color: var(--bearish);
+    }
+
+    .scenario-card.neutral .scenario-value {
+      color: var(--text-primary);
+    }
+
+    .scenario-prob {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: var(--space-8);
+    }
+
+    .scenario-condition {
+      font-size: 11px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+
+    /* === TIMEFRAME BUTTONS === */
+    .timeframe-btn {
+      padding: 10px 20px;
+      border-radius: var(--radius-button);
+      font-size: 14px;
+      font-weight: 600;
+      border: 1px solid var(--border-default);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 150ms ease;
+    }
+
+    .timeframe-btn:hover {
+      background: var(--bg-inner);
+      border-color: var(--accent-dim);
+    }
+
+    .timeframe-btn.active-timeframe {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+    }
+
+    /* === SIGNAL STATS === */
+    .signal-stats {
+      display: flex;
+      gap: var(--space-12);
+      flex-wrap: wrap;
+    }
+
+    .signal-stat {
+      background: var(--bg-inner);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-button);
+      padding: 10px var(--space-16);
+      flex: 1;
+      min-width: 120px;
+    }
+
+    .signal-stat-label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: var(--space-4);
+    }
+
+    .signal-stat-value {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    /* === STAT CARDS === */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-12);
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-12);
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-12);
+    }
+
+    @media (max-width: 768px) {
+      .grid-2, .grid-3, .grid-4 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-card);
+      padding: var(--space-20);
+      transition: border-color 150ms ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card:hover {
+      border-color: var(--border-hover);
+    }
+
+    .stat-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-8);
+    }
+
+    .stat-card-icon {
+      width: 15px;
+      height: 15px;
+      color: var(--accent);
+    }
+
+    .stat-card-label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+    }
+
+    .help-icon {
+      width: 12px;
+      height: 12px;
+      color: var(--text-muted);
+      cursor: help;
+    }
+
+    .stat-card-value {
+      font-size: 22px;
+      font-weight: 600;
+      line-height: 1.2;
+      color: var(--text-primary);
+      margin-bottom: var(--space-4);
+    }
+
+    .stat-card-description {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .stat-card-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      border-radius: 0 0 var(--radius-card) var(--radius-card);
+    }
+
+    .stat-card-bar.bullish {
+      background: var(--bullish);
+    }
+
+    .stat-card-bar.bearish {
+      background: var(--bearish);
+    }
+
+    .stat-card-bar.neutral {
+      background: var(--neutral);
+    }
+
+    .stat-card-bar.accent {
+      background: var(--accent);
+    }
+
+    /* === PROGRESS BARS === */
+    .progress-bar {
+      height: 5px;
+      background: var(--border-default);
+      border-radius: var(--radius-pill);
+      overflow: hidden;
+      margin-top: var(--space-8);
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: var(--radius-pill);
+      transition: width 300ms ease;
+    }
+
+    .progress-fill.bullish {
+      background: var(--bullish);
+    }
+
+    .progress-fill.bearish {
+      background: var(--bearish);
+    }
+
+    .progress-fill.neutral {
+      background: var(--neutral);
+    }
+
+    .progress-fill.accent {
+      background: var(--accent);
+    }
+
+    /* === BADGES === */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 3px 10px;
+      border-radius: var(--radius-micro);
+      border: 1px solid;
+    }
+
+    .badge.bullish {
+      background: var(--bullish-bg);
+      color: var(--bullish);
+      border-color: var(--bullish-border);
+    }
+
+    .badge.bearish {
+      background: var(--bearish-bg);
+      color: var(--bearish);
+      border-color: var(--bearish-border);
+    }
+
+    .badge.neutral {
+      background: var(--neutral-bg);
+      color: var(--neutral);
+      border-color: var(--neutral-border);
+    }
+
+    .badge.accent {
+      background: var(--accent-bg);
+      color: var(--accent);
+      border-color: var(--accent-border);
+    }
+
+    .badge.inactive {
+      background: var(--bg-inner);
+      color: var(--text-muted);
+      border-color: var(--border-default);
+    }
+
+    /* === LOADING STATE === */
+    .skeleton {
+      background: var(--bg-inner);
+      border-radius: var(--radius-card);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .skeleton::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+      animation: shimmer 1.5s infinite;
+    }
+
+    @keyframes shimmer {
+      to {
+        left: 100%;
+      }
+    }
+
+    .skeleton-card {
+      height: 140px;
+    }
+
+    /* === EMPTY STATE === */
+    .empty-state {
+      background: var(--bg-card);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-card);
+      padding: var(--space-48) var(--space-24);
+      text-align: center;
+    }
+
+    .empty-icon {
+      width: 24px;
+      height: 24px;
+      color: var(--neutral);
+      margin: 0 auto var(--space-12);
+    }
+
+    .empty-title {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: var(--space-8);
+    }
+
+    .empty-description {
+      font-size: 13px;
+      color: var(--text-secondary);
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    /* === SECTION HEADERS === */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-20);
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .section-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--space-12);
+    }
+
+    /* === CONTENT SECTIONS === */
+    .content-section {
+      margin-bottom: var(--space-32);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* === VOTING BAR === */
+    .voting-bar-container {
+      margin: var(--space-24) 0;
+    }
+
+    .voting-bar {
+      height: 8px;
+      border-radius: var(--radius-pill);
+      display: flex;
+      overflow: hidden;
+      margin-bottom: var(--space-12);
+    }
+
+    .voting-segment {
+      height: 100%;
+      transition: flex 300ms ease;
+    }
+
+    .voting-segment.bullish {
+      background: var(--bullish);
+    }
+
+    .voting-segment.neutral {
+      background: var(--neutral);
+    }
+
+    .voting-segment.bearish {
+      background: var(--bearish);
+    }
+
+    .voting-labels {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .voting-label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .voting-agreement {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .voting-agreement.low {
+      color: var(--bearish);
+    }
+
+    .voting-agreement.medium {
+      color: var(--neutral);
+    }
+
+    .voting-agreement.high {
+      color: var(--bullish);
+    }
+
+    /* === CHART CONTAINER === */
+    .chart-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-card);
+      padding: var(--space-20);
+      margin-bottom: var(--space-24);
+    }
+
+    .chart-canvas-wrapper {
+      height: 280px;
+      position: relative;
+    }
+
+    /* === UTILITIES === */
+    .mb-24 {
+      margin-bottom: var(--space-24);
+    }
+
+    .mt-32 {
+      margin-top: var(--space-32);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* === TOOLTIP === */
+    .tooltip {
+      position: relative;
+    }
+
+    .tooltip-text {
+      visibility: hidden;
+      width: 200px;
+      background: var(--text-primary);
+      color: var(--bg-card);
+      text-align: center;
+      border-radius: var(--radius-micro);
+      padding: var(--space-8);
+      position: absolute;
+      z-index: 1000;
+      bottom: 125%;
+      left: 50%;
+      margin-left: -100px;
+      font-size: 11px;
+      line-height: 1.4;
+      opacity: 0;
+      transition: opacity 150ms ease;
+    }
+
+    .tooltip:hover .tooltip-text {
+      visibility: visible;
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <!-- HEADER -->
+  <header class="header">
+    <div class="logo">
+      <a href="/" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 10px;">
+        <i data-lucide="zap" class="logo-icon"></i>
+        <span class="logo-brand">AtomicX</span>
+      </a>
+    </div>
+
+    <div class="header-badges">
+      <div class="header-badge">
+        <div class="status-dot" id="statusDot"></div>
+        <span class="badge-text" id="statusText">System Active</span>
+      </div>
+
+      <div class="header-divider"></div>
+
+      <div class="header-badge">
+        <i data-lucide="cpu" class="badge-icon"></i>
+        <span class="badge-text" id="modelCount">3 / 11 Models</span>
+      </div>
+
+      <div class="header-divider"></div>
+
+      <div class="header-badge">
+        <i data-lucide="arrow-left-right" class="badge-icon"></i>
+        <select id="symbolSelector" style="background: transparent; border: none; color: #f8fafc; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'JetBrains Mono', monospace; outline: none;">
+          <option value="">Loading...</option>
+          <!-- Populated dynamically -->
+        </select>
+      </div>
+    </div>
+  </header>
+
+  <!-- TABS -->
+  <div class="tabs-container">
+    <div class="tabs">
+      <button class="tab active" data-tab="trade-now">
+        <i data-lucide="trending-up" class="tab-icon"></i>
+        <span>Trade Now</span>
+      </button>
+      <button class="tab" data-tab="intel-brief">
+        <i data-lucide="bar-chart-2" class="tab-icon"></i>
+        <span>Intel Brief</span>
+      </button>
+      <button class="tab" data-tab="ensemble">
+        <i data-lucide="layers" class="tab-icon"></i>
+        <span>Ensemble</span>
+      </button>
+      <button class="tab" data-tab="predictions">
+        <i data-lucide="activity" class="tab-icon"></i>
+        <span>Predictions</span>
+      </button>
+      <button class="tab" data-tab="swarm">
+        <i data-lucide="users" class="tab-icon"></i>
+        <span>Swarm</span>
+      </button>
+      <button class="tab" data-tab="orderbook">
+        <i data-lucide="book-open" class="tab-icon"></i>
+        <span>Order Book</span>
+      </button>
+      <button class="tab" data-tab="altdata">
+        <i data-lucide="database" class="tab-icon"></i>
+        <span>Alt Data</span>
+      </button>
+      <button class="tab" data-tab="causal">
+        <i data-lucide="git-branch" class="tab-icon"></i>
+        <span>Causal Graph</span>
+      </button>
+      <button class="tab" data-tab="neurosymbolic">
+        <i data-lucide="brain" class="tab-icon"></i>
+        <span>Neurosymbolic</span>
+      </button>
+      <button class="tab" data-tab="portfolio">
+        <i data-lucide="wallet" class="tab-icon"></i>
+        <span>Portfolio</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="page-container">
+    <!-- DAILY SUMMARY (NEW - Shows on all tabs) -->
+    <div class="daily-summary">
+      <div class="daily-summary-header">
+        <i data-lucide="calendar" class="daily-summary-icon"></i>
+        <span class="daily-summary-time" id="dailySummaryTime">Sunday 6 April, 02:51</span>
+      </div>
+      <div class="daily-summary-text" id="dailySummaryText">
+        Loading market analysis...
+      </div>
+    </div>
+
+    <!-- PRICE BAR (shown on all tabs) -->
+    <div class="price-bar">
+      <div class="price-main">
+        <div class="price-label" id="priceSymbol">Loading...</div>
+        <div class="price-row">
+          <div class="price-value" id="currentPrice">$0.00</div>
+          <div class="price-change up" id="priceChange">
+            <i data-lucide="arrow-up" class="price-change-icon"></i>
+            <span>+0.50%</span>
+          </div>
+        </div>
+      </div>
+      <div class="price-updated" id="lastUpdated">Updated 5s ago</div>
+    </div>
+
+    <!-- TAB: TRADE NOW -->
+    <div id="tab-trade-now" class="tab-content active">
+      <!-- Main Signal Card -->
+      <div class="signal-card no-signal" id="signalCard">
+        <div class="signal-header">
+          <div class="signal-dot neutral"></div>
+          <h2 class="signal-title neutral">No Signal</h2>
+        </div>
+        <p class="signal-description">
+          Confidence is at 56.3% — just below the 61% threshold. Waiting for stronger model alignment.
+        </p>
+        <div class="signal-stats">
+          <div class="signal-stat">
+            <div class="signal-stat-label">Confidence</div>
+            <div class="signal-stat-value">56.3%</div>
+          </div>
+          <div class="signal-stat">
+            <div class="signal-stat-label">Direction</div>
+            <div class="signal-stat-value">Neutral</div>
+          </div>
+          <div class="signal-stat">
+            <div class="signal-stat-label">Models Active</div>
+            <div class="signal-stat-value">3 / 11</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Portfolio Position (NEW) -->
+      <div class="explanation-section" id="portfolioSection" style="display: none;">
+        <div class="explanation-title">
+          <i data-lucide="wallet" class="explanation-icon"></i>
+          <span>Your Position</span>
+        </div>
+        <div class="explanation-text" id="portfolioInfo">
+          You have $0.00 invested in this asset across 0 open positions.
+        </div>
+      </div>
+
+      <!-- Detailed Reasons (NEW) -->
+      <div class="explanation-section">
+        <div class="explanation-title">
+          <i data-lucide="list" class="explanation-icon"></i>
+          <span>Why This Recommendation</span>
+        </div>
+        <ul class="reason-list" id="reasonsList">
+          <li>Loading analysis...</li>
+        </ul>
+      </div>
+
+      <!-- Future Scenarios (NEW) -->
+      <div class="explanation-section">
+        <div class="explanation-title">
+          <i data-lucide="trending-up" class="explanation-icon"></i>
+          <span>Potential Future</span>
+        </div>
+        <div class="scenarios-grid" id="scenariosGrid">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- What This Means -->
+      <div class="explanation-section">
+        <div class="explanation-title">
+          <i data-lucide="info" class="explanation-icon"></i>
+          <span>What This Means</span>
+        </div>
+        <div class="explanation-text" id="whatThisMeans">
+          Loading market analysis...
+        </div>
+      </div>
+
+      <!-- What To Watch For -->
+      <div class="explanation-section">
+        <div class="explanation-title">
+          <i data-lucide="eye" class="explanation-icon"></i>
+          <span>What To Watch For</span>
+        </div>
+        <div class="explanation-text" id="whatToWatch">
+          Loading recommendations...
+        </div>
+      </div>
+
+      <!-- Last Signal -->
+      <div class="explanation-section">
+        <div class="explanation-title">
+          <i data-lucide="clock" class="explanation-icon"></i>
+          <span>Last Signal</span>
+        </div>
+        <div class="explanation-text" id="lastSignal">
+          Loading signal history...
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: INTEL BRIEF -->
+    <div id="tab-intel-brief" class="tab-content">
+      <div class="tab-summary" id="intelSummary">
+        Technical indicators are mixed. RSI is neutral at 65, volatility is moderate, and selling pressure is detected in the order book.
+      </div>
+
+      <div class="grid-4 mb-24">
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <i data-lucide="activity" class="stat-card-icon"></i>
+            <div class="stat-card-label tooltip">
+              RSI (14)
+              <i data-lucide="help-circle" class="help-icon"></i>
+              <span class="tooltip-text">Relative Strength Index measures momentum. Above 70 is overbought, below 30 is oversold.</span>
+            </div>
+          </div>
+          <div class="stat-card-value" id="rsiValue">65.2</div>
+          <div class="stat-card-description">Neutral momentum - neither overbought nor oversold</div>
+          <div class="progress-bar">
+            <div class="progress-fill neutral" style="width: 65%"></div>
+          </div>
+          <div class="stat-card-bar neutral"></div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <i data-lucide="bar-chart-2" class="stat-card-icon"></i>
+            <div class="stat-card-label tooltip">
+              ATR Volatility
+              <i data-lucide="help-circle" class="help-icon"></i>
+              <span class="tooltip-text">Average True Range measures how much price typically moves. Higher = more volatile.</span>
+            </div>
+          </div>
+          <div class="stat-card-value" id="atrValue">$0.00</div>
+          <div class="stat-card-description" id="atrDescription">Loading...</div>
+          <div class="stat-card-bar accent"></div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <i data-lucide="trending-up" class="stat-card-icon"></i>
+            <div class="stat-card-label tooltip">
+              OB Imbalance
+              <i data-lucide="help-circle" class="help-icon"></i>
+              <span class="tooltip-text">Order Book Imbalance shows if more buyers or sellers are waiting. Negative = more sellers.</span>
+            </div>
+          </div>
+          <div class="stat-card-value" id="cvdValue">0.00</div>
+          <div class="stat-card-description" id="cvdDescription">Loading...</div>
+          <div class="progress-bar">
+            <div class="progress-fill bearish" style="width: 91%"></div>
+          </div>
+          <div class="stat-card-bar bearish"></div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <i data-lucide="bar-chart" class="stat-card-icon"></i>
+            <div class="stat-card-label tooltip">
+              Volume Ratio
+              <i data-lucide="help-circle" class="help-icon"></i>
+              <span class="tooltip-text">Compares current trading volume to the average. Above 1.0 = more active than usual.</span>
+            </div>
+          </div>
+          <div class="stat-card-value" id="volumeRatioValue">0.00x</div>
+          <div class="stat-card-description" id="volumeRatioDescription">Loading...</div>
+          <div class="stat-card-bar bullish"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: ENSEMBLE -->
+    <div id="tab-ensemble" class="tab-content">
+      <div class="tab-summary" id="ensembleSummary">
+        Only 3 of 11 models have enough data to vote. Confidence is low. More models need to load before this verdict is reliable.
+      </div>
+
+      <div class="section-header">
+        <h2 class="section-title">Ensemble Voting</h2>
+        <div class="section-actions">
+          <span class="badge accent" id="ensembleAgreement">0% Agreement</span>
+          <span class="badge inactive" id="ensembleCount">3 / 11 Models</span>
+        </div>
+      </div>
+
+      <div class="grid-3 mb-24" id="ensembleGrid">
+        <!-- Model cards will be inserted here -->
+      </div>
+
+      <div class="voting-bar-container">
+        <div class="voting-bar" id="votingBar">
+          <div class="voting-segment bullish" style="flex: 0"></div>
+          <div class="voting-segment neutral" style="flex: 3"></div>
+          <div class="voting-segment bearish" style="flex: 0"></div>
+        </div>
+        <div class="voting-labels">
+          <span class="voting-label" id="votingLabel">Bullish 0% • Neutral 100% • Bearish 0%</span>
+          <span class="voting-agreement low" id="votingAgreementValue">0%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: PREDICTIONS -->
+    <div id="tab-predictions" class="tab-content">
+      <div class="tab-summary">
+        Select a timeframe to see AI-powered price predictions. Customize from hours to weeks ahead.
+      </div>
+
+      <!-- Timeframe Selector -->
+      <div style="background: var(--bg-inner); border-radius: var(--radius-card); padding: var(--space-20); margin-bottom: var(--space-24);">
+        <div style="margin-bottom: var(--space-16);">
+          <label style="font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: var(--space-8);">Quick Select</label>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="timeframe-btn" data-hours="4">4 Hours</button>
+            <button class="timeframe-btn" data-hours="12">12 Hours</button>
+            <button class="timeframe-btn active-timeframe" data-hours="24">1 Day</button>
+            <button class="timeframe-btn" data-hours="72">3 Days</button>
+            <button class="timeframe-btn" data-hours="168">1 Week</button>
+            <button class="timeframe-btn" data-hours="336">2 Weeks</button>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: var(--space-8);">Custom Timeframe</label>
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <input type="number" id="customPredValue" placeholder="Enter number" min="1" style="padding: 10px 16px; background: var(--bg-primary); border: 1px solid var(--border-default); border-radius: var(--radius-button); color: var(--text-primary); font-size: 14px; width: 150px;">
+            <select id="customPredUnit" style="padding: 10px 16px; background: var(--bg-primary); border: 1px solid var(--border-default); border-radius: var(--radius-button); color: var(--text-primary); font-size: 14px;">
+              <option value="hours">Hours</option>
+              <option value="days">Days</option>
+              <option value="weeks">Weeks</option>
+            </select>
+            <button onclick="generateCustomPrediction()" style="padding: 10px 20px; background: var(--accent); border: none; border-radius: var(--radius-button); color: #ffffff; font-size: 14px; font-weight: 600; cursor: pointer;">Generate</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="predictionResultsArea">
+        <!-- Results will be injected here -->
+        <div class="chart-container">
+          <div class="chart-canvas-wrapper">
+            <canvas id="customPredictionChart"></canvas>
+          </div>
+        </div>
+
+        <div class="grid-3" id="predictionScenariosGrid">
+          <!-- Scenarios will be populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: SWARM -->
+    <div id="tab-swarm" class="tab-content">
+      <div class="tab-summary" id="swarmSummary">
+        500 simulated trading agents are perfectly split — half expect the price to rise, half expect it to fall. No useful signal here.
+      </div>
+
+      <div class="signal-card no-signal">
+        <div class="signal-header">
+          <div class="signal-dot neutral"></div>
+          <h2 class="signal-title neutral">No Consensus</h2>
+        </div>
+        <p class="signal-description">
+          500 agents are evenly split. No clear directional bias detected.
+        </p>
+      </div>
+
+      <div class="grid-4 mb-24">
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <i data-lucide="target" class="stat-card-icon"></i>
+            <div class="stat-card-label tooltip">
+              Convergence
+              <i data-lucide="help-circle" class="help-icon"></i>
+              <span class="tooltip-text">How well agents agree with each other. Higher = stronger consensus.</span>
+            </div>
+          </div>
+          <div class="stat-card-value" id="swarmConvergence">N/A</div>
+          <div class="stat-card-description" id="swarmConvergenceDesc">Swarm data loading...</div>
+          <div class="progress-bar">
+            <div class="progress-fill accent" style="width: 0%" id="swarmConvergenceBar"></div>
+          </div>
+          <div class="stat-card-bar accent"></div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <i data-lucide="git-branch" class="stat-card-icon"></i>
+            <div class="stat-card-label tooltip">
+              Diversity
+              <i data-lucide="help-circle" class="help-icon"></i>
+              <span class="tooltip-text">How much strategies vary. Some diversity is healthy.</span>
+            </div>
+          </div>
+          <div class="stat-card-value" id="swarmDiversity">N/A</div>
+          <div class="stat-card-description" id="swarmDiversityDesc">Swarm data loading...</div>
+          <div class="stat-card-bar accent"></div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <i data-lucide="shield" class="stat-card-icon"></i>
+            <div class="stat-card-label tooltip">
+              Stability
+              <i data-lucide="help-circle" class="help-icon"></i>
+              <span class="tooltip-text">How consistent positions are. Higher = less flip-flopping.</span>
+            </div>
+          </div>
+          <div class="stat-card-value" id="swarmStability">N/A</div>
+          <div class="stat-card-description" id="swarmStabilityDesc">Swarm data loading...</div>
+          <div class="progress-bar">
+            <div class="progress-fill accent" style="width: 0%" id="swarmStabilityBar"></div>
+          </div>
+          <div class="stat-card-bar accent"></div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <i data-lucide="zap" class="stat-card-icon"></i>
+            <div class="stat-card-label tooltip">
+              Reward Signal
+              <i data-lucide="help-circle" class="help-icon"></i>
+              <span class="tooltip-text">Average position value. Positive = bullish bias, negative = bearish.</span>
+            </div>
+          </div>
+          <div class="stat-card-value" id="swarmReward">N/A</div>
+          <div class="stat-card-description" id="swarmRewardDesc">Swarm data loading...</div>
+          <div class="stat-card-bar neutral"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: ORDER BOOK -->
+    <div id="tab-orderbook" class="tab-content">
+      <div class="tab-summary">
+        There is significantly more selling pressure than buying pressure right now. The market is leaning bearish based on the orders currently placed.
+      </div>
+
+      <div class="grid-3 mb-24">
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <i data-lucide="scale" class="stat-card-icon"></i>
+            <div class="stat-card-label tooltip">
+              Imbalance
+              <i data-lucide="help-circle" class="help-icon"></i>
+              <span class="tooltip-text">Ratio of buy orders to sell orders. Negative = more sellers waiting.</span>
+            </div>
+          </div>
+          <div class="stat-card-value" id="obImbalance">0%</div>
+          <div class="stat-card-description" id="obImbalanceDesc">Loading...</div>
+          <div class="progress-bar">
+            <div class="progress-fill bearish" style="width: 0%" id="obImbalanceBar"></div>
+          </div>
+          <div class="stat-card-bar bearish"></div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <i data-lucide="alert-triangle" class="stat-card-icon"></i>
+            <div class="stat-card-label tooltip">
+              Toxicity
+              <i data-lucide="help-circle" class="help-icon"></i>
+              <span class="tooltip-text">Measures aggressive order flow. Higher = more informed trading.</span>
+            </div>
+          </div>
+          <div class="stat-card-value" id="obToxicity">N/A</div>
+          <div class="stat-card-description" id="obToxicityDesc">Loading...</div>
+          <div class="stat-card-bar accent"></div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <i data-lucide="eye-off" class="stat-card-icon"></i>
+            <div class="stat-card-label tooltip">
+              Spoofing
+              <i data-lucide="help-circle" class="help-icon"></i>
+              <span class="tooltip-text">Detects fake orders placed to manipulate price. Higher = more manipulation.</span>
+            </div>
+          </div>
+          <div class="stat-card-value" id="obSpoofing">N/A</div>
+          <div class="stat-card-description" id="obSpoofingDesc">Loading...</div>
+          <div class="stat-card-bar accent"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: ALT DATA -->
+    <div id="tab-altdata" class="tab-content">
+      <div class="tab-summary">
+        Sentiment is slightly bullish, options traders are cautious, and stablecoin flows suggest some buying interest. Overall leaning mildly positive.
+      </div>
+
+      <div class="grid-4 mb-24">
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <i data-lucide="trending-up" class="stat-card-icon"></i>
+            <div class="stat-card-label tooltip">
+              Sentiment
+              <i data-lucide="help-circle" class="help-icon"></i>
+              <span class="tooltip-text">Measures social media and news sentiment. Above 0.5 = bullish mood.</span>
+            </div>
+          </div>
+          <div class="stat-card-value" id="altSentiment">N/A</div>
+          <div class="stat-card-description" id="altSentimentDesc">Loading...</div>
+          <div class="progress-bar">
+            <div class="progress-fill bullish" style="width: 0%" id="altSentimentBar"></div>
+          </div>
+          <div class="stat-card-bar bullish"></div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <i data-lucide="newspaper" class="stat-card-icon"></i>
+            <div class="stat-card-label tooltip">
+              News Signals
+              <i data-lucide="help-circle" class="help-icon"></i>
+              <span class="tooltip-text">Number of significant news events detected in last 24 hours.</span>
+            </div>
+          </div>
+          <div class="stat-card-value" id="altNewsCount">0</div>
+          <div class="stat-card-description" id="altNewsDesc">Loading...</div>
+          <div class="stat-card-bar accent"></div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <i data-lucide="users" class="stat-card-icon"></i>
+            <div class="stat-card-label tooltip">
+              Social Momentum
+              <i data-lucide="help-circle" class="help-icon"></i>
+              <span class="tooltip-text">Overall direction of social media discussion.</span>
+            </div>
+          </div>
+          <div class="stat-card-value" id="altDirection">N/A</div>
+          <div class="stat-card-description" id="altDirectionDesc">Loading...</div>
+          <div class="stat-card-bar neutral"></div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <i data-lucide="zap" class="stat-card-icon"></i>
+            <span class="stat-card-label">Confidence</span>
+          </div>
+          <div class="stat-card-value" id="altConfidence">0%</div>
+          <div class="stat-card-description" id="altConfidenceDesc">Loading...</div>
+          <div class="progress-bar">
+            <div class="progress-fill neutral" style="width: 0%" id="altConfidenceBar"></div>
+          </div>
+          <div class="stat-card-bar neutral"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: CAUSAL GRAPH -->
+    <div id="tab-causal" class="tab-content">
+      <div class="tab-summary">
+        This module is still training and will be available in 2 days. It will show which market forces are actually driving the price.
+      </div>
+
+      <div class="empty-state">
+        <i data-lucide="git-branch" class="empty-icon"></i>
+        <h3 class="empty-title">Causal Analysis</h3>
+        <p class="empty-description">
+          The causal discovery engine analyzes which market variables are directly causing price movement, rather than just correlating with it. This module is currently being trained on live data and will be available shortly.
+        </p>
+        <div class="progress-bar" style="max-width: 400px; margin: var(--space-24) auto 0;">
+          <div class="progress-fill accent" style="width: 40%"></div>
+        </div>
+        <p class="empty-description" style="margin-top: var(--space-12);">
+          Training in progress — est. ready in 2 days
+        </p>
+      </div>
+    </div>
+
+    <!-- TAB: NEUROSYMBOLIC -->
+    <div id="tab-neurosymbolic" class="tab-content">
+      <div class="tab-summary">
+        This advanced reasoning module is integrating with the system. Expected ready in 1 day.
+      </div>
+
+      <div class="empty-state">
+        <i data-lucide="brain" class="empty-icon"></i>
+        <h3 class="empty-title">Neurosymbolic Reasoning</h3>
+        <p class="empty-description">
+          This system combines neural network predictions with symbolic logic rules to provide explainable decision-making. The explainability module is currently being calibrated with the ensemble system.
+        </p>
+        <div class="progress-bar" style="max-width: 400px; margin: var(--space-24) auto 0;">
+          <div class="progress-fill accent" style="width: 65%"></div>
+        </div>
+        <p class="empty-description" style="margin-top: var(--space-12);">
+          Integration in progress — est. ready in 1 day
+        </p>
+      </div>
+    </div>
+
+    <!-- TAB: PORTFOLIO -->
+    <div id="tab-portfolio" class="tab-content">
+      <div class="tab-summary">
+        Track your positions, P&L, and manage your trading portfolio across all assets.
+      </div>
+
+      <!-- Portfolio Stats -->
+      <div class="grid-4 mb-24" id="portfolioStatsGrid">
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <i data-lucide="dollar-sign" class="stat-card-icon"></i>
+            <span class="stat-card-label">Total P&L</span>
+          </div>
+          <div class="stat-card-value" id="portfolioTotalPnl">$0.00</div>
+          <div class="stat-card-description">Across all positions</div>
+          <div class="stat-card-bar neutral"></div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <i data-lucide="trending-up" class="stat-card-icon"></i>
+            <span class="stat-card-label">Win Rate</span>
+          </div>
+          <div class="stat-card-value" id="portfolioWinRate">0%</div>
+          <div class="stat-card-description" id="portfolioWinLoss">0W / 0L</div>
+          <div class="stat-card-bar accent"></div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <i data-lucide="activity" class="stat-card-icon"></i>
+            <span class="stat-card-label">Open Positions</span>
+          </div>
+          <div class="stat-card-value" id="portfolioOpenPos">0</div>
+          <div class="stat-card-description" id="portfolioClosedPos">0 closed</div>
+          <div class="stat-card-bar bullish"></div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <i data-lucide="wallet" class="stat-card-icon"></i>
+            <span class="stat-card-label">Total Invested</span>
+          </div>
+          <div class="stat-card-value" id="portfolioInvested">$0.00</div>
+          <div class="stat-card-description" id="portfolioTotalPos">0 positions</div>
+          <div class="stat-card-bar accent"></div>
+        </div>
+      </div>
+
+      <!-- Assets List -->
+      <div style="background: var(--bg-card); border: 1px solid var(--border-default); border-radius: var(--radius-card); overflow: hidden; margin-bottom: var(--space-24);">
+        <div style="padding: var(--space-20); border-bottom: 1px solid var(--border-default); display: flex; justify-content: space-between; align-items: center;">
+          <h2 style="font-size: 16px; font-weight: 700; color: var(--text-primary);">Your Assets</h2>
+          <button onclick="showAddAssetModal()" style="padding: 8px 16px; background: var(--accent); border: none; border-radius: var(--radius-button); color: #ffffff; font-size: 13px; font-weight: 600; cursor: pointer;">+ Add Asset</button>
+        </div>
+        <div id="portfolioAssetsList">
+          <div class="empty-state">
+            <i data-lucide="wallet" class="empty-icon"></i>
+            <h3 class="empty-title">No Assets Yet</h3>
+            <p class="empty-description">Add your first asset to start tracking positions</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Position Form for Current Asset -->
+      <div style="background: var(--bg-inner); border-radius: var(--radius-card); padding: var(--space-20);">
+        <h3 style="font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-16);">Quick Open Position (BTC/USDT)</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-12);">
+          <div>
+            <label style="font-size: 12px; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: var(--space-4);">Side</label>
+            <select id="quickSide" style="width: 100%; padding: 10px 12px; background: var(--bg-primary); border: 1px solid var(--border-default); border-radius: var(--radius-button); color: var(--text-primary); font-size: 14px;">
+              <option value="long">Long (Buy)</option>
+              <option value="short">Short (Sell)</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size: 12px; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: var(--space-4);">Entry Price</label>
+            <input type="number" step="0.01" id="quickEntryPrice" placeholder="0.00" style="width: 100%; padding: 10px 12px; background: var(--bg-primary); border: 1px solid var(--border-default); border-radius: var(--radius-button); color: var(--text-primary); font-size: 14px;">
+          </div>
+          <div>
+            <label style="font-size: 12px; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: var(--space-4);">Quantity</label>
+            <input type="number" step="0.0001" id="quickQuantity" placeholder="0.00" style="width: 100%; padding: 10px 12px; background: var(--bg-primary); border: 1px solid var(--border-default); border-radius: var(--radius-button); color: var(--text-primary); font-size: 14px;">
+          </div>
+          <div>
+            <label style="font-size: 12px; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: var(--space-4);">&nbsp;</label>
+            <button onclick="quickOpenPosition()" style="width: 100%; padding: 10px 16px; background: var(--accent); border: none; border-radius: var(--radius-button); color: #ffffff; font-size: 14px; font-weight: 600; cursor: pointer;">Open Position</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    console.log('🔥 DASHBOARD LOADED: VERSION 2026-04-06-06:21:00 - FIXED MODEL TEXT');
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Get symbol from URL or default to BTC/USDT
+    function getCurrentSymbol() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('symbol') || 'BTC/USDT';
+    }
+
+    // API endpoint (dynamic based on symbol)
+    function getAPIUrl() {
+      return `/api/god_mode/predictions?symbol=${encodeURIComponent(getCurrentSymbol())}`;
+    }
+
+    // State
+    let currentData = null;
+    let predictionChart = null;
+    let currentSymbol = getCurrentSymbol();
+
+    // CRITICAL DEBUG
+    console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: cyan; font-weight: bold');
+    console.log('%cDASHBOARD LOADED - VERSION 2.2.0 (ALL DYNAMIC DATA)', 'color: cyan; font-size: 16px; font-weight: bold');
+    console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: cyan; font-weight: bold');
+    console.log('URL:', window.location.href);
+    console.log('currentSymbol:', currentSymbol);
+    console.log('Time:', new Date().toISOString());
+    console.log('');
+    console.log('%cAll Fixes Applied:', 'color: lime; font-weight: bold');
+    console.log('  ✓ Removed inline onchange handler (prevents redirect bug)');
+    console.log('  ✓ Symbol label updates dynamically (shows correct asset)');
+    console.log('  ✓ Price change calculated from real data');
+    console.log('  ✓ Last updated timestamp is dynamic');
+    console.log('  ✓ Technical indicators (RSI, ATR, CVD, Volume) use API data');
+    console.log('  ✓ Swarm metrics use real simulation data');
+    console.log('  ✓ Order book metrics use real orderbook data');
+    console.log('  ✓ Alternative data metrics use real alt data');
+    console.log('  ✓ Removed hardcoded fallback prices (69213)');
+
+    // Switch symbol function
+    function switchSymbol(newSymbol) {
+      console.log('%c⚠️ switchSymbol CALLED', 'color: orange; font-weight: bold');
+      console.log('  → Requested symbol:', newSymbol);
+      console.log('  → Current symbol:', currentSymbol);
+      console.log('  → Stack trace:', new Error().stack);
+
+      // Prevent redirect if we're already on this symbol
+      if (newSymbol === currentSymbol) {
+        console.log('  → BLOCKED: Already on this symbol');
+        return;
+      }
+
+      console.log('%c  → REDIRECTING...', 'color: red; font-weight: bold');
+      window.location.href = `/dashboard.html?symbol=${encodeURIComponent(newSymbol)}`;
+    }
+
+    // Track if we've already set up the change listener
+    let symbolSelectorInitialized = false;
+
+    // Load portfolio assets into dropdown
+    async function loadSymbolSelector() {
+      try {
+        console.log('%c📋 loadSymbolSelector START', 'color: yellow');
+        console.log('  → currentSymbol:', currentSymbol);
+
+        const response = await fetch('/api/portfolio/assets');
+        const data = await response.json();
+
+        console.log('  → Fetched assets:', data.assets?.map(a => a.symbol));
+
+        if (data.assets && data.assets.length > 0) {
+          const selector = document.getElementById('symbolSelector');
+          console.log('  → Dropdown value BEFORE update:', selector.value);
+
+          // Build options HTML (currentSymbol should be selected)
+          const optionsHTML = data.assets.map(asset => {
+            const isSelected = asset.symbol === currentSymbol;
+            console.log(`  → Asset ${asset.symbol}: selected=${isSelected}`);
+            return `<option value="${asset.symbol}" ${isSelected ? 'selected' : ''}>${asset.symbol}</option>`;
+          }).join('');
+
+          selector.innerHTML = optionsHTML;
+          console.log('  → Dropdown value AFTER update:', selector.value);
+
+          // Add onchange handler ONCE (no inline handler in HTML anymore)
+          if (!symbolSelectorInitialized) {
+            console.log('  → Adding change listener');
+            selector.addEventListener('change', function(e) {
+              console.log('%c🎯 DROPDOWN CHANGED BY USER', 'color: lime; font-weight: bold');
+              switchSymbol(e.target.value);
+            });
+            symbolSelectorInitialized = true;
+          }
+
+          console.log('%c✅ loadSymbolSelector COMPLETE', 'color: green');
+        }
+      } catch (error) {
+        console.error('[Dashboard] Failed to load symbol selector:', error);
+      }
+    }
+
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const tabName = tab.dataset.tab;
+
+        // Update tab states
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+
+        // Update content visibility
+        document.querySelectorAll('.tab-content').forEach(content => {
+          content.classList.remove('active');
+        });
+        document.getElementById(`tab-${tabName}`).classList.add('active');
+
+        // Refresh icons
+        lucide.createIcons();
+
+        // Initialize chart if predictions tab
+        if (tabName === 'predictions' && !predictionChart) {
+          initPredictionChart();
+        }
+      });
+    });
+
+    // Fetch and update data
+    async function fetchData() {
+      try {
+        const response = await fetch(getAPIUrl());
+        const data = await response.json();
+        currentData = data;
+        updateUI(data);
+
+        // Fetch trade recommendation
+        fetchTradeRecommendation();
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    }
+
+    async function fetchTradeRecommendation() {
+      try {
+        const response = await fetch(`/api/god_mode/trade_recommendation?symbol=${encodeURIComponent(currentSymbol)}`);
+        const rec = await response.json();
+        console.log('[DASHBOARD] Trade recommendation received:', rec);
+        updateTradeRecommendation(rec);
+      } catch (error) {
+        console.error('Error fetching trade recommendation:', error);
+      }
+    }
+
+    // Update UI with data
+    function updateUI(data) {
+      if (!data) return;
+
+      // Update status
+      const isActive = data.ensemble && data.ensemble.data_source === 'REAL';
+      const statusDot = document.getElementById('statusDot');
+      const statusText = document.getElementById('statusText');
+
+      if (isActive) {
+        statusDot.classList.remove('initializing');
+        statusText.textContent = 'System Active';
+      } else {
+        statusDot.classList.add('initializing');
+        statusText.textContent = 'Initializing';
+      }
+
+      // Update model count
+      document.getElementById('modelCount').textContent = `${data.models_active || 0} / ${data.total_models || 11} Models`;
+
+      // Update symbol label
+      const symbol = data.symbol || currentSymbol;
+      document.getElementById('priceSymbol').textContent = symbol;
+
+      // Update price
+      const price = data.variables?.PRICE || data.current_price || 0;
+      document.getElementById('currentPrice').textContent = `$${price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+
+      // Update price change
+      const priceChangeElement = document.getElementById('priceChange');
+      let changePercent = 0;
+
+      // Check if we have daily change data (for stocks)
+      if (data.variables?.DAILY_CHANGE_PERCENT !== undefined) {
+        // Use pre-calculated daily change (from backend)
+        changePercent = data.variables.DAILY_CHANGE_PERCENT;
+      } else if (data.variables?.RECENT_PRICES && Array.isArray(data.variables.RECENT_PRICES) && data.variables.RECENT_PRICES.length > 1) {
+        // Fallback: calculate from recent prices (for crypto 24/7 trading)
+        const recentPrices = data.variables.RECENT_PRICES;
+        const currentPrice = recentPrices[recentPrices.length - 1];
+        const previousPrice = recentPrices[0]; // First price in the window
+        changePercent = ((currentPrice - previousPrice) / previousPrice) * 100;
+      }
+
+      // Update text
+      const changeText = changePercent >= 0 ? `+${changePercent.toFixed(2)}%` : `${changePercent.toFixed(2)}%`;
+      priceChangeElement.querySelector('span').textContent = changeText;
+
+      // Update class and icon
+      priceChangeElement.className = 'price-change ' + (changePercent >= 0 ? 'up' : 'down');
+      const icon = priceChangeElement.querySelector('i');
+      icon.setAttribute('data-lucide', changePercent >= 0 ? 'arrow-up' : 'arrow-down');
+
+      // Update timestamp
+      const lastUpdatedElement = document.getElementById('lastUpdated');
+      if (data.timestamp) {
+        const dataTime = new Date(data.timestamp);
+        const now = new Date();
+        const secondsAgo = Math.floor((now - dataTime) / 1000);
+
+        let timeText;
+        if (secondsAgo < 60) {
+          timeText = `Updated ${secondsAgo}s ago`;
+        } else if (secondsAgo < 3600) {
+          timeText = `Updated ${Math.floor(secondsAgo / 60)}m ago`;
+        } else {
+          timeText = `Updated ${Math.floor(secondsAgo / 3600)}h ago`;
+        }
+        lastUpdatedElement.textContent = timeText;
+      } else {
+        lastUpdatedElement.textContent = 'Updated just now';
+      }
+
+      // Update technical indicators
+      updateTechnicalIndicators(data);
+
+      // Update swarm metrics
+      updateSwarmMetrics(data);
+
+      // Update orderbook metrics
+      updateOrderbookMetrics(data);
+
+      // Update alternative data metrics
+      updateAltDataMetrics(data);
+
+      // Update daily summary
+      updateDailySummary(data);
+
+      // Update signal card
+      updateSignalCard(data);
+
+      // Update ensemble
+      updateEnsemble(data);
+
+      // Update predictions chart
+      if (predictionChart && currentData) {
+        updatePredictionChart();
+      }
+
+      // Refresh icons
+      lucide.createIcons();
+    }
+
+    // Update technical indicators
+    function updateTechnicalIndicators(data) {
+      const vars = data.variables || {};
+
+      // RSI
+      const rsi = vars.RSI_14 || 0;
+      document.getElementById('rsiValue').textContent = rsi.toFixed(1);
+      const rsiDesc = rsi > 70 ? 'Overbought - price may be too high' :
+                      rsi < 30 ? 'Oversold - price may be too low' :
+                      'Neutral momentum - neither overbought nor oversold';
+      document.getElementById('rsiDescription')?.textContent || (document.querySelector('#rsiValue').nextElementSibling.textContent = rsiDesc);
+
+      // ATR (volatility)
+      const atr = vars.ATR_14 || 0;
+      document.getElementById('atrValue').textContent = `$${atr.toFixed(2)}`;
+      const atrDesc = atr > 200 ? 'High volatility - large price swings' :
+                      atr > 100 ? 'Moderate volatility - normal price swings' :
+                      'Low volatility - small price movements';
+      document.getElementById('atrDescription').textContent = atrDesc;
+
+      // CVD (cumulative volume delta / order book imbalance)
+      const cvd = vars.CVD || 0;
+      document.getElementById('cvdValue').textContent = cvd.toFixed(2);
+      const cvdDesc = cvd > 0.5 ? 'Strong buying pressure - more buy orders' :
+                      cvd < -0.5 ? 'Strong selling pressure - more sell orders' :
+                      'Balanced - roughly equal buy and sell orders';
+      document.getElementById('cvdDescription').textContent = cvdDesc;
+
+      // Relative Volume
+      const relVol = vars.RELATIVE_VOLUME || 0;
+      document.getElementById('volumeRatioValue').textContent = `${relVol.toFixed(2)}x`;
+      const volDesc = relVol > 1.5 ? 'Very high - much more trading than usual' :
+                      relVol > 1.0 ? 'Above average - more trading activity than normal' :
+                      relVol > 0.5 ? 'Below average - less trading than normal' :
+                      'Very low - much less trading than usual';
+      document.getElementById('volumeRatioDescription').textContent = volDesc;
+    }
+
+    // Update swarm metrics
+    function updateSwarmMetrics(data) {
+      const swarm = data.swarm || null;
+
+      if (!swarm || !swarm.metrics) {
+        // Swarm data not available
+        document.getElementById('swarmConvergence').textContent = 'N/A';
+        document.getElementById('swarmConvergenceDesc').textContent = 'Swarm simulation not available';
+        document.getElementById('swarmDiversity').textContent = 'N/A';
+        document.getElementById('swarmDiversityDesc').textContent = 'Swarm simulation not available';
+        document.getElementById('swarmStability').textContent = 'N/A';
+        document.getElementById('swarmStabilityDesc').textContent = 'Swarm simulation not available';
+        document.getElementById('swarmReward').textContent = 'N/A';
+        document.getElementById('swarmRewardDesc').textContent = 'Swarm simulation not available';
+        return;
+      }
+
+      const metrics = swarm.metrics;
+
+      // Convergence
+      const convergence = (metrics.convergence || 0) * 100;
+      document.getElementById('swarmConvergence').textContent = `${convergence.toFixed(0)}%`;
+      document.getElementById('swarmConvergenceBar').style.width = `${convergence}%`;
+      const convDesc = convergence > 80 ? 'Strong consensus - agents highly aligned' :
+                       convergence > 60 ? 'Good alignment - agents mostly agree' :
+                       convergence > 40 ? 'Moderate agreement - some divergence' :
+                       'Low consensus - agents disagree';
+      document.getElementById('swarmConvergenceDesc').textContent = convDesc;
+
+      // Diversity
+      const diversity = metrics.diversity || 0;
+      document.getElementById('swarmDiversity').textContent = diversity.toFixed(2);
+      const divDesc = diversity > 0.5 ? 'High diversity - many different strategies' :
+                      diversity > 0.3 ? 'Moderate diversity - healthy variety' :
+                      'Low diversity - similar strategies';
+      document.getElementById('swarmDiversityDesc').textContent = divDesc;
+
+      // Stability
+      const stability = (metrics.stability || 0) * 100;
+      document.getElementById('swarmStability').textContent = stability.toFixed(0) + '%';
+      document.getElementById('swarmStabilityBar').style.width = `${stability}%`;
+      const stabDesc = stability > 80 ? 'Very stable - consistent positions' :
+                       stability > 60 ? 'Stable - few position changes' :
+                       'Unstable - frequent position changes';
+      document.getElementById('swarmStabilityDesc').textContent = stabDesc;
+
+      // Reward Signal
+      const reward = metrics.reward_signal || 0;
+      document.getElementById('swarmReward').textContent = reward.toFixed(2);
+      const rewDesc = reward > 0.3 ? 'Strong bullish bias' :
+                      reward > 0.1 ? 'Slight bullish bias' :
+                      reward < -0.3 ? 'Strong bearish bias' :
+                      reward < -0.1 ? 'Slight bearish bias' :
+                      'Neutral - no directional bias';
+      document.getElementById('swarmRewardDesc').textContent = rewDesc;
+    }
+
+    // Update orderbook metrics
+    function updateOrderbookMetrics(data) {
+      const orderbook = data.orderbook || null;
+
+      if (!orderbook || !orderbook.metrics) {
+        // Orderbook data not available - use CVD from variables as fallback
+        const cvd = data.variables?.CVD || 0;
+        const imbalancePercent = cvd * 100;
+
+        document.getElementById('obImbalance').textContent = `${imbalancePercent.toFixed(0)}%`;
+        document.getElementById('obImbalanceBar').style.width = `${Math.abs(imbalancePercent)}%`;
+        document.getElementById('obImbalanceBar').className = `progress-fill ${imbalancePercent < 0 ? 'bearish' : 'bullish'}`;
+
+        const imbalanceDesc = imbalancePercent < -50 ? 'Heavy selling pressure dominates' :
+                              imbalancePercent < -20 ? 'Moderate selling pressure' :
+                              imbalancePercent > 50 ? 'Heavy buying pressure dominates' :
+                              imbalancePercent > 20 ? 'Moderate buying pressure' :
+                              'Balanced - roughly equal buy/sell orders';
+        document.getElementById('obImbalanceDesc').textContent = imbalanceDesc;
+
+        // No detailed orderbook data
+        document.getElementById('obToxicity').textContent = 'N/A';
+        document.getElementById('obToxicityDesc').textContent = 'Orderbook data not available';
+        document.getElementById('obSpoofing').textContent = 'N/A';
+        document.getElementById('obSpoofingDesc').textContent = 'Orderbook data not available';
+        return;
+      }
+
+      const metrics = orderbook.metrics;
+
+      // Imbalance
+      const imbalance = (metrics.imbalance || 0) * 100;
+      document.getElementById('obImbalance').textContent = `${imbalance.toFixed(0)}%`;
+      document.getElementById('obImbalanceBar').style.width = `${Math.abs(imbalance)}%`;
+      document.getElementById('obImbalanceBar').className = `progress-fill ${imbalance < 0 ? 'bearish' : 'bullish'}`;
+      const imbalanceDesc = imbalance < -50 ? 'Heavy selling pressure dominates' :
+                            imbalance < -20 ? 'Moderate selling pressure' :
+                            imbalance > 50 ? 'Heavy buying pressure dominates' :
+                            imbalance > 20 ? 'Moderate buying pressure' :
+                            'Balanced - roughly equal buy/sell orders';
+      document.getElementById('obImbalanceDesc').textContent = imbalanceDesc;
+
+      // Toxicity
+      const toxicity = metrics.toxic_flow || 0;
+      document.getElementById('obToxicity').textContent = toxicity.toFixed(2);
+      const toxicityDesc = toxicity > 0.5 ? 'High toxic flow - informed trading detected' :
+                           toxicity > 0.3 ? 'Moderate toxic flow' :
+                           'Low toxic flow - normal trading';
+      document.getElementById('obToxicityDesc').textContent = toxicityDesc;
+
+      // Spoofing
+      const spoofing = metrics.spoofing || 0;
+      document.getElementById('obSpoofing').textContent = spoofing.toFixed(2);
+      const spoofingDesc = spoofing > 0.3 ? 'High spoofing - manipulation detected' :
+                           spoofing > 0.1 ? 'Moderate spoofing' :
+                           'Minimal spoofing detected';
+      document.getElementById('obSpoofingDesc').textContent = spoofingDesc;
+    }
+
+    // Update alternative data metrics
+    function updateAltDataMetrics(data) {
+      const altData = data.alt_data || null;
+
+      if (!altData) {
+        // Alt data not available
+        document.getElementById('altSentiment').textContent = 'N/A';
+        document.getElementById('altSentimentDesc').textContent = 'Alternative data not available';
+        document.getElementById('altSentimentBar').style.width = '0%';
+        document.getElementById('altNewsCount').textContent = '0';
+        document.getElementById('altNewsDesc').textContent = 'No news data available';
+        document.getElementById('altDirection').textContent = 'N/A';
+        document.getElementById('altDirectionDesc').textContent = 'No social data available';
+        document.getElementById('altConfidence').textContent = '0%';
+        document.getElementById('altConfidenceDesc').textContent = 'No alt data available';
+        document.getElementById('altConfidenceBar').style.width = '0%';
+        return;
+      }
+
+      // Sentiment
+      const sentiment = altData.sentiment || 0.5;
+      document.getElementById('altSentiment').textContent = sentiment.toFixed(2);
+      document.getElementById('altSentimentBar').style.width = `${sentiment * 100}%`;
+      document.getElementById('altSentimentBar').className = `progress-fill ${sentiment > 0.5 ? 'bullish' : sentiment < 0.5 ? 'bearish' : 'neutral'}`;
+      const sentimentDesc = sentiment > 0.6 ? 'Strong bullish social sentiment' :
+                            sentiment > 0.5 ? 'Slightly bullish social sentiment' :
+                            sentiment < 0.4 ? 'Strong bearish social sentiment' :
+                            sentiment < 0.5 ? 'Slightly bearish social sentiment' :
+                            'Neutral social sentiment';
+      document.getElementById('altSentimentDesc').textContent = sentimentDesc;
+
+      // News Count
+      const newsCount = altData.news_count || 0;
+      document.getElementById('altNewsCount').textContent = newsCount.toString();
+      const newsDesc = newsCount > 10 ? 'High news activity' :
+                       newsCount > 5 ? 'Moderate news activity' :
+                       newsCount > 0 ? 'Low news activity' :
+                       'No recent news';
+      document.getElementById('altNewsDesc').textContent = newsDesc;
+
+      // Direction
+      const direction = altData.direction || 'neutral';
+      document.getElementById('altDirection').textContent = direction.charAt(0).toUpperCase() + direction.slice(1);
+      const directionDesc = direction === 'bullish' ? 'Positive social momentum' :
+                            direction === 'bearish' ? 'Negative social momentum' :
+                            'Mixed signals from social media';
+      document.getElementById('altDirectionDesc').textContent = directionDesc;
+
+      // Confidence
+      const confidence = (altData.confidence || 0) * 100;
+      document.getElementById('altConfidence').textContent = `${confidence.toFixed(0)}%`;
+      document.getElementById('altConfidenceBar').style.width = `${confidence}%`;
+      document.getElementById('altConfidenceBar').className = `progress-fill ${confidence > 60 ? 'bullish' : confidence < 40 ? 'bearish' : 'neutral'}`;
+      const confDesc = confidence > 70 ? 'High conviction in alt data signals' :
+                       confidence > 50 ? 'Moderate conviction' :
+                       'Low conviction in alt data signals';
+      document.getElementById('altConfidenceDesc').textContent = confDesc;
+    }
+
+    // Update daily summary
+    function updateDailySummary(data) {
+      const now = new Date();
+      const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+      const timeStr = `${dayNames[now.getDay()]} ${now.getDate()} ${monthNames[now.getMonth()]}, ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+      document.getElementById('dailySummaryTime').textContent = timeStr;
+
+      const ensemble = data.ensemble || {};
+      const confidence = (ensemble.confidence || 0) * 100;
+      const action = ensemble.action || 'STAY_OUT';
+      const direction = ensemble.direction || 'neutral';
+      const symbol = data.symbol || 'asset';
+      const price = data.variables?.PRICE || 0;
+      const priceText = price > 0 ? `$${price.toFixed(2)}` : '';
+      const regime = ensemble.regime || 'unknown';
+      const modelsAgreed = direction === 'bullish' ? (data.ensemble.models_bullish || 0) :
+                           direction === 'bearish' ? (data.ensemble.models_bearish || 0) :
+                           (data.ensemble.models_neutral || 0);
+      const totalModels = data.total_models || 11;
+
+      // Get price change for context
+      let changePercent = 0;
+      let changeDirection = '';
+      if (data.variables?.DAILY_CHANGE_PERCENT !== undefined) {
+        changePercent = data.variables.DAILY_CHANGE_PERCENT;
+      } else if (data.variables?.RECENT_PRICES && Array.isArray(data.variables.RECENT_PRICES) && data.variables.RECENT_PRICES.length > 1) {
+        const recentPrices = data.variables.RECENT_PRICES;
+        changePercent = ((recentPrices[recentPrices.length - 1] - recentPrices[0]) / recentPrices[0]) * 100;
+      }
+
+      if (Math.abs(changePercent) < 0.5) {
+        changeDirection = 'trading flat';
+      } else if (changePercent > 0) {
+        changeDirection = `up ${Math.abs(changePercent).toFixed(2)}%`;
+      } else {
+        changeDirection = `down ${Math.abs(changePercent).toFixed(2)}%`;
+      }
+
+      let summaryText = '';
+
+      // Generate personalized summary based on data
+      if (action === 'BET' && confidence >= 61) {
+        if (direction === 'bullish') {
+          summaryText = `${symbol} is showing bullish momentum (${changeDirection}) at ${priceText}. ${modelsAgreed}/${totalModels} models recommend buying. Confidence: ${confidence.toFixed(0)}%. Market regime: ${regime}. Consider long position.`;
+        } else if (direction === 'bearish') {
+          summaryText = `${symbol} is showing bearish pressure (${changeDirection}) at ${priceText}. ${modelsAgreed}/${totalModels} models recommend selling. Confidence: ${confidence.toFixed(0)}%. Market regime: ${regime}. Consider short position.`;
+        }
+      } else if (confidence >= 58 && confidence < 61) {
+        summaryText = `${symbol} is ${changeDirection} at ${priceText}. System confidence at ${confidence.toFixed(0)}% (just below 61% threshold). Models show ${modelsAgreed}/${totalModels} agreement for ${direction}. Wait for clearer signal.`;
+      } else {
+        // Neutral/low confidence
+        const agreement = ensemble.agreement ? (ensemble.agreement * 100).toFixed(0) : '0';
+        summaryText = `${symbol} is ${changeDirection} at ${priceText}. No trade recommended. System confidence at ${confidence.toFixed(0)}% with ${agreement}% model agreement. Models are split on direction. Suggested action: wait and monitor.`;
+      }
+
+      document.getElementById('dailySummaryText').textContent = summaryText;
+    }
+
+    // Update signal card
+    function updateSignalCard(data) {
+      console.log('[DEBUG] updateSignalCard called with data:', data);
+      const card = document.getElementById('signalCard');
+      const ensemble = data.ensemble || {};
+
+      const action = ensemble.action || 'STAY_OUT';
+      const direction = ensemble.direction || 'neutral';
+      const confidence = (ensemble.confidence || 0) * 100;
+      const modelsActive = data.models_active || 0;
+      const totalModels = data.total_models || 11;
+
+      // Changed threshold from 60% to 61%
+      const hasSignal = action === 'BET' && confidence >= 61;
+
+      // Remove all classes
+      card.className = 'signal-card';
+
+      let whatThisMeans = '';
+      let whatToWatch = '';
+
+      if (!hasSignal) {
+        if (confidence >= 58 && confidence < 61) {
+          // Borderline case
+          const symbol = data.symbol || 'the asset';
+          const price = data.variables?.PRICE || 0;
+          const priceText = price > 0 ? ` at $${price.toFixed(2)}` : '';
+          const regime = ensemble.regime || 'unknown';
+          const modelsAgreed = direction === 'bullish' ? (ensemble.models_bullish || 0) :
+                               direction === 'bearish' ? (ensemble.models_bearish || 0) :
+                               (ensemble.models_neutral || 0);
+
+          card.classList.add('no-signal');
+          card.innerHTML = `
+            <div class="signal-header">
+              <div class="signal-dot neutral"></div>
+              <h2 class="signal-title neutral">Signal Borderline</h2>
+            </div>
+            <p class="signal-description">
+              Confidence is at ${confidence.toFixed(1)}% — just ${(61 - confidence).toFixed(1)}% below the 61% threshold. Models are close to agreeing.
+            </p>
+            <div class="signal-stats">
+              <div class="signal-stat">
+                <div class="signal-stat-label">Confidence</div>
+                <div class="signal-stat-value">${confidence.toFixed(1)}%</div>
+              </div>
+              <div class="signal-stat">
+                <div class="signal-stat-label">Direction</div>
+                <div class="signal-stat-value">${direction.charAt(0).toUpperCase() + direction.slice(1)}</div>
+              </div>
+              <div class="signal-stat">
+                <div class="signal-stat-label">Models Active</div>
+                <div class="signal-stat-value">${modelsActive} / ${totalModels}</div>
+              </div>
+            </div>
+          `;
+
+          // Generate text based on whether we have individual model data
+          if (modelsAgreed > 0) {
+            whatThisMeans = `${symbol} is showing ${direction} tendency${priceText} in a ${regime} regime. With ${modelsAgreed}/${totalModels} models leaning ${direction} at ${confidence.toFixed(1)}% confidence, you're just ${(61 - confidence).toFixed(1)}% away from a tradeable signal. The system is waiting for 1-2 more models to confirm the direction before recommending action.`;
+          } else {
+            whatThisMeans = `${symbol} is showing ${direction} tendency${priceText} in a ${regime} regime. Ensemble confidence at ${confidence.toFixed(1)}% — just ${(61 - confidence).toFixed(1)}% below the actionable threshold. The fusion layer is detecting ${direction} pressure but needs stronger conviction from the prediction layers (swarm: ${data.predictions?.swarm?.confidence ? (data.predictions.swarm.confidence * 100).toFixed(0) : 0}%, altdata, causal) before recommending entry.`;
+          }
+
+          whatToWatch = `A trade signal will trigger when confidence crosses 61%. Currently at ${confidence.toFixed(1)}%. Watch for ${direction === 'bullish' ? 'upward' : 'downward'} momentum or volume confirmation. Check back in 5-10 minutes as the models reassess.`;
+
+        } else {
+          // Clear no signal
+          const symbol = data.symbol || 'the asset';
+          const price = data.variables?.PRICE || 0;
+          const priceText = price > 0 ? ` at $${price.toFixed(2)}` : '';
+          const regime = ensemble.regime || 'unknown';
+          const agreement = ensemble.agreement ? (ensemble.agreement * 100).toFixed(0) : '0';
+
+          // Get price movement
+          let changePercent = 0;
+          if (data.variables?.DAILY_CHANGE_PERCENT !== undefined) {
+            changePercent = data.variables.DAILY_CHANGE_PERCENT;
+          } else if (data.variables?.RECENT_PRICES && Array.isArray(data.variables.RECENT_PRICES) && data.variables.RECENT_PRICES.length > 1) {
+            const recentPrices = data.variables.RECENT_PRICES;
+            changePercent = ((recentPrices[recentPrices.length - 1] - recentPrices[0]) / recentPrices[0]) * 100;
+          }
+          const movement = Math.abs(changePercent) < 0.5 ? 'trading sideways' :
+                          changePercent > 0 ? `up ${Math.abs(changePercent).toFixed(2)}%` :
+                          `down ${Math.abs(changePercent).toFixed(2)}%`;
+
+          card.classList.add('no-signal');
+          card.innerHTML = `
+            <div class="signal-header">
+              <div class="signal-dot neutral"></div>
+              <h2 class="signal-title neutral">No Signal</h2>
+            </div>
+            <p class="signal-description">
+              Confidence is at ${confidence.toFixed(1)}% — below the 61% threshold. Waiting for stronger model alignment.
+            </p>
+            <div class="signal-stats">
+              <div class="signal-stat">
+                <div class="signal-stat-label">Confidence</div>
+                <div class="signal-stat-value">${confidence.toFixed(1)}%</div>
+              </div>
+              <div class="signal-stat">
+                <div class="signal-stat-label">Direction</div>
+                <div class="signal-stat-value">${direction.charAt(0).toUpperCase() + direction.slice(1)}</div>
+              </div>
+              <div class="signal-stat">
+                <div class="signal-stat-label">Models Active</div>
+                <div class="signal-stat-value">${modelsActive} / ${totalModels}</div>
+              </div>
+            </div>
+          `;
+
+          // Generate meaningful text even when individual model predictions aren't available
+          const hasSplitModels = (ensemble.models_bullish || 0) + (ensemble.models_bearish || 0) + (ensemble.models_neutral || 0) > 0;
+
+          if (hasSplitModels) {
+            whatThisMeans = `${symbol} is ${movement}${priceText} in a ${regime} market regime. With only ${agreement}% model agreement and ${confidence.toFixed(0)}% confidence, the system doesn't have a clear directional signal. Models are split between bullish (${ensemble.models_bullish}), bearish (${ensemble.models_bearish}), and neutral (${ensemble.models_neutral}) predictions.`;
+          } else {
+            // When individual model data isn't available, describe what we DO know
+            whatThisMeans = `${symbol} is ${movement}${priceText} in a ${regime} regime. The ensemble fusion layer shows ${direction} tendency at ${confidence.toFixed(0)}% confidence, but this is below the 61% threshold for actionable signals. The system is monitoring ${modelsActive} prediction layers (swarm, altdata, causal) waiting for clearer consensus before recommending a trade.`;
+          }
+
+          whatToWatch = `A trade signal will appear when confidence rises above 61% and the prediction layers converge. Currently at ${confidence.toFixed(0)}% confidence in ${regime} regime. Monitor ${symbol} for regime shifts, volume spikes, or news events that could drive clearer directional signals.`;
+        }
+
+        document.getElementById('lastSignal').textContent = `No recent signals for ${data.symbol || 'this asset'}. The system is monitoring ${modelsActive} models continuously and will alert when confidence crosses 61%.`;
+
+      } else {
+        const signalClass = direction === 'bullish' ? 'bullish' : 'bearish';
+        const signalTitle = direction === 'bullish' ? 'Long Signal' : 'Short Signal';
+        const modelAgreement = direction === 'bullish' ? (ensemble.models_bullish || 0) : (ensemble.models_bearish || 0);
+
+        card.classList.add(signalClass);
+        card.innerHTML = `
+          <div class="signal-header">
+            <div class="signal-dot ${signalClass}"></div>
+            <h2 class="signal-title ${signalClass}">${signalTitle}</h2>
+          </div>
+          <p class="signal-description">
+            Strong ${direction} signal detected with ${confidence.toFixed(0)}% confidence. ${modelAgreement} of ${totalModels} models in agreement.
+          </p>
+          <div class="signal-stats">
+            <div class="signal-stat">
+              <div class="signal-stat-label">Confidence</div>
+              <div class="signal-stat-value">${confidence.toFixed(1)}%</div>
+            </div>
+            <div class="signal-stat">
+              <div class="signal-stat-label">Direction</div>
+              <div class="signal-stat-value">${signalTitle}</div>
+            </div>
+            <div class="signal-stat">
+              <div class="signal-stat-label">Models Agree</div>
+              <div class="signal-stat-value">${modelAgreement}</div>
+            </div>
+          </div>
+        `;
+
+        if (direction === 'bullish') {
+          whatThisMeans = `Multiple models are predicting the price will rise. This is a reasonably strong signal backed by ${modelAgreement} independent models all pointing in the same direction. The suggested action is to consider opening a long position.`;
+          whatToWatch = 'Monitor the position once opened. If confidence drops below 50% or the price hits your stop loss, consider exiting. The system will alert you if the signal changes.';
+        } else {
+          whatThisMeans = `Multiple models are predicting the price will fall. This is a reasonably strong signal backed by ${modelAgreement} independent models all pointing downward. The suggested action is to consider opening a short position or staying out if you prefer.`;
+          whatToWatch = 'Monitor the position once opened. If confidence drops below 50% or the price hits your stop loss, consider exiting. The system will alert you if the signal changes.';
+        }
+
+        document.getElementById('lastSignal').textContent = `Active signal: ${signalTitle} at ${confidence.toFixed(0)}% confidence. Generated just now.`;
+      }
+
+      console.log('[DEBUG] Setting whatThisMeans:', whatThisMeans);
+      console.log('[DEBUG] Setting whatToWatch:', whatToWatch);
+      document.getElementById('whatThisMeans').textContent = whatThisMeans;
+      document.getElementById('whatToWatch').textContent = whatToWatch;
+    }
+
+    // Update trade recommendation details
+    function updateTradeRecommendation(rec) {
+      console.log('[DASHBOARD] updateTradeRecommendation called with:', rec);
+      if (!rec || rec.error) {
+        console.warn('No trade recommendation available:', rec?.error);
+        return;
+      }
+
+      // Update portfolio section
+      const portfolioSection = document.getElementById('portfolioSection');
+      const portfolioInfo = document.getElementById('portfolioInfo');
+
+      if (rec.portfolio && rec.portfolio.open_positions > 0) {
+        portfolioSection.style.display = 'block';
+        const invested = rec.portfolio.total_invested.toFixed(2);
+        const positions = rec.portfolio.open_positions;
+        const avgEntry = rec.portfolio.avg_entry ? rec.portfolio.avg_entry.toFixed(2) : '0.00';
+        portfolioInfo.textContent = `You have $${invested} invested in ${rec.symbol} across ${positions} open position${positions > 1 ? 's' : ''}. Average entry: $${avgEntry}`;
+      } else {
+        portfolioSection.style.display = 'none';
+      }
+
+      // Update reasons list
+      const reasonsList = document.getElementById('reasonsList');
+      console.log('[DASHBOARD] Updating reasons list with:', rec.reasons);
+      if (rec.reasons && rec.reasons.length > 0) {
+        reasonsList.innerHTML = rec.reasons.map(reason => `<li>${reason}</li>`).join('');
+        console.log('[DASHBOARD] Reasons list updated with', rec.reasons.length, 'items');
+      } else {
+        reasonsList.innerHTML = '<li>Analyzing market conditions...</li>';
+        console.log('[DASHBOARD] No reasons available, showing placeholder');
+      }
+
+      // Update scenarios grid
+      const scenariosGrid = document.getElementById('scenariosGrid');
+      if (rec.scenarios) {
+        let scenariosHTML = '';
+
+        // Bullish scenario
+        if (rec.scenarios.bullish) {
+          const s = rec.scenarios.bullish;
+          scenariosHTML += `
+            <div class="scenario-card bullish">
+              <div class="scenario-label">Bullish Case</div>
+              <div class="scenario-value">$${s.target.toFixed(2)}</div>
+              <div class="scenario-prob">${(s.probability * 100).toFixed(0)}% probability</div>
+              <div class="scenario-condition">${s.condition}</div>
+            </div>
+          `;
+        }
+
+        // Neutral scenario
+        if (rec.scenarios.neutral) {
+          const s = rec.scenarios.neutral;
+          scenariosHTML += `
+            <div class="scenario-card neutral">
+              <div class="scenario-label">Neutral Case</div>
+              <div class="scenario-value">$${s.range_low.toFixed(2)} - $${s.range_high.toFixed(2)}</div>
+              <div class="scenario-prob">${(s.probability * 100).toFixed(0)}% probability</div>
+              <div class="scenario-condition">${s.condition}</div>
+            </div>
+          `;
+        }
+
+        // Bearish scenario
+        if (rec.scenarios.bearish) {
+          const s = rec.scenarios.bearish;
+          scenariosHTML += `
+            <div class="scenario-card bearish">
+              <div class="scenario-label">Bearish Case</div>
+              <div class="scenario-value">$${s.target.toFixed(2)}</div>
+              <div class="scenario-prob">${(s.probability * 100).toFixed(0)}% probability</div>
+              <div class="scenario-condition">${s.condition}</div>
+            </div>
+          `;
+        }
+
+        scenariosGrid.innerHTML = scenariosHTML;
+      }
+    }
+
+    // Update ensemble grid
+    function updateEnsemble(data) {
+      const grid = document.getElementById('ensembleGrid');
+      const predictions = data.predictions || {};
+
+      // Calculate real vote counts
+      let bullishCount = 0;
+      let bearishCount = 0;
+      let neutralCount = 0;
+      let totalActive = 0;
+
+      let html = '';
+
+      Object.entries(predictions).forEach(([key, pred]) => {
+        if (key === 'ensemble') return; // Skip ensemble itself
+
+        const name = pred.name || key;
+        const direction = pred.direction || 'neutral';
+        const confidence = (pred.confidence || 0) * 100;
+        const dataSource = pred.data_source;
+
+        if (dataSource === 'REAL') {
+          const badgeClass = direction === 'bullish' ? 'bullish' : direction === 'bearish' ? 'bearish' : 'neutral';
+          const barClass = direction === 'bullish' ? 'bullish' : direction === 'bearish' ? 'bearish' : 'neutral';
+
+          // Count votes
+          if (direction === 'bullish') bullishCount++;
+          else if (direction === 'bearish') bearishCount++;
+          else neutralCount++;
+          totalActive++;
+
+          html += `
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <i data-lucide="cpu" class="stat-card-icon"></i>
+                <span class="stat-card-label">${name}</span>
+              </div>
+              <div class="stat-card-value">${confidence.toFixed(1)}%</div>
+              <div class="stat-card-description">
+                <span class="badge ${badgeClass}">${direction.charAt(0).toUpperCase() + direction.slice(1)}</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill ${barClass}" style="width: ${confidence}%"></div>
+              </div>
+              <div class="stat-card-bar ${barClass}"></div>
+            </div>
+          `;
+        } else {
+          html += `
+            <div class="skeleton skeleton-card"></div>
+          `;
+        }
+      });
+
+      grid.innerHTML = html;
+
+      // Update voting bar to match actual votes
+      const totalVotes = bullishCount + bearishCount + neutralCount;
+      const bullishPct = totalVotes > 0 ? Math.round((bullishCount / totalVotes) * 100) : 0;
+      const bearishPct = totalVotes > 0 ? Math.round((bearishCount / totalVotes) * 100) : 0;
+      const neutralPct = totalVotes > 0 ? Math.round((neutralCount / totalVotes) * 100) : 0;
+
+      document.getElementById('votingBar').innerHTML = `
+        <div class="voting-segment bullish" style="flex: ${bullishCount}"></div>
+        <div class="voting-segment neutral" style="flex: ${neutralCount}"></div>
+        <div class="voting-segment bearish" style="flex: ${bearishCount}"></div>
+      `;
+
+      document.getElementById('votingLabel').textContent = `Bullish ${bullishPct}% • Neutral ${neutralPct}% • Bearish ${bearishPct}%`;
+
+      // Calculate real agreement
+      const maxVotes = Math.max(bullishCount, bearishCount, neutralCount);
+      const agreement = totalVotes > 0 ? Math.round((maxVotes / totalVotes) * 100) : 0;
+
+      const agreementValue = document.getElementById('votingAgreementValue');
+      agreementValue.textContent = `${agreement}%`;
+      agreementValue.className = 'voting-agreement';
+      if (agreement < 40) agreementValue.classList.add('low');
+      else if (agreement < 70) agreementValue.classList.add('medium');
+      else agreementValue.classList.add('high');
+
+      document.getElementById('ensembleAgreement').textContent = `${agreement}% Agreement`;
+      document.getElementById('ensembleCount').textContent = `${totalActive} / ${data.total_models || 11} Models`;
+
+      // Update summary
+      document.getElementById('ensembleSummary').textContent =
+        `Only ${totalActive} of ${data.total_models || 11} models have enough data to vote. ${agreement < 50 ? 'Agreement is low.' : 'Decent agreement.'} ${totalActive < 6 ? 'More models need to load before this verdict is reliable.' : 'Ensemble is becoming reliable.'}`;
+
+      // Update swarm summary
+      const swarm = predictions.swarm || {};
+      const swarmBullish = swarm.bullish_agents || 0;
+      const swarmBearish = swarm.bearish_agents || 0;
+      const swarmTotal = swarm.agent_count || 500;
+
+      if (Math.abs(swarmBullish - swarmBearish) < 50) {
+        document.getElementById('swarmSummary').textContent =
+          `${swarmTotal} simulated trading agents are evenly split (${swarmBullish} bullish, ${swarmBearish} bearish). No useful signal here.`;
+      } else if (swarmBullish > swarmBearish) {
+        document.getElementById('swarmSummary').textContent =
+          `${swarmTotal} agents lean bullish: ${swarmBullish} expect rise, ${swarmBearish} expect fall. Moderate bullish signal from swarm.`;
+      } else {
+        document.getElementById('swarmSummary').textContent =
+          `${swarmTotal} agents lean bearish: ${swarmBearish} expect fall, ${swarmBullish} expect rise. Moderate bearish signal from swarm.`;
+      }
+
+      lucide.createIcons();
+    }
+
+    // Initialize prediction chart
+    function initPredictionChart() {
+      const canvas = document.getElementById('predictionChart');
+      if (!canvas) return;
+
+      const ctx = canvas.getContext('2d');
+      const currentPrice = currentData?.variables?.PRICE || 0;
+      if (!currentPrice) return; // Don't render chart without price data
+
+      // Generate time labels (next 24 hours, every 4 hours)
+      const now = Date.now();
+      const labels = [];
+      for (let i = 0; i <= 24; i += 4) {
+        const time = new Date(now + i * 60 * 60 * 1000);
+        labels.push(time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }));
+      }
+
+      // Generate forecast data
+      const expectedPrices = [
+        currentPrice,
+        currentPrice + 200,
+        currentPrice + 600,
+        currentPrice + 800,
+        currentPrice + 1000,
+        currentPrice + 987,
+        currentPrice + 950
+      ];
+
+      const upperBound = expectedPrices.map(p => p + currentPrice * 0.025);
+      const lowerBound = expectedPrices.map(p => p - currentPrice * 0.018);
+
+      predictionChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Upper Bound',
+              data: upperBound,
+              borderColor: 'transparent',
+              backgroundColor: 'rgba(91,106,240,0.08)',
+              fill: '+1',
+              pointRadius: 0,
+              tension: 0.4
+            },
+            {
+              label: 'Expected',
+              data: expectedPrices,
+              borderColor: '#5B6AF0',
+              backgroundColor: 'transparent',
+              borderWidth: 2,
+              pointRadius: 0,
+              tension: 0.4
+            },
+            {
+              label: 'Lower Bound',
+              data: lowerBound,
+              borderColor: 'transparent',
+              backgroundColor: 'rgba(91,106,240,0.08)',
+              fill: false,
+              pointRadius: 0,
+              tension: 0.4
+            },
+            {
+              label: 'Current Price',
+              data: Array(labels.length).fill(currentPrice),
+              borderColor: '#A8A49E',
+              backgroundColor: 'transparent',
+              borderWidth: 1,
+              borderDash: [5, 5],
+              pointRadius: 0
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false
+            }
+          },
+          scales: {
+            x: {
+              grid: {
+                display: false
+              }
+            },
+            y: {
+              grid: {
+                color: '#F1F0ED',
+                drawBorder: false
+              },
+              ticks: {
+                callback: function(value) {
+                  return '$' + value.toLocaleString('en-US', { maximumFractionDigits: 0 });
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Update prediction chart
+    function updatePredictionChart() {
+      if (!predictionChart || !currentData) return;
+
+      const currentPrice = currentData.variables?.PRICE || 0;
+      if (!currentPrice) return; // Don't update chart without price data
+
+      // Update datasets with new current price
+      const expectedPrices = [
+        currentPrice,
+        currentPrice + 200,
+        currentPrice + 600,
+        currentPrice + 800,
+        currentPrice + 1000,
+        currentPrice + 987,
+        currentPrice + 950
+      ];
+
+      const upperBound = expectedPrices.map(p => p + currentPrice * 0.025);
+      const lowerBound = expectedPrices.map(p => p - currentPrice * 0.018);
+
+      predictionChart.data.datasets[0].data = upperBound;
+      predictionChart.data.datasets[1].data = expectedPrices;
+      predictionChart.data.datasets[2].data = lowerBound;
+      predictionChart.data.datasets[3].data = Array(7).fill(currentPrice);
+
+      predictionChart.update('none');
+    }
+
+    // Load symbol selector from portfolio
+    loadSymbolSelector();
+
+    // Initial fetch
+    fetchData();
+
+    // Poll every 30 seconds
+    setInterval(fetchData, 30000);
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // CUSTOM PREDICTIONS
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    let customPredChart = null;
+
+    // Timeframe button clicks
+    document.querySelectorAll('.timeframe-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.timeframe-btn').forEach(b => b.classList.remove('active-timeframe'));
+        this.classList.add('active-timeframe');
+        const hours = parseInt(this.dataset.hours);
+        generatePredictionForHours(hours);
+      });
+    });
+
+    function generateCustomPrediction() {
+      const customValue = parseInt(document.getElementById('customPredValue').value);
+      const customUnit = document.getElementById('customPredUnit').value;
+
+      if (!customValue || customValue < 1) {
+        alert('Please enter a valid number');
+        return;
+      }
+
+      let hours = customValue;
+      if (customUnit === 'days') hours *= 24;
+      else if (customUnit === 'weeks') hours *= 168;
+
+      document.querySelectorAll('.timeframe-btn').forEach(b => b.classList.remove('active-timeframe'));
+      generatePredictionForHours(hours);
+    }
+
+    async function generatePredictionForHours(hours) {
+      if (!currentData || !currentData.ensemble) return;
+
+      const currentPrice = currentData.variables?.PRICE || currentData.current_price || 0;
+      const ensemble = currentData.ensemble;
+      const direction = ensemble.direction || 'neutral';
+      const confidence = ensemble.confidence || 0;
+
+      const atr = currentData.variables?.ATR_14 || currentPrice * 0.015;
+
+      let expectedChange = 0;
+      if (direction === 'bullish') {
+        expectedChange = (confidence * atr * Math.sqrt(hours / 24)) * 1.2;
+      } else if (direction === 'bearish') {
+        expectedChange = -(confidence * atr * Math.sqrt(hours / 24)) * 1.2;
+      }
+
+      const expectedPrice = currentPrice + expectedChange;
+      const upperBound = expectedPrice + (atr * Math.sqrt(hours / 24) * 1.5);
+      const lowerBound = expectedPrice - (atr * Math.sqrt(hours / 24) * 1.5);
+
+      const optimisticPrice = currentPrice + (atr * Math.sqrt(hours / 24) * 2);
+      const pessimisticPrice = currentPrice - (atr * Math.sqrt(hours / 24) * 2);
+
+      // Render scenarios
+      const scenariosGrid = document.getElementById('predictionScenariosGrid');
+      scenariosGrid.innerHTML = `
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <i data-lucide="trending-up" class="stat-card-icon"></i>
+            <span class="stat-card-label">Optimistic</span>
+          </div>
+          <div class="stat-card-value" style="color: var(--bullish);">$${optimisticPrice.toFixed(2)}</div>
+          <div class="stat-card-description">+${((optimisticPrice - currentPrice) / currentPrice * 100).toFixed(2)}%</div>
+          <div class="stat-card-bar bullish"></div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <i data-lucide="target" class="stat-card-icon"></i>
+            <span class="stat-card-label">Expected</span>
+          </div>
+          <div class="stat-card-value">$${expectedPrice.toFixed(2)}</div>
+          <div class="stat-card-description">${expectedChange >= 0 ? '+' : ''}${((expectedPrice - currentPrice) / currentPrice * 100).toFixed(2)}%</div>
+          <div class="stat-card-bar accent"></div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <i data-lucide="trending-down" class="stat-card-icon"></i>
+            <span class="stat-card-label">Pessimistic</span>
+          </div>
+          <div class="stat-card-value" style="color: var(--bearish);">$${pessimisticPrice.toFixed(2)}</div>
+          <div class="stat-card-description">${((pessimisticPrice - currentPrice) / currentPrice * 100).toFixed(2)}%</div>
+          <div class="stat-card-bar bearish"></div>
+        </div>
+      `;
+
+      lucide.createIcons();
+
+      // Render chart
+      renderCustomPredictionChart(hours, currentPrice, expectedPrice, upperBound, lowerBound);
+    }
+
+    function renderCustomPredictionChart(hours, currentPrice, expectedPrice, upperBound, lowerBound) {
+      const ctx = document.getElementById('customPredictionChart').getContext('2d');
+
+      if (customPredChart) {
+        customPredChart.destroy();
+      }
+
+      const intervals = Math.min(7, Math.ceil(hours / 4));
+      const labels = [];
+      for (let i = 0; i <= intervals; i++) {
+        const hoursOffset = (hours / intervals) * i;
+        if (hoursOffset < 24) {
+          labels.push(`+${hoursOffset.toFixed(0)}h`);
+        } else if (hoursOffset < 168) {
+          labels.push(`+${(hoursOffset / 24).toFixed(1)}d`);
+        } else {
+          labels.push(`+${(hoursOffset / 168).toFixed(1)}w`);
+        }
+      }
+
+      const expectedData = [];
+      const upperData = [];
+      const lowerData = [];
+
+      for (let i = 0; i <= intervals; i++) {
+        const progress = i / intervals;
+        expectedData.push(currentPrice + ((expectedPrice - currentPrice) * progress));
+        upperData.push(currentPrice + ((upperBound - currentPrice) * progress));
+        lowerData.push(currentPrice + ((lowerBound - currentPrice) * progress));
+      }
+
+      customPredChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Upper Bound',
+              data: upperData,
+              borderColor: 'rgba(16,185,129,0.3)',
+              borderWidth: 2,
+              fill: false,
+              tension: 0.3,
+              pointRadius: 0
+            },
+            {
+              label: 'Expected',
+              data: expectedData,
+              borderColor: '#10b981',
+              borderWidth: 3,
+              fill: false,
+              tension: 0.3
+            },
+            {
+              label: 'Lower Bound',
+              data: lowerData,
+              borderColor: 'rgba(239,68,68,0.3)',
+              borderWidth: 2,
+              fill: false,
+              tension: 0.3,
+              pointRadius: 0
+            },
+            {
+              label: 'Current',
+              data: Array(labels.length).fill(currentPrice),
+              borderColor: '#f59e0b',
+              borderWidth: 2,
+              borderDash: [5, 5],
+              fill: false,
+              pointRadius: 0
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: true,
+              position: 'top',
+              labels: { color: '#94a3b8', font: { family: 'Inter', size: 11 } }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(255,255,255,0.04)', drawBorder: false },
+              ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 11 } }
+            },
+            y: {
+              grid: { color: 'rgba(255,255,255,0.04)', drawBorder: false },
+              ticks: {
+                color: '#64748b',
+                font: { family: 'JetBrains Mono', size: 11 },
+                callback: value => '$' + value.toFixed(0)
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Auto-generate 24h prediction on load
+    setTimeout(() => {
+      if (currentData) {
+        generatePredictionForHours(24);
+      }
+    }, 1000);
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // PORTFOLIO MANAGEMENT
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    async function loadPortfolio() {
+      try {
+        // Load global stats
+        const statsRes = await fetch('/api/portfolio/stats');
+        const stats = await statsRes.json();
+        updatePortfolioStats(stats);
+
+        // Load assets
+        const assetsRes = await fetch('/api/portfolio/assets');
+        const assetsData = await assetsRes.json();
+        renderPortfolioAssets(assetsData.assets);
+      } catch (error) {
+        console.error('Failed to load portfolio:', error);
+      }
+    }
+
+    function updatePortfolioStats(stats) {
+      const pnlSign = stats.total_pnl >= 0 ? '+' : '';
+      const pnlColor = stats.total_pnl >= 0 ? 'var(--bullish)' : 'var(--bearish)';
+
+      document.getElementById('portfolioTotalPnl').textContent = `${pnlSign}$${Math.abs(stats.total_pnl).toFixed(2)}`;
+      document.getElementById('portfolioTotalPnl').style.color = pnlColor;
+
+      document.getElementById('portfolioWinRate').textContent = `${stats.win_rate.toFixed(1)}%`;
+      document.getElementById('portfolioWinLoss').textContent = `${stats.winning_positions}W / ${stats.losing_positions}L`;
+
+      document.getElementById('portfolioOpenPos').textContent = stats.open_positions;
+      document.getElementById('portfolioClosedPos').textContent = `${stats.closed_positions} closed`;
+
+      document.getElementById('portfolioInvested').textContent = `$${stats.total_invested.toFixed(2)}`;
+      document.getElementById('portfolioTotalPos').textContent = `${stats.total_positions} positions`;
+    }
+
+    function renderPortfolioAssets(assets) {
+      const container = document.getElementById('portfolioAssetsList');
+
+      if (!assets || assets.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <i data-lucide="wallet" class="empty-icon"></i>
+            <h3 class="empty-title">No Assets Yet</h3>
+            <p class="empty-description">Add your first asset to start tracking</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      const rows = assets.map(asset => {
+        const pnlClass = asset.stats.total_pnl >= 0 ? 'bullish' : 'bearish';
+        const pnlSign = asset.stats.total_pnl >= 0 ? '+' : '';
+
+        return `
+          <div style="padding: var(--space-16) var(--space-20); border-bottom: 1px solid var(--border-subtle); display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: var(--space-16); align-items: center;">
+            <div>
+              <div style="font-family: var(--font-mono); font-weight: 600; font-size: 15px; color: var(--text-primary);">${asset.symbol}</div>
+              <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">${asset.asset_type}</div>
+            </div>
+            <div style="font-family: var(--font-mono); font-size: 14px; color: var(--text-primary);">$${asset.stats.total_invested.toFixed(2)}</div>
+            <div style="font-family: var(--font-mono); font-size: 14px; color: var(--${pnlClass});">${pnlSign}$${Math.abs(asset.stats.total_pnl).toFixed(2)}</div>
+            <div style="font-size: 13px; color: var(--text-secondary);">${asset.stats.open_positions} open</div>
+            <div style="font-size: 13px; color: var(--text-muted);">${asset.stats.win_rate.toFixed(1)}% WR</div>
+          </div>
+        `;
+      }).join('');
+
+      container.innerHTML = `
+        <div style="padding: var(--space-12) var(--space-20); background: var(--bg-inner); display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: var(--space-16); font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">
+          <div>Asset</div>
+          <div>Invested</div>
+          <div>P&L</div>
+          <div>Open</div>
+          <div>Win Rate</div>
+        </div>
+        ${rows}
+      `;
+    }
+
+    function showAddAssetModal() {
+      const symbol = prompt('Enter asset symbol (e.g., ETH/USDT, AAPL):');
+      if (!symbol) return;
+
+      const type = prompt('Enter asset type (crypto/stock/commodity/forex):', 'crypto');
+      if (!type) return;
+
+      addAsset(symbol.trim().toUpperCase(), type.toLowerCase());
+    }
+
+    async function addAsset(symbol, assetType) {
+      try {
+        const response = await fetch('/api/portfolio/assets/add', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ symbol, asset_type: assetType })
+        });
+
+        if (response.ok) {
+          loadPortfolio();
+        } else {
+          const result = await response.json();
+          alert('Failed to add asset: ' + (result.detail || 'Unknown error'));
+        }
+      } catch (error) {
+        console.error('Failed to add asset:', error);
+        alert('Failed to add asset');
+      }
+    }
+
+    async function quickOpenPosition() {
+      const symbol = 'BTC/USDT'; // Current asset
+      const side = document.getElementById('quickSide').value;
+      const entryPrice = parseFloat(document.getElementById('quickEntryPrice').value);
+      const quantity = parseFloat(document.getElementById('quickQuantity').value);
+
+      if (!entryPrice || !quantity) {
+        alert('Please enter both entry price and quantity');
+        return;
+      }
+
+      try {
+        // First ensure asset exists
+        await fetch('/api/portfolio/assets/add', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ symbol, asset_type: 'crypto' })
+        });
+
+        // Then open position
+        const response = await fetch('/api/portfolio/positions/add', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ symbol, side, entry_price: entryPrice, quantity })
+        });
+
+        if (response.ok) {
+          document.getElementById('quickEntryPrice').value = '';
+          document.getElementById('quickQuantity').value = '';
+          loadPortfolio();
+          alert('Position opened successfully!');
+        } else {
+          const result = await response.json();
+          alert('Failed to open position: ' + (result.detail || 'Unknown error'));
+        }
+      } catch (error) {
+        console.error('Failed to open position:', error);
+        alert('Failed to open position');
+      }
+    }
+
+    // Load portfolio when tab is clicked
+    document.querySelector('[data-tab="portfolio"]').addEventListener('click', loadPortfolio);
+
+  </script>
+</body>
+</html>

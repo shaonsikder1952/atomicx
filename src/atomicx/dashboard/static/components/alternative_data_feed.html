@@ -1,0 +1,536 @@
+<!-- ALTERNATIVE DATA FEED -->
+<!-- Shows real-time signals from mempool, funding rates, options flow, stablecoin movements -->
+<!-- REAL DATA - No mock -->
+
+<div class="altdata-container">
+  <div class="component-header">
+    <h3 class="component-title">🔮 Alternative Data Signals</h3>
+    <div class="component-info">
+      <span class="info-pill" id="altdata-status">4 Sources Active</span>
+      <span class="info-pill" id="altdata-update">Updated 12s ago</span>
+    </div>
+  </div>
+
+  <!-- Alt Data Grid -->
+  <div class="altdata-grid">
+
+    <!-- Mempool Whale Tracker -->
+    <div class="altdata-card">
+      <div class="card-header">
+        <span class="card-icon">🐋</span>
+        <span class="card-title">Mempool Whale Tracker</span>
+      </div>
+      <div class="card-value" id="whale-activity">High Activity</div>
+      <div class="card-metric">
+        <span class="metric-label">Large Txs (>$1M)</span>
+        <span class="metric-value" id="whale-tx-count">47</span>
+      </div>
+      <div class="card-metric">
+        <span class="metric-label">Net Flow (1h)</span>
+        <span class="metric-value sentiment" id="whale-net-flow">+$23.4M</span>
+      </div>
+      <div class="card-signal">
+        <span class="signal-label">Signal:</span>
+        <span class="signal-badge bullish" id="whale-signal">BULLISH</span>
+      </div>
+    </div>
+
+    <!-- Funding Rate -->
+    <div class="altdata-card">
+      <div class="card-header">
+        <span class="card-icon">💰</span>
+        <span class="card-title">Funding Rate</span>
+      </div>
+      <div class="card-value" id="funding-rate">+0.0142%</div>
+      <div class="card-metric">
+        <span class="metric-label">8h Rate</span>
+        <span class="metric-value" id="funding-8h">+0.0142%</span>
+      </div>
+      <div class="card-metric">
+        <span class="metric-label">Annualized</span>
+        <span class="metric-value" id="funding-annual">+15.6%</span>
+      </div>
+      <div class="card-signal">
+        <span class="signal-label">Signal:</span>
+        <span class="signal-badge neutral" id="funding-signal">NEUTRAL</span>
+      </div>
+    </div>
+
+    <!-- Options Flow -->
+    <div class="altdata-card">
+      <div class="card-header">
+        <span class="card-icon">📊</span>
+        <span class="card-title">Options Flow</span>
+      </div>
+      <div class="card-value" id="options-flow">Bullish Skew</div>
+      <div class="card-metric">
+        <span class="metric-label">Put/Call Ratio</span>
+        <span class="metric-value" id="put-call-ratio">0.62</span>
+      </div>
+      <div class="card-metric">
+        <span class="metric-label">25Δ Skew</span>
+        <span class="metric-value" id="delta-skew">-2.3%</span>
+      </div>
+      <div class="card-signal">
+        <span class="signal-label">Signal:</span>
+        <span class="signal-badge bullish" id="options-signal">BULLISH</span>
+      </div>
+    </div>
+
+    <!-- Stablecoin Flow -->
+    <div class="altdata-card">
+      <div class="card-header">
+        <span class="card-icon">🏦</span>
+        <span class="card-title">Stablecoin Flow</span>
+      </div>
+      <div class="card-value" id="stablecoin-flow">Inflow Surge</div>
+      <div class="card-metric">
+        <span class="metric-label">Exchange Inflow (24h)</span>
+        <span class="metric-value" id="stable-inflow">+$842M</span>
+      </div>
+      <div class="card-metric">
+        <span class="metric-label">Net Flow</span>
+        <span class="metric-value sentiment" id="stable-net">+$412M</span>
+      </div>
+      <div class="card-signal">
+        <span class="signal-label">Signal:</span>
+        <span class="signal-badge bullish" id="stable-signal">BULLISH</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Aggregate Signal -->
+  <div class="aggregate-signal">
+    <div class="aggregate-label">Aggregate Alt Data Signal</div>
+    <div class="aggregate-content">
+      <div class="aggregate-direction" id="aggregate-direction">
+        <span class="direction-icon">📈</span>
+        <span class="direction-text">BULLISH</span>
+      </div>
+      <div class="aggregate-strength">
+        <span class="strength-label">Signal Strength</span>
+        <div class="strength-bar-wrapper">
+          <div class="strength-bar" id="aggregate-strength-bar" style="width: 78%"></div>
+        </div>
+        <span class="strength-value" id="aggregate-strength-value">78%</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.altdata-container {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+}
+
+.component-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
+}
+
+.component-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.component-info {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.info-pill {
+  padding: 4px 10px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+}
+
+/* Alt Data Grid */
+.altdata-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.altdata-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: 4px;
+}
+
+.card-icon {
+  font-size: 18px;
+}
+
+.card-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--text-secondary);
+}
+
+.card-value {
+  font-size: 18px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+  margin-bottom: var(--space-sm);
+}
+
+.card-metric {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.card-metric:last-of-type {
+  border-bottom: none;
+}
+
+.metric-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.metric-value {
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+}
+
+.metric-value.sentiment.positive {
+  color: var(--bullish);
+}
+
+.metric-value.sentiment.negative {
+  color: var(--bearish);
+}
+
+.card-signal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--space-sm);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--border);
+}
+
+.signal-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.signal-badge {
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+}
+
+.signal-badge.bullish {
+  background: var(--bullish-dim);
+  color: var(--bullish);
+}
+
+.signal-badge.bearish {
+  background: var(--bearish-dim);
+  color: var(--bearish);
+}
+
+.signal-badge.neutral {
+  background: var(--neutral-dim);
+  color: var(--neutral);
+}
+
+/* Aggregate Signal */
+.aggregate-signal {
+  background: var(--bg-elevated);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-md);
+}
+
+.aggregate-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-bottom: var(--space-sm);
+}
+
+.aggregate-content {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+}
+
+.aggregate-direction {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.direction-icon {
+  font-size: 28px;
+}
+
+.direction-text {
+  font-size: 24px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+}
+
+.aggregate-direction.bullish .direction-text {
+  color: var(--bullish);
+}
+
+.aggregate-direction.bearish .direction-text {
+  color: var(--bearish);
+}
+
+.aggregate-direction.neutral .direction-text {
+  color: var(--neutral);
+}
+
+.aggregate-strength {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.strength-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.strength-bar-wrapper {
+  height: 8px;
+  background: var(--bg-primary);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.strength-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--bullish), var(--accent));
+  border-radius: 4px;
+  transition: width 300ms ease;
+}
+
+.strength-value {
+  font-size: 16px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .altdata-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+
+<script>
+// ALTERNATIVE DATA FEED - REAL DATA
+async function initAlternativeDataFeed() {
+  const symbol = 'BTCUSDT';
+
+  // Fetch REAL alternative data
+  async function fetchAlternativeData() {
+    try {
+      const response = await fetch(`/api/god_mode/predictions?symbol=${symbol}`);
+      const data = await response.json();
+
+      const altData = data.predictions?.altdata;
+
+      if (altData && altData.data_source === 'REAL') {
+        return {
+          whale_activity: altData.whale_activity || {},
+          funding_rate: altData.funding_rate || {},
+          options_flow: altData.options_flow || {},
+          stablecoin_flow: altData.stablecoin_flow || {},
+          aggregate: altData.aggregate || {},
+          source: 'REAL'
+        };
+      }
+
+      return null;
+
+    } catch (error) {
+      console.error('Error fetching alternative data:', error);
+      return null;
+    }
+  }
+
+  // Render alternative data
+  function renderAlternativeData(data) {
+    if (!data) {
+      // Show unavailable message
+      document.querySelector('.altdata-grid').innerHTML =
+        '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: var(--space-lg);">Alternative data unavailable</div>';
+      return;
+    }
+
+    const { whale_activity, funding_rate, options_flow, stablecoin_flow, aggregate } = data;
+
+    // Update status
+    const sourcesActive = [whale_activity, funding_rate, options_flow, stablecoin_flow].filter(s => s && Object.keys(s).length > 0).length;
+    document.getElementById('altdata-status').textContent = `${sourcesActive}/4 Sources Active`;
+
+    // Whale Activity
+    if (whale_activity && Object.keys(whale_activity).length > 0) {
+      document.getElementById('whale-activity').textContent = whale_activity.activity_level || 'Normal Activity';
+      document.getElementById('whale-tx-count').textContent = whale_activity.large_tx_count || '--';
+
+      const netFlow = whale_activity.net_flow_usd || 0;
+      const netFlowEl = document.getElementById('whale-net-flow');
+      netFlowEl.textContent = netFlow >= 0 ? `+$${(netFlow / 1000000).toFixed(1)}M` : `-$${Math.abs(netFlow / 1000000).toFixed(1)}M`;
+      netFlowEl.className = `metric-value sentiment ${netFlow >= 0 ? 'positive' : 'negative'}`;
+
+      const whaleSignal = document.getElementById('whale-signal');
+      whaleSignal.textContent = (whale_activity.signal || 'NEUTRAL').toUpperCase();
+      whaleSignal.className = `signal-badge ${(whale_activity.signal || 'neutral').toLowerCase()}`;
+    }
+
+    // Funding Rate
+    if (funding_rate && Object.keys(funding_rate).length > 0) {
+      const rate = funding_rate.current_rate || 0;
+      document.getElementById('funding-rate').textContent = `${rate >= 0 ? '+' : ''}${(rate * 100).toFixed(4)}%`;
+      document.getElementById('funding-8h').textContent = `${rate >= 0 ? '+' : ''}${(rate * 100).toFixed(4)}%`;
+
+      const annualized = rate * 365 * 3; // 3 funding periods per day
+      document.getElementById('funding-annual').textContent = `${annualized >= 0 ? '+' : ''}${(annualized * 100).toFixed(1)}%`;
+
+      const fundingSignal = document.getElementById('funding-signal');
+      fundingSignal.textContent = (funding_rate.signal || 'NEUTRAL').toUpperCase();
+      fundingSignal.className = `signal-badge ${(funding_rate.signal || 'neutral').toLowerCase()}`;
+    }
+
+    // Options Flow
+    if (options_flow && Object.keys(options_flow).length > 0) {
+      document.getElementById('options-flow').textContent = options_flow.skew_description || 'Neutral Skew';
+      document.getElementById('put-call-ratio').textContent = (options_flow.put_call_ratio || 0).toFixed(2);
+      document.getElementById('delta-skew').textContent = `${(options_flow.delta_25_skew || 0) >= 0 ? '+' : ''}${((options_flow.delta_25_skew || 0) * 100).toFixed(1)}%`;
+
+      const optionsSignal = document.getElementById('options-signal');
+      optionsSignal.textContent = (options_flow.signal || 'NEUTRAL').toUpperCase();
+      optionsSignal.className = `signal-badge ${(options_flow.signal || 'neutral').toLowerCase()}`;
+    }
+
+    // Stablecoin Flow
+    if (stablecoin_flow && Object.keys(stablecoin_flow).length > 0) {
+      document.getElementById('stablecoin-flow').textContent = stablecoin_flow.flow_description || 'Neutral Flow';
+
+      const inflow = stablecoin_flow.exchange_inflow_24h || 0;
+      document.getElementById('stable-inflow').textContent = `${inflow >= 0 ? '+' : ''}$${(inflow / 1000000).toFixed(0)}M`;
+
+      const netFlow = stablecoin_flow.net_flow_24h || 0;
+      const netFlowEl = document.getElementById('stable-net');
+      netFlowEl.textContent = netFlow >= 0 ? `+$${(netFlow / 1000000).toFixed(0)}M` : `-$${Math.abs(netFlow / 1000000).toFixed(0)}M`;
+      netFlowEl.className = `metric-value sentiment ${netFlow >= 0 ? 'positive' : 'negative'}`;
+
+      const stableSignal = document.getElementById('stable-signal');
+      stableSignal.textContent = (stablecoin_flow.signal || 'NEUTRAL').toUpperCase();
+      stableSignal.className = `signal-badge ${(stablecoin_flow.signal || 'neutral').toLowerCase()}`;
+    }
+
+    // Aggregate Signal
+    if (aggregate && Object.keys(aggregate).length > 0) {
+      const direction = aggregate.direction || 'neutral';
+      const strength = aggregate.strength || 0.5;
+
+      const aggregateDir = document.getElementById('aggregate-direction');
+      aggregateDir.className = `aggregate-direction ${direction}`;
+
+      const directionText = aggregateDir.querySelector('.direction-text');
+      directionText.textContent = direction.toUpperCase();
+
+      const directionIcon = aggregateDir.querySelector('.direction-icon');
+      directionIcon.textContent = direction === 'bullish' ? '📈' : direction === 'bearish' ? '📉' : '➡️';
+
+      const strengthPct = Math.round(strength * 100);
+      document.getElementById('aggregate-strength-bar').style.width = `${strengthPct}%`;
+      document.getElementById('aggregate-strength-value').textContent = `${strengthPct}%`;
+    }
+
+    // Update timestamp
+    document.getElementById('altdata-update').textContent = 'Updated just now';
+  }
+
+  // PERFORMANCE FIX: Connect to global event bus
+  if (window.godModeEventBus) {
+    window.godModeEventBus.subscribe((apiData) => {
+      if (apiData && apiData.predictions && apiData.predictions.altdata) {
+        const altData = apiData.predictions.altdata;
+        if (altData.data_source === "REAL") {
+          renderAlternativeData(altData);
+        } else {
+          document.querySelector('.altdata-grid').innerHTML = `
+            <div style="grid-column: 1/-1; padding: 48px; text-align: center; color: var(--text-muted);">
+              <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
+              <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">Alternative Data Unavailable</div>
+              <div style="font-size: 14px;">Narrative tracker is warming up</div>
+            </div>
+          `;
+        }
+      }
+    });
+    console.log('[ALTDATA] Connected to global event bus');
+  } else {
+    console.warn('[ALTDATA] Event bus not found, using fallback');
+    const data = await fetchAlternativeData();
+    renderAlternativeData(data);
+
+    setInterval(async () => {
+      const data = await fetchAlternativeData();
+      renderAlternativeData(data);
+    }, 60000);
+  }
+}
+
+// Auto-init when loaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initAlternativeDataFeed);
+} else {
+  initAlternativeDataFeed();
+}
+</script>

@@ -1,0 +1,213 @@
+# ============================================================================
+# AtomicX .gitignore - Institutional Grade
+# ============================================================================
+
+# Python
+# ============================================================================
+# Byte-compiled / optimized
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+*.egg
+.eggs/
+wheels/
+pip-wheel-metadata/
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+
+# Type checking
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+
+# Linting
+.ruff_cache/
+.pylint.d/
+
+# Virtual environments
+# ============================================================================
+.venv/
+venv/
+env/
+ENV/
+virtualenv/
+
+# IDEs & Editors
+# ============================================================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.vim/
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# OS
+# ============================================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Environment & Secrets
+# ============================================================================
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+secrets/
+credentials/
+
+# Logs
+# ============================================================================
+*.log
+logs/
+log/
+*.log.*
+
+# Database & Storage
+# ============================================================================
+# Docker volumes (local data)
+timescaledb_data/
+redis_data/
+kafka_data/
+qdrant_data/
+postgres_data/
+mongodb_data/
+
+# SQLite databases (if used for local testing)
+*.db
+*.sqlite
+*.sqlite3
+
+# Local development
+# ============================================================================
+# Planning & Notes (local only)
+.planning/
+notes/
+scratch/
+Idea/
+IDEAS/
+
+# Agent tools & sessions
+.agent/
+.claude/
+.cursor/
+.windsurf/
+
+# Code review & analysis caches
+.code-review-graph/
+.mcp.json
+
+# Testing & Development
+# ============================================================================
+# Test outputs
+test_output/
+test_results/
+*_test.log
+*_test.txt
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+*~
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Documentation builds
+# ============================================================================
+docs/_build/
+docs/.doctrees/
+site/
+
+# Data & Models
+# ============================================================================
+# Large data files (use Git LFS if needed)
+*.csv
+*.parquet
+*.pkl
+*.pickle
+*.h5
+*.hdf5
+*.pt
+*.pth
+*.onnx
+*.pb
+
+# Model checkpoints
+checkpoints/
+models/
+weights/
+
+# Exceptions (keep specific files if needed)
+# !data/sample.csv
+# !models/README.md
+
+# Wiki (submodule - managed separately)
+# ============================================================================
+# If wiki is a submodule, this line is optional
+# wiki/ is tracked via .gitmodules
+
+# Crucix (submodule - managed separately)
+# ============================================================================
+# If crucix is a submodule, tracked via .gitmodules
+
+# Build artifacts
+# ============================================================================
+*.whl
+*.tar.gz
+
+# Alembic (keep structure, ignore local migration state if needed)
+# ============================================================================
+# Uncomment if you want to ignore local migration state
+# alembic/versions/local_*.py
+
+# Docker
+# ============================================================================
+docker-compose.override.yml
+
+# Miscellaneous
+# ============================================================================
+.cache/
+.npm/
+node_modules/
+package-lock.json
+yarn.lock

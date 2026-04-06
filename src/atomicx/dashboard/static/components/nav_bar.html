@@ -1,0 +1,178 @@
+<!-- ATOMICX NAVIGATION BAR - With Instant Navigation Support -->
+<style>
+.atomicx-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 52px;
+  background: var(--bg-card, #13141b);
+  border-bottom: 1px solid var(--border, rgba(255,255,255,0.08));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  z-index: 1000;
+}
+
+.atomicx-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--accent, #10b981);
+  text-decoration: none;
+}
+
+.atomicx-nav-links {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.atomicx-nav-link {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary, #94a3b8);
+  text-decoration: none;
+  transition: all 150ms ease;
+  position: relative;
+}
+
+.atomicx-nav-link:hover {
+  background: var(--accent-dim, rgba(16,185,129,0.1));
+  color: var(--accent, #10b981);
+}
+
+.atomicx-nav-link.active {
+  background: var(--accent-dim, rgba(16,185,129,0.1));
+  color: var(--accent, #10b981);
+  font-weight: 600;
+}
+
+.atomicx-nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 16px;
+  right: 16px;
+  height: 2px;
+  background: var(--accent, #10b981);
+}
+
+.atomicx-nav-status {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.atomicx-nav-pill {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 100px;
+  background: var(--bg-elevated, #1a1b24);
+  border: 1px solid var(--border, rgba(255,255,255,0.08));
+  color: var(--text-secondary, #94a3b8);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.atomicx-nav-pill.live {
+  background: var(--accent-dim, rgba(16,185,129,0.1));
+  color: var(--accent, #10b981);
+  border-color: var(--accent, #10b981);
+}
+
+.atomicx-nav-pulse {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent, #10b981);
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Adjust body padding when nav is present */
+body.has-nav {
+  padding-top: 52px;
+}
+</style>
+
+<nav class="atomicx-nav">
+  <a href="/" class="atomicx-nav-brand" data-instant-nav>
+    ⚛️ AtomicX
+  </a>
+
+  <div class="atomicx-nav-links">
+    <a href="/" class="atomicx-nav-link" data-page="index">
+      Intelligence Terminal
+    </a>
+    <a href="/god_mode.html" class="atomicx-nav-link" data-page="god_mode">
+      God Mode
+    </a>
+    <a href="/causality.html" class="atomicx-nav-link" data-page="causality">
+      Causality Viewer
+    </a>
+    <a href="/evolution.html" class="atomicx-nav-link" data-page="evolution">
+      Evolution Lab
+    </a>
+  </div>
+
+  <div class="atomicx-nav-status">
+    <div class="atomicx-nav-pill live">
+      <span class="atomicx-nav-pulse"></span>
+      LIVE
+    </div>
+    <div class="atomicx-nav-pill" id="nav-regime">
+      RANGING
+    </div>
+  </div>
+</nav>
+
+<script>
+// Mark current page as active
+(function() {
+  const currentPath = window.location.pathname;
+  const links = document.querySelectorAll('.atomicx-nav-link');
+
+  links.forEach(link => {
+    const page = link.getAttribute('data-page');
+    if (
+      (currentPath === '/' || currentPath === '/index.html') && page === 'index' ||
+      currentPath.includes(page) && page !== 'index'
+    ) {
+      link.classList.add('active');
+    }
+  });
+
+  // Add body class for padding
+  document.body.classList.add('has-nav');
+
+  // Update regime pill from API (if available)
+  if (window.godModeEventBus) {
+    window.godModeEventBus.subscribe((data) => {
+      const regime = data?.ensemble?.regime || data?.predictions?.ensemble?.regime;
+      if (regime) {
+        const regimePill = document.getElementById('nav-regime');
+        if (regimePill) {
+          regimePill.textContent = regime.toUpperCase().replace(/_/g, ' ');
+        }
+      }
+    });
+  }
+})();
+</script>

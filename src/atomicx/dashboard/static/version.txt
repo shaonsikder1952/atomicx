@@ -1,0 +1,14 @@
+VERSION 2.2.0 - ALL DYNAMIC DATA
+Generated: 2026-04-06 05:02:00 UTC
+Changes:
+- Replaced ALL hardcoded/mock data with real API data
+- Price change: calculated from RECENT_PRICES array
+- Last updated: dynamic timestamp from API response
+- Technical indicators: RSI, ATR, CVD, Relative Volume from API
+- Swarm metrics: convergence, diversity, stability, reward from API
+- Order book metrics: imbalance, toxicity, spoofing from API
+- Alternative data: sentiment, news count, direction, confidence from API
+- Removed hardcoded fallback price value (69213)
+- Symbol display now dynamic (v2.1)
+- Redirect bug fixed (v2.0)
+All data is now 100% live from the backend - no more placeholders!

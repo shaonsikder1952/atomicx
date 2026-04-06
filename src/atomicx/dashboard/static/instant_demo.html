@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Navigation Demo - AtomicX</title>
+
+  <!-- INSTANT NAVIGATION -->
+  <script src="/static/instant-nav.js" type="module"></script>
+
+  <style>
+    :root {
+      --bg-primary: #0a0b0f;
+      --bg-card: #13141b;
+      --bg-elevated: #1a1b24;
+      --border: rgba(255, 255, 255, 0.08);
+      --accent: #10b981;
+      --accent-hover: #059669;
+      --accent-dim: rgba(16, 185, 129, 0.1);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --font-mono: "SF Mono", Monaco, "Cascadia Code", monospace;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      transition: opacity 150ms ease-out;
+    }
+
+    .demo-header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .demo-title {
+      font-size: 48px;
+      font-weight: 800;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, var(--accent), #3b82f6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .demo-subtitle {
+      font-size: 20px;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+    }
+
+    .demo-stats {
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      padding: 12px 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 14px;
+    }
+
+    .stat-value {
+      color: var(--accent);
+      font-weight: 700;
+      margin-right: 8px;
+    }
+
+    .nav-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      margin-bottom: 60px;
+    }
+
+    .nav-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px;
+      text-decoration: none;
+      transition: all 200ms ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nav-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent), #3b82f6);
+      opacity: 0;
+      transition: opacity 200ms ease;
+    }
+
+    .nav-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(16, 185, 129, 0.2);
+    }
+
+    .nav-card:hover::before {
+      opacity: 1;
+    }
+
+    .nav-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .nav-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .nav-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .nav-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      background: var(--accent-dim);
+      color: var(--accent);
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 16px;
+      font-family: var(--font-mono);
+    }
+
+    .console-demo {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      margin-bottom: 60px;
+    }
+
+    .console-title {
+      color: var(--accent);
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .console-line {
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      padding-left: 8px;
+      border-left: 2px solid var(--border);
+    }
+
+    .console-line.success {
+      color: var(--accent);
+      border-left-color: var(--accent);
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+
+    .feature {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    .feature-icon {
+      font-size: 24px;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .feature-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+
+    .feature-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .pulse {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.5;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main data-instant-main>
+    <div class="demo-header">
+      <div class="demo-title">⚡ Instant Navigation</div>
+      <div class="demo-subtitle">10x Faster Page Transitions for AtomicX Dashboard</div>
+
+      <div class="demo-stats" id="stats">
+        <div class="stat">
+          <span class="stat-value">0</span>
+          <span>Pages Cached</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">0 KB</span>
+          <span>Memory Used</span>
+        </div>
+        <div class="stat pulse">
+          <span class="stat-value">✅</span>
+          <span>Active</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="console-demo">
+      <div class="console-title">
+        <span>💻</span>
+        <span>Live Console Output</span>
+      </div>
+      <div id="console-output">
+        <div class="console-line success">[INSTANT-NAV] ⚡ Instant navigation enabled</div>
+      </div>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature">
+        <span class="feature-icon">🚀</span>
+        <div class="feature-title">Hover Prefetch</div>
+        <div class="feature-desc">Pages load in background when you hover (65ms delay)</div>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">💾</span>
+        <div class="feature-title">Smart Caching</div>
+        <div class="feature-desc">Intelligent memory cache for instant return visits</div>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">⚡</span>
+        <div class="feature-title">Instant Swaps</div>
+        <div class="feature-desc">No white flash, no full reload, just instant transitions</div>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">📱</span>
+        <div class="feature-title">Touch Optimized</div>
+        <div class="feature-desc">Prefetches immediately on touchstart for mobile</div>
+      </div>
+    </div>
+
+    <div class="nav-grid">
+      <a href="/god_mode.html" class="nav-card">
+        <span class="nav-icon">🎯</span>
+        <div class="nav-title">God Mode</div>
+        <div class="nav-desc">Real-time predictions with ensemble voting, swarm intelligence, and alternative data feeds</div>
+        <span class="nav-badge">HOVER TO PREFETCH</span>
+      </a>
+
+      <a href="/index.html" class="nav-card">
+        <span class="nav-icon">🧠</span>
+        <div class="nav-title">Intelligence Terminal</div>
+        <div class="nav-desc">Main dashboard with cognitive signals, variables, and multi-layered decision analysis</div>
+        <span class="nav-badge">HOVER TO PREFETCH</span>
+      </a>
+
+      <a href="/causality.html" class="nav-card">
+        <span class="nav-icon">🔗</span>
+        <div class="nav-title">Causality Viewer</div>
+        <div class="nav-desc">Explore decision audit logs with complete swarm simulations and variable snapshots</div>
+        <span class="nav-badge">HOVER TO PREFETCH</span>
+      </a>
+
+      <a href="/evolution.html" class="nav-card">
+        <span class="nav-icon">🧬</span>
+        <div class="nav-title">Evolution Lab</div>
+        <div class="nav-desc">Track strategy evolution, gene mutations, and autonomous learning progress</div>
+        <span class="nav-badge">HOVER TO PREFETCH</span>
+      </a>
+    </div>
+
+    <div class="console-demo">
+      <div class="console-title">
+        <span>📖</span>
+        <span>How It Works</span>
+      </div>
+      <div style="color: var(--text-secondary); line-height: 1.8;">
+        <p style="margin-bottom: 16px;">
+          1. <strong style="color: var(--accent);">Hover</strong> over any link above for 65ms
+        </p>
+        <p style="margin-bottom: 16px;">
+          2. <strong style="color: var(--accent);">Watch</strong> the console - page prefetches in background
+        </p>
+        <p style="margin-bottom: 16px;">
+          3. <strong style="color: var(--accent);">Click</strong> the link - instant page swap (no reload!)
+        </p>
+        <p>
+          4. <strong style="color: var(--accent);">Experience</strong> native-app speed 🚀
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Update stats in real-time
+    function updateStats() {
+      if (window.instantNav) {
+        const stats = window.instantNav.getCacheStats();
+        const statsContainer = document.getElementById('stats');
+
+        statsContainer.innerHTML = `
+          <div class="stat">
+            <span class="stat-value">${stats.size}</span>
+            <span>Pages Cached</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">${(stats.totalBytes / 1024).toFixed(1)} KB</span>
+            <span>Memory Used</span>
+          </div>
+          <div class="stat pulse">
+            <span class="stat-value">✅</span>
+            <span>Active</span>
+          </div>
+        `;
+      }
+    }
+
+    // Listen for instant-nav events
+    const consoleOutput = document.getElementById('console-output');
+    let lineCount = 1;
+
+    // Intercept console.log from instant-nav
+    const originalLog = console.log;
+    console.log = function(...args) {
+      originalLog.apply(console, args);
+
+      const message = args.join(' ');
+      if (message.includes('[INSTANT-NAV]')) {
+        lineCount++;
+        const line = document.createElement('div');
+        line.className = 'console-line success';
+        line.textContent = message;
+        consoleOutput.appendChild(line);
+
+        // Keep only last 10 lines
+        if (lineCount > 10) {
+          consoleOutput.removeChild(consoleOutput.firstChild);
+        }
+
+        // Update stats
+        updateStats();
+      }
+    };
+
+    // Listen for navigation complete
+    window.addEventListener('instant-nav:complete', (event) => {
+      const line = document.createElement('div');
+      line.className = 'console-line success';
+      line.textContent = `[INSTANT-NAV] ✅ Navigated to: ${event.detail.url}`;
+      consoleOutput.appendChild(line);
+      updateStats();
+    });
+
+    // Initial stats update
+    setTimeout(updateStats, 100);
+
+    // Update stats every 2 seconds
+    setInterval(updateStats, 2000);
+  </script>
+</body>
+</html>

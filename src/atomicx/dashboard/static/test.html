@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard Fix Verification</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 40px;
+            background: #000;
+            color: #0f0;
+        }
+        .result { margin: 20px 0; padding: 20px; border: 2px solid #0f0; }
+        .pass { border-color: #0f0; color: #0f0; }
+        .fail { border-color: #f00; color: #f00; }
+        button {
+            background: #0f0;
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-family: monospace;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover { background: #0ff; }
+        .test-links { margin: 30px 0; }
+        .test-links a {
+            display: block;
+            color: #0ff;
+            margin: 10px 0;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Dashboard Fix Verification Test</h1>
+
+    <div class="result" id="cacheTest">
+        <h2>Step 1: Check File Version</h2>
+        <p id="cacheResult">Testing...</p>
+    </div>
+
+    <div class="result" id="htmlTest">
+        <h2>Step 2: Check Dashboard HTML</h2>
+        <p id="htmlResult">Testing...</p>
+    </div>
+
+    <div class="result" id="selectorTest">
+        <h2>Step 3: Check Dropdown Handler</h2>
+        <p id="selectorResult">Will test when dashboard loads...</p>
+    </div>
+
+    <div class="test-links">
+        <h2>🔗 Direct Test Links (click these):</h2>
+        <a href="/dashboard.html?symbol=ETC/USDT&_nocache=${Date.now()}" target="_blank">
+            → Open ETC/USDT Dashboard (with cache buster)
+        </a>
+        <a href="/dashboard.html?symbol=BTC/USDT&_nocache=${Date.now()}" target="_blank">
+            → Open BTC/USDT Dashboard (with cache buster)
+        </a>
+    </div>
+
+    <div style="margin-top: 40px;">
+        <h2>Manual Tests:</h2>
+        <button onclick="testVersion()">1. Check Server Version</button>
+        <button onclick="testDashboardHTML()">2. Check Dashboard HTML</button>
+        <button onclick="clearCacheAndReload()">3. Clear Cache & Reload</button>
+    </div>
+
+    <div id="logs" style="margin-top: 40px; padding: 20px; background: #111; border: 1px solid #333; max-height: 400px; overflow-y: auto;"></div>
+
+    <script>
+        function log(msg, isError = false) {
+            const logsDiv = document.getElementById('logs');
+            const color = isError ? '#f00' : '#0f0';
+            logsDiv.innerHTML += `<div style="color: ${color}">[${new Date().toISOString()}] ${msg}</div>`;
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+        }
+
+        async function testVersion() {
+            log('Checking version.txt...');
+            try {
+                const response = await fetch(`/static/version.txt?_=${Date.now()}`);
+                const text = await response.text();
+
+                if (text.includes('VERSION 2.0')) {
+                    document.getElementById('cacheResult').innerHTML = '✅ PASS: Server is serving VERSION 2.0<br><pre>' + text + '</pre>';
+                    document.getElementById('cacheTest').className = 'result pass';
+                    log('✅ Version check PASSED');
+                } else {
+                    document.getElementById('cacheResult').innerHTML = '❌ FAIL: Wrong version<br><pre>' + text + '</pre>';
+                    document.getElementById('cacheTest').className = 'result fail';
+                    log('❌ Version check FAILED', true);
+                }
+            } catch (e) {
+                document.getElementById('cacheResult').innerHTML = '❌ ERROR: ' + e.message;
+                document.getElementById('cacheTest').className = 'result fail';
+                log('❌ Error checking version: ' + e.message, true);
+            }
+        }
+
+        async function testDashboardHTML() {
+            log('Fetching dashboard.html...');
+            try {
+                const response = await fetch(`/dashboard.html?_=${Date.now()}`);
+                const html = await response.text();
+
+                log('Checking for inline onchange handler...');
+                if (html.includes('onchange="switchSymbol')) {
+                    document.getElementById('htmlResult').innerHTML = '❌ FAIL: Inline onchange handler STILL EXISTS!<br>Browser is serving OLD version.';
+                    document.getElementById('htmlTest').className = 'result fail';
+                    log('❌ OLD CODE DETECTED: inline handler found', true);
+                } else if (html.includes('VERSION 2.0 (FIX APPLIED)')) {
+                    document.getElementById('htmlResult').innerHTML = '✅ PASS: Dashboard HTML is VERSION 2.0<br>Inline handler removed correctly.';
+                    document.getElementById('htmlTest').className = 'result pass';
+                    log('✅ NEW CODE CONFIRMED: VERSION 2.0');
+                } else {
+                    document.getElementById('htmlResult').innerHTML = '⚠️ UNKNOWN: File looks different but not version 2.0';
+                    document.getElementById('htmlTest').className = 'result';
+                    log('⚠️ Unknown version', true);
+                }
+            } catch (e) {
+                document.getElementById('htmlResult').innerHTML = '❌ ERROR: ' + e.message;
+                document.getElementById('htmlTest').className = 'result fail';
+                log('❌ Error fetching HTML: ' + e.message, true);
+            }
+        }
+
+        function clearCacheAndReload() {
+            log('Attempting to clear cache...');
+            if ('caches' in window) {
+                caches.keys().then(function(names) {
+                    for (let name of names) {
+                        caches.delete(name);
+                        log('Deleted cache: ' + name);
+                    }
+                });
+            }
+
+            log('Cache cleared. Reloading in 2 seconds...');
+            setTimeout(() => {
+                window.location.reload(true);
+            }, 2000);
+        }
+
+        // Auto-run tests on load
+        window.onload = () => {
+            log('='.repeat(50));
+            log('Test page loaded');
+            log('='.repeat(50));
+            setTimeout(() => {
+                testVersion();
+                setTimeout(() => testDashboardHTML(), 1000);
+            }, 500);
+        };
+    </script>
+</body>
+</html>

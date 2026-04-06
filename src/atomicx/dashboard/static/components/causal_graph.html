@@ -1,0 +1,427 @@
+<!-- INFLUENCE NETWORK - Shows what's driving price -->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+.influence-wrapper {
+  font-family: 'Inter', sans-serif;
+  background: #0a0b0f;
+  padding: 24px;
+  color: #f8fafc;
+}
+
+.influence-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.influence-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 8px;
+}
+
+.influence-subtitle {
+  font-size: 14px;
+  color: #64748b;
+}
+
+/* Drivers Grid */
+.drivers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.driver-card {
+  background: #13141b;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.driver-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #64748b;
+}
+
+.driver-card.bullish::before { background: #10b981; }
+.driver-card.bearish::before { background: #ef4444; }
+.driver-card.strong { border-color: rgba(16,185,129,0.3); }
+
+.driver-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.driver-value {
+  font-size: 28px;
+  font-weight: 800;
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 8px;
+  color: #f8fafc;
+}
+
+.driver-signal {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 100px;
+  display: inline-block;
+  margin-bottom: 12px;
+}
+
+.driver-signal.bullish {
+  background: rgba(16,185,129,0.15);
+  color: #10b981;
+}
+
+.driver-signal.bearish {
+  background: rgba(239,68,68,0.15);
+  color: #ef4444;
+}
+
+.driver-signal.neutral {
+  background: rgba(148,163,184,0.15);
+  color: #94a3b8;
+}
+
+.driver-desc {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #94a3b8;
+}
+
+/* Influence Flows */
+.flows-section {
+  background: #13141b;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 32px;
+}
+
+.flows-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 20px;
+}
+
+.flow-item {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 16px;
+  align-items: center;
+  padding: 16px;
+  background: #1a1b24;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.flow-item:last-child { margin-bottom: 0; }
+
+.flow-source {
+  text-align: right;
+  font-size: 14px;
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+.flow-arrow {
+  font-size: 24px;
+  color: #64748b;
+}
+
+.flow-arrow.strong { color: #10b981; font-size: 32px; }
+
+.flow-target {
+  font-size: 14px;
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+.flow-strength {
+  font-size: 11px;
+  color: #64748b;
+  text-align: center;
+  margin-top: 4px;
+}
+
+/* Summary */
+.summary-section {
+  background: linear-gradient(135deg, #13141b, #0a0b0f);
+  border: 1px solid rgba(16,185,129,0.2);
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+}
+
+.summary-verdict {
+  font-size: 32px;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.summary-verdict.bullish { color: #10b981; }
+.summary-verdict.bearish { color: #ef4444; }
+.summary-verdict.neutral { color: #f59e0b; }
+
+.summary-text {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #cbd5e1;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.loading-state {
+  text-align: center;
+  padding: 80px 20px;
+  color: #64748b;
+}
+</style>
+
+<div class="influence-wrapper" id="influenceWrapper">
+  <div class="loading-state">
+    <div style="font-size: 48px; margin-bottom: 16px;">⏳</div>
+    <div>Analyzing market drivers...</div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const wrapper = document.getElementById('influenceWrapper');
+
+  async function loadData() {
+    try {
+      const response = await fetch('/api/god_mode/predictions?symbol=BTC/USDT');
+      const data = await response.json();
+      render(data);
+    } catch (error) {
+      console.error('Influence network error:', error);
+      wrapper.innerHTML = `
+        <div class="loading-state">
+          <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
+          <div style="color: #ef4444;">Error loading data</div>
+        </div>
+      `;
+    }
+  }
+
+  function render(data) {
+    const vars = data.variables || {};
+    const ensemble = data.ensemble || {};
+
+    // Analyze drivers
+    const drivers = [];
+
+    // Order Book Imbalance
+    if (vars.OB_IMBALANCE !== undefined) {
+      const val = vars.OB_IMBALANCE;
+      drivers.push({
+        name: 'Order Book',
+        value: (val * 100).toFixed(1) + '%',
+        signal: Math.abs(val) > 0.5 ? (val > 0 ? 'bullish' : 'bearish') : 'neutral',
+        desc: Math.abs(val) > 0.5 ? `Strong ${val > 0 ? 'buying' : 'selling'} pressure` : 'Balanced bid/ask',
+        strength: Math.abs(val),
+        strong: Math.abs(val) > 0.5
+      });
+    }
+
+    // RSI
+    if (vars.RSI_14 !== undefined) {
+      const rsi = vars.RSI_14;
+      drivers.push({
+        name: 'RSI Momentum',
+        value: rsi.toFixed(1),
+        signal: rsi > 60 ? 'bullish' : rsi < 40 ? 'bearish' : 'neutral',
+        desc: rsi > 70 ? 'Overbought' : rsi < 30 ? 'Oversold' : rsi > 60 ? 'Strong momentum' : rsi > 50 ? 'Bullish bias' : 'Bearish bias',
+        strength: Math.abs(rsi - 50) / 50,
+        strong: rsi > 70 || rsi < 30
+      });
+    }
+
+    // Volume
+    if (vars.RELATIVE_VOLUME !== undefined) {
+      const vol = vars.RELATIVE_VOLUME;
+      drivers.push({
+        name: 'Volume',
+        value: vol.toFixed(2) + 'x',
+        signal: vol > 1.5 ? 'bullish' : vol < 0.8 ? 'bearish' : 'neutral',
+        desc: vol > 1.5 ? 'High interest' : vol > 1.0 ? 'Above average' : 'Below average',
+        strength: vol,
+        strong: vol > 1.5
+      });
+    }
+
+    // MACD
+    if (vars.MACD_HISTOGRAM !== undefined) {
+      const macd = vars.MACD_HISTOGRAM;
+      drivers.push({
+        name: 'MACD',
+        value: macd.toFixed(2),
+        signal: macd > 0.5 ? 'bullish' : macd < -0.5 ? 'bearish' : 'neutral',
+        desc: macd > 0 ? 'Bullish crossover' : 'Bearish crossover',
+        strength: Math.abs(macd) / 2,
+        strong: Math.abs(macd) > 1.0
+      });
+    }
+
+    // Bollinger Band Position
+    if (vars.BB_PERCENT_B !== undefined) {
+      const bb = vars.BB_PERCENT_B;
+      drivers.push({
+        name: 'Bollinger Position',
+        value: (bb * 100).toFixed(0) + '%',
+        signal: bb > 0.8 ? 'bearish' : bb < 0.2 ? 'bullish' : 'neutral',
+        desc: bb > 0.8 ? 'Near upper band' : bb < 0.2 ? 'Near lower band' : 'Mid-range',
+        strength: Math.abs(bb - 0.5) * 2,
+        strong: bb > 0.9 || bb < 0.1
+      });
+    }
+
+    // ATR (Volatility)
+    if (vars.ATR_14 !== undefined) {
+      const atr = vars.ATR_14;
+      drivers.push({
+        name: 'Volatility (ATR)',
+        value: '$' + atr.toFixed(0),
+        signal: 'neutral',
+        desc: atr > 100 ? 'High volatility' : atr > 50 ? 'Moderate' : 'Low volatility',
+        strength: atr / 200,
+        strong: false
+      });
+    }
+
+    // Count signals
+    const bullishCount = drivers.filter(d => d.signal === 'bullish').length;
+    const bearishCount = drivers.filter(d => d.signal === 'bearish').length;
+    const totalSignals = bullishCount + bearishCount;
+
+    // Overall verdict
+    let verdict = 'NEUTRAL';
+    let verdictClass = 'neutral';
+    if (bullishCount > bearishCount + 2) {
+      verdict = 'BULLISH';
+      verdictClass = 'bullish';
+    } else if (bearishCount > bullishCount + 2) {
+      verdict = 'BEARISH';
+      verdictClass = 'bearish';
+    }
+
+    // Build flows
+    const flows = [];
+
+    if (Math.abs(vars.OB_IMBALANCE || 0) > 0.3 && (vars.RELATIVE_VOLUME || 0) > 1.2) {
+      flows.push({
+        source: 'Order Book Imbalance',
+        target: 'Price Momentum',
+        strength: 'Strong correlation',
+        strong: true
+      });
+    }
+
+    if ((vars.RSI_14 || 50) > 60 && (vars.MACD_HISTOGRAM || 0) > 0) {
+      flows.push({
+        source: 'RSI + MACD',
+        target: 'Trend Strength',
+        strength: 'Aligned momentum',
+        strong: true
+      });
+    }
+
+    if ((vars.RELATIVE_VOLUME || 1.0) > 1.3) {
+      flows.push({
+        source: 'High Volume',
+        target: 'Price Conviction',
+        strength: 'Confirms move',
+        strong: false
+      });
+    }
+
+    let html = `
+    <div class="influence-header">
+      <div class="influence-title">🎯 Market Influence Network</div>
+      <div class="influence-subtitle">What's driving Bitcoin price right now</div>
+    </div>
+
+    <div class="drivers-grid">
+      ${drivers.map(d => `
+        <div class="driver-card ${d.signal} ${d.strong ? 'strong' : ''}">
+          <div class="driver-name">${d.name}</div>
+          <div class="driver-value">${d.value}</div>
+          <div class="driver-signal ${d.signal}">${d.signal.toUpperCase()}</div>
+          <div class="driver-desc">${d.desc}</div>
+        </div>
+      `).join('')}
+    </div>
+
+    ${flows.length > 0 ? `
+      <div class="flows-section">
+        <div class="flows-title">📊 Influence Flows</div>
+        ${flows.map(f => `
+          <div class="flow-item">
+            <div>
+              <div class="flow-source">${f.source}</div>
+            </div>
+            <div>
+              <div class="flow-arrow ${f.strong ? 'strong' : ''}">→</div>
+              <div class="flow-strength">${f.strength}</div>
+            </div>
+            <div>
+              <div class="flow-target">${f.target}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    ` : ''}
+
+    <div class="summary-section">
+      <div class="summary-verdict ${verdictClass}">${verdict}</div>
+      <div class="summary-text">
+        ${buildSummaryText(bullishCount, bearishCount, drivers, ensemble)}
+      </div>
+    </div>
+    `;
+
+    wrapper.innerHTML = html;
+  }
+
+  function buildSummaryText(bullish, bearish, drivers, ensemble) {
+    const total = bullish + bearish;
+    const confidence = (ensemble.confidence || 0) * 100;
+
+    if (bullish > bearish + 2) {
+      return `<strong>${bullish} of ${total}</strong> key indicators are bullish. ${drivers.filter(d => d.strong && d.signal === 'bullish').length > 0 ? 'Multiple strong signals detected.' : 'Moderate bullish setup.'} System confidence: <strong>${confidence.toFixed(0)}%</strong>`;
+    } else if (bearish > bullish + 2) {
+      return `<strong>${bearish} of ${total}</strong> key indicators are bearish. ${drivers.filter(d => d.strong && d.signal === 'bearish').length > 0 ? 'Multiple strong signals detected.' : 'Moderate bearish setup.'} System confidence: <strong>${confidence.toFixed(0)}%</strong>`;
+    } else {
+      return `Market is <strong>mixed</strong> with ${bullish} bullish and ${bearish} bearish signals. No clear directional bias. System confidence: <strong>${confidence.toFixed(0)}%</strong> (below threshold for trade recommendation)`;
+    }
+  }
+
+  // Load
+  loadData();
+
+  // Subscribe to event bus
+  if (window.godModeEventBus) {
+    window.godModeEventBus.subscribe(render);
+    console.log('[INFLUENCE-NETWORK] Connected to event bus');
+  } else {
+    setInterval(loadData, 30000);
+  }
+
+})();
+</script>

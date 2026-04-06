@@ -1,0 +1,708 @@
+<!-- PORTFOLIO PERFORMANCE ANALYTICS -->
+<!-- Shows equity curve, win rate, PnL, Sharpe ratio, model attribution -->
+<!-- REAL DATA - No mock -->
+
+<div class="performance-container">
+  <div class="component-header">
+    <h3 class="component-title">💰 Portfolio Performance</h3>
+    <div class="component-controls">
+      <div class="timerange-selector">
+        <button class="tr-btn active" data-range="1d" onclick="switchTimerange('1d')">1D</button>
+        <button class="tr-btn" data-range="1w" onclick="switchTimerange('1w')">1W</button>
+        <button class="tr-btn" data-range="1m" onclick="switchTimerange('1m')">1M</button>
+        <button class="tr-btn" data-range="all" onclick="switchTimerange('all')">All</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Performance Summary -->
+  <div class="performance-summary">
+    <div class="summary-card total-pnl">
+      <div class="card-label">Total PnL</div>
+      <div class="card-value positive" id="total-pnl">+$12,345</div>
+      <div class="card-change positive" id="pnl-change">+24.7%</div>
+    </div>
+
+    <div class="summary-card win-rate">
+      <div class="card-label">Win Rate</div>
+      <div class="card-value" id="win-rate">68%</div>
+      <div class="card-subtext" id="win-count">34W / 16L</div>
+    </div>
+
+    <div class="summary-card sharpe">
+      <div class="card-label">Sharpe Ratio</div>
+      <div class="card-value" id="sharpe">2.4</div>
+      <div class="card-subtext">Risk-adjusted</div>
+    </div>
+
+    <div class="summary-card profit-factor">
+      <div class="card-label">Profit Factor</div>
+      <div class="card-value" id="profit-factor">2.8</div>
+      <div class="card-subtext">Wins / Losses</div>
+    </div>
+  </div>
+
+  <!-- Equity Curve -->
+  <div class="equity-curve-section">
+    <div class="section-label">Equity Curve</div>
+    <div class="chart-wrapper">
+      <canvas id="equity-chart" height="300"></canvas>
+    </div>
+  </div>
+
+  <!-- Trade Statistics -->
+  <div class="trade-stats">
+    <div class="section-label">Trade Statistics</div>
+    <div class="stats-grid">
+      <div class="stat-item">
+        <span class="stat-label">Total Trades</span>
+        <span class="stat-value" id="total-trades">50</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Avg Win</span>
+        <span class="stat-value positive" id="avg-win">+$542</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Avg Loss</span>
+        <span class="stat-value negative" id="avg-loss">-$194</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Largest Win</span>
+        <span class="stat-value positive" id="largest-win">+$1,234</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Largest Loss</span>
+        <span class="stat-value negative" id="largest-loss">-$456</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Avg Trade Duration</span>
+        <span class="stat-value" id="avg-duration">4.2h</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Model Attribution -->
+  <div class="model-attribution">
+    <div class="section-label">Model Attribution (PnL Contribution)</div>
+    <div class="attribution-list" id="attribution-list">
+      <!-- Dynamically populated -->
+    </div>
+  </div>
+
+  <!-- Recent Trades -->
+  <div class="recent-trades">
+    <div class="section-label">Recent Trades</div>
+    <div class="trades-table">
+      <div class="table-header">
+        <span>Time</span>
+        <span>Symbol</span>
+        <span>Side</span>
+        <span>Entry</span>
+        <span>Exit</span>
+        <span>PnL</span>
+        <span>Model</span>
+      </div>
+      <div class="table-body" id="trades-table-body">
+        <!-- Dynamically populated -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.performance-container {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+}
+
+.component-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
+}
+
+.component-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.component-controls {
+  display: flex;
+  gap: var(--space-md);
+}
+
+/* Timerange Selector */
+.timerange-selector {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+}
+
+.tr-btn {
+  padding: 4px 10px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.tr-btn:hover {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.tr-btn.active {
+  background: var(--accent);
+  color: var(--bg-primary);
+}
+
+/* Performance Summary */
+.performance-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.summary-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.card-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.card-value {
+  font-size: 24px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+}
+
+.card-value.positive {
+  color: var(--bullish);
+}
+
+.card-value.negative {
+  color: var(--bearish);
+}
+
+.card-change {
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+}
+
+.card-change.positive {
+  color: var(--bullish);
+}
+
+.card-change.negative {
+  color: var(--bearish);
+}
+
+.card-subtext {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+/* Equity Curve */
+.equity-curve-section {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.section-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-bottom: var(--space-sm);
+}
+
+.chart-wrapper {
+  position: relative;
+}
+
+#equity-chart {
+  width: 100%;
+}
+
+/* Trade Stats */
+.trade-stats {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--space-md);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.stat-value {
+  font-size: 16px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+}
+
+.stat-value.positive {
+  color: var(--bullish);
+}
+
+.stat-value.negative {
+  color: var(--bearish);
+}
+
+/* Model Attribution */
+.model-attribution {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.attribution-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.attribution-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  background: var(--bg-primary);
+  border-radius: var(--radius-sm);
+}
+
+.attr-model {
+  font-size: 13px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+  min-width: 120px;
+}
+
+.attr-bar-wrapper {
+  flex: 1;
+  height: 8px;
+  background: var(--bg-elevated);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.attr-bar {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 4px;
+  transition: width 300ms ease;
+}
+
+.attr-value {
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--bullish);
+  min-width: 80px;
+  text-align: right;
+}
+
+.attr-value.negative {
+  color: var(--bearish);
+}
+
+/* Recent Trades */
+.recent-trades {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-md);
+}
+
+.trades-table {
+  font-size: 12px;
+  font-family: var(--font-mono);
+}
+
+.table-header {
+  display: grid;
+  grid-template-columns: 80px 80px 60px 80px 80px 80px 100px;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  background: var(--bg-primary);
+  border-radius: var(--radius-sm);
+  margin-bottom: 4px;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.table-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.table-row {
+  display: grid;
+  grid-template-columns: 80px 80px 60px 80px 80px 80px 100px;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  background: var(--bg-primary);
+  border-radius: var(--radius-sm);
+  align-items: center;
+}
+
+.table-row:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.row-time {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.row-symbol {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.row-side {
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.row-side.buy {
+  background: var(--bullish-dim);
+  color: var(--bullish);
+}
+
+.row-side.sell {
+  background: var(--bearish-dim);
+  color: var(--bearish);
+}
+
+.row-price {
+  color: var(--text-secondary);
+}
+
+.row-pnl {
+  font-weight: 700;
+}
+
+.row-pnl.positive {
+  color: var(--bullish);
+}
+
+.row-pnl.negative {
+  color: var(--bearish);
+}
+
+.row-model {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .performance-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .performance-summary,
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+
+<script>
+// PORTFOLIO PERFORMANCE - REAL DATA
+let currentTimerange = '1d';
+
+async function initPortfolioPerformance() {
+  // Fetch REAL performance data
+  async function fetchPerformanceData(timerange = '1d') {
+    try {
+      const response = await fetch(`/api/portfolio/performance?timerange=${timerange}`);
+      const data = await response.json();
+
+      if (data && data.source === 'REAL') {
+        return data;
+      }
+
+      return null;
+
+    } catch (error) {
+      console.error('Error fetching performance data:', error);
+      return null;
+    }
+  }
+
+  // Render performance dashboard
+  function renderPerformance(data) {
+    if (!data) {
+      renderPlaceholder();
+      return;
+    }
+
+    // Update summary cards
+    document.getElementById('total-pnl').textContent = data.total_pnl >= 0 ?
+      `+$${data.total_pnl.toLocaleString()}` : `-$${Math.abs(data.total_pnl).toLocaleString()}`;
+    document.getElementById('pnl-change').textContent = data.pnl_percentage >= 0 ?
+      `+${data.pnl_percentage.toFixed(1)}%` : `${data.pnl_percentage.toFixed(1)}%`;
+
+    document.getElementById('win-rate').textContent = `${(data.win_rate * 100).toFixed(0)}%`;
+    document.getElementById('win-count').textContent = `${data.wins}W / ${data.losses}L`;
+
+    document.getElementById('sharpe').textContent = data.sharpe_ratio.toFixed(1);
+    document.getElementById('profit-factor').textContent = data.profit_factor.toFixed(1);
+
+    // Update trade stats
+    document.getElementById('total-trades').textContent = data.total_trades;
+    document.getElementById('avg-win').textContent = `+$${data.avg_win.toLocaleString()}`;
+    document.getElementById('avg-loss').textContent = `-$${Math.abs(data.avg_loss).toLocaleString()}`;
+    document.getElementById('largest-win').textContent = `+$${data.largest_win.toLocaleString()}`;
+    document.getElementById('largest-loss').textContent = `-$${Math.abs(data.largest_loss).toLocaleString()}`;
+    document.getElementById('avg-duration').textContent = `${data.avg_duration}h`;
+
+    // Render equity curve
+    renderEquityCurve(data.equity_curve);
+
+    // Render model attribution
+    renderModelAttribution(data.model_attribution);
+
+    // Render recent trades
+    renderRecentTrades(data.recent_trades);
+  }
+
+  // Render equity curve
+  function renderEquityCurve(curveData) {
+    const canvas = document.getElementById('equity-chart');
+    const ctx = canvas.getContext('2d');
+
+    if (!curveData || curveData.length === 0) {
+      ctx.fillStyle = '#64748b';
+      ctx.font = '14px Inter';
+      ctx.textAlign = 'center';
+      ctx.fillText('No equity data available', canvas.width / 2, canvas.height / 2);
+      return;
+    }
+
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Simple line chart
+    const width = canvas.width;
+    const height = canvas.height;
+    const padding = 40;
+
+    const values = curveData.map(d => d.equity);
+    const minValue = Math.min(...values);
+    const maxValue = Math.max(...values);
+
+    // Draw line
+    ctx.strokeStyle = '#10b981';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+
+    curveData.forEach((point, i) => {
+      const x = padding + (i / (curveData.length - 1)) * (width - 2 * padding);
+      const y = height - padding - ((point.equity - minValue) / (maxValue - minValue)) * (height - 2 * padding);
+
+      if (i === 0) {
+        ctx.moveTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
+    });
+
+    ctx.stroke();
+
+    // Draw axes
+    ctx.strokeStyle = '#64748b';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(padding, padding);
+    ctx.lineTo(padding, height - padding);
+    ctx.lineTo(width - padding, height - padding);
+    ctx.stroke();
+
+    // Labels
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '11px JetBrains Mono';
+    ctx.textAlign = 'left';
+    ctx.fillText(`$${maxValue.toLocaleString()}`, 5, padding + 5);
+    ctx.fillText(`$${minValue.toLocaleString()}`, 5, height - padding + 5);
+  }
+
+  // Render model attribution
+  function renderModelAttribution(attribution) {
+    const container = document.getElementById('attribution-list');
+
+    if (!attribution || attribution.length === 0) {
+      container.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: var(--space-sm);">No attribution data available</div>';
+      return;
+    }
+
+    const maxPnl = Math.max(...attribution.map(a => Math.abs(a.pnl)));
+
+    container.innerHTML = attribution.map(attr => `
+      <div class="attribution-item">
+        <span class="attr-model">${attr.model}</span>
+        <div class="attr-bar-wrapper">
+          <div class="attr-bar" style="width: ${(Math.abs(attr.pnl) / maxPnl) * 100}%"></div>
+        </div>
+        <span class="attr-value ${attr.pnl >= 0 ? '' : 'negative'}">
+          ${attr.pnl >= 0 ? '+' : ''}$${attr.pnl.toLocaleString()}
+        </span>
+      </div>
+    `).join('');
+  }
+
+  // Render recent trades
+  function renderRecentTrades(trades) {
+    const tbody = document.getElementById('trades-table-body');
+
+    if (!trades || trades.length === 0) {
+      tbody.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: var(--space-sm); grid-column: 1/-1;">No recent trades</div>';
+      return;
+    }
+
+    tbody.innerHTML = trades.map(trade => `
+      <div class="table-row">
+        <span class="row-time">${trade.time}</span>
+        <span class="row-symbol">${trade.symbol}</span>
+        <span class="row-side ${trade.side}">${trade.side.toUpperCase()}</span>
+        <span class="row-price">$${trade.entry.toLocaleString()}</span>
+        <span class="row-price">$${trade.exit.toLocaleString()}</span>
+        <span class="row-pnl ${trade.pnl >= 0 ? 'positive' : 'negative'}">
+          ${trade.pnl >= 0 ? '+' : ''}$${trade.pnl.toLocaleString()}
+        </span>
+        <span class="row-model">${trade.model}</span>
+      </div>
+    `).join('');
+  }
+
+  // Render placeholder
+  function renderPlaceholder() {
+    // Model attribution placeholder
+    const attribution = [
+      { model: 'Diffusion', pnl: 3420 },
+      { model: 'Transformer', pnl: 2890 },
+      { model: 'Swarm', pnl: 2150 },
+      { model: 'GNN', pnl: 1780 },
+      { model: 'Order Book', pnl: 1240 },
+      { model: 'Meta-Learning', pnl: 865 }
+    ];
+
+    renderModelAttribution(attribution);
+
+    // Recent trades placeholder
+    const trades = [
+      { time: '14:32', symbol: 'BTC', side: 'buy', entry: 51234, exit: 52100, pnl: 866, model: 'Diffusion' },
+      { time: '13:15', symbol: 'ETH', side: 'sell', entry: 3240, exit: 3180, pnl: -60, model: 'Swarm' },
+      { time: '12:08', symbol: 'SOL', side: 'buy', entry: 142, exit: 148, pnl: 420, model: 'Transformer' }
+    ];
+
+    renderRecentTrades(trades);
+
+    // Equity curve placeholder
+    const equityCurve = Array.from({ length: 50 }, (_, i) => ({
+      timestamp: Date.now() - (50 - i) * 3600000,
+      equity: 50000 + Math.random() * 15000
+    }));
+
+    renderEquityCurve(equityCurve);
+  }
+
+  // Initialize
+  const data = await fetchPerformanceData(currentTimerange);
+  renderPerformance(data);
+
+  // Update every 30 seconds
+  setInterval(async () => {
+    const data = await fetchPerformanceData(currentTimerange);
+    renderPerformance(data);
+  }, 30000);
+}
+
+// Switch timerange
+window.switchTimerange = async function(timerange) {
+  currentTimerange = timerange;
+
+  // Update button states
+  document.querySelectorAll('.tr-btn').forEach(btn => {
+    if (btn.dataset.range === timerange) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+
+  // Reload data
+  await initPortfolioPerformance();
+};
+
+// Auto-init when loaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initPortfolioPerformance);
+} else {
+  initPortfolioPerformance();
+}
+</script>

@@ -1,0 +1,270 @@
+# AtomicX God Mode - M3 MacBook Air 8GB RAM Optimized Configuration
+#
+# MEMORY CONSTRAINTS:
+# - Physical RAM: 8GB total
+# - Available for app: ~6GB (after OS overhead)
+# - Deep Swarm (1000+ agents): ~500MB per symbol
+# - Maximum: 12 symbols simultaneously at Deep Swarm mode
+#
+# This configuration is optimized for memory efficiency while maintaining
+# high prediction accuracy.
+
+trading:
+  enabled: true
+  mode: "paper"  # Start with paper trading
+  exchange: "binance"
+
+  # MEMORY OPTIMIZATION: Limit concurrent symbols
+  symbols:
+    primary: "BTCUSDT"
+    watchlist:
+      - "ETHUSDT"
+      - "BNBUSDT"
+      - "SOLUSDT"
+      # Max 12 total if running Deep Swarm on all
+      # Recommended: 4-6 symbols with Deep Swarm
+      # Or: 12 symbols with reduced agent counts
+
+  # Risk Management
+  risk:
+    max_position_size: 1.0
+    max_leverage: 1.0
+    max_drawdown: 0.15
+    stop_loss: 0.05
+    take_profit: 0.10
+
+god_mode:
+  enabled: true
+  device: "mps"  # M3 Neural Engine acceleration
+
+  # MEMORY OPTIMIZATION: Model configurations
+  models:
+    diffusion:
+      enabled: true
+      checkpoint: "checkpoints/diffusion_v4.pt"
+      weight: 0.15
+      # Memory optimization
+      diffusion_steps: 500  # Reduced from 1000 (saves ~50% memory)
+      num_samples: 500      # Reduced from 1000 (saves ~50% memory)
+      hidden_dim: 96        # Reduced from 128 (saves ~30% memory)
+
+    metalearning:
+      enabled: true
+      checkpoint: "checkpoints/maml_v4.pt"
+      weight: 0.20
+      # Already efficient (<100MB)
+
+    transformer:
+      enabled: true
+      checkpoint: "checkpoints/transformer_v4.pt"
+      weight: 0.25
+      # Memory optimization
+      d_model: 384          # Reduced from 512 (saves ~30% memory)
+      n_heads: 6            # Reduced from 8
+      num_layers: 4         # Reduced from 6 (saves ~33% memory)
+
+    gnn:
+      enabled: true
+      checkpoint: "checkpoints/gnn_v4.pt"
+      weight: 0.10
+      # Memory optimization
+      hidden_dim: 96        # Reduced from 128
+      num_layers: 2         # Reduced from 3
+
+    swarm:
+      enabled: true
+      checkpoint: "checkpoints/marl_swarm_v4.pt"
+      weight: 0.15
+      # CRITICAL MEMORY SETTING
+      swarm_mode: "adaptive"  # Options: "light", "medium", "deep", "adaptive"
+      # Adaptive mode adjusts agent count based on available memory
+      agent_counts:
+        light: 100          # ~50MB per symbol
+        medium: 500         # ~250MB per symbol
+        deep: 1000          # ~500MB per symbol
+      # Recommendation for 8GB M3:
+      # - 12 symbols max at "light" mode (~600MB total)
+      # - 6 symbols max at "medium" mode (~1.5GB total)
+      # - 4 symbols max at "deep" mode (~2GB total)
+      max_concurrent_symbols: 6  # Safe default for 8GB RAM
+
+    neurosymbolic:
+      enabled: true
+      rules_file: "config/logic_rules.txt"
+      weight: 0.15
+      # Already efficient (<50MB)
+
+  # Ensemble Settings
+  ensemble:
+    min_models: 3
+    confidence_threshold: 0.70
+    disagreement_threshold: 0.30
+    adaptive_weighting: true
+    # Memory optimization
+    cache_predictions: true   # Cache recent predictions
+    cache_size: 100           # Reduced from 1000
+
+  # RL Optimizer
+  rl:
+    enabled: true
+    checkpoint: "checkpoints/rl_agent_v4.pt"
+    policy: "conservative"
+
+  # Alternative Data
+  alternative_data:
+    mempool:
+      enabled: true
+      whale_threshold: 100
+      # Memory optimization
+      buffer_size: 100      # Reduced from 1000
+
+    funding:
+      enabled: true
+      update_interval: 300
+      # Memory optimization
+      history_length: 100   # Reduced from 500
+
+    options:
+      enabled: true
+      update_interval: 600
+      history_length: 100
+
+    stablecoins:
+      enabled: true
+      update_interval: 900
+      history_length: 100
+
+  # Performance Settings
+  performance:
+    cache_features: true
+    batch_predictions: false
+    fp16: true              # ENABLED for M3 (saves ~40% memory)
+    parallel_models: true
+    # Memory management
+    clear_cache_interval: 300  # Clear caches every 5 minutes
+    gc_interval: 60           # Run garbage collection every minute
+
+data:
+  # WebSocket Streams
+  websocket:
+    enabled: true
+    orderbook_depth: 50     # Reduced from 100 (saves ~50% memory)
+    trade_buffer_size: 500  # Reduced from 1000
+
+  # Historical Data
+  historical:
+    lookback_days: 180      # Reduced from 365 (saves ~50% memory)
+    update_interval: 3600
+
+  # Variable Engine
+  variables:
+    update_interval: 10
+    num_variables: 46
+
+database:
+  # PostgreSQL
+  postgres:
+    host: "localhost"
+    port: 5432
+    database: "atomicx"
+    user: "atomicx"
+    password: "secure_password"
+    pool_size: 5            # Reduced from 10
+
+  # Redis Cache
+  redis:
+    host: "localhost"
+    port: 6379
+    db: 0
+    password: null
+    maxmemory: "512mb"      # Limit Redis memory
+
+logging:
+  level: "INFO"
+  format: "json"
+  file: "logs/atomicx_{time}.log"
+  rotation: "50 MB"         # Reduced from 100 MB
+  retention: "7 days"       # Reduced from 30 days
+
+monitoring:
+  # Prometheus
+  prometheus:
+    enabled: true
+    port: 9090
+
+  # Grafana
+  grafana:
+    enabled: false          # Disable to save memory
+    port: 3000
+
+  # Memory Monitoring
+  memory_alerts:
+    enabled: true
+    warning_threshold: 0.75  # Alert at 75% memory usage
+    critical_threshold: 0.90 # Critical at 90%
+    check_interval: 30       # Check every 30 seconds
+
+# M3 SPECIFIC OPTIMIZATIONS
+m3_optimizations:
+  # Neural Engine utilization
+  use_neural_engine: true
+
+  # Memory management
+  aggressive_gc: true           # Run garbage collection frequently
+  clear_unused_models: true     # Unload models not in use
+
+  # Swap management (SSD-based memory extension)
+  allow_swap: true              # M3 SSD is fast enough
+  swap_threshold: 0.85          # Start swapping at 85% RAM
+
+  # Thermal management
+  thermal_throttle_aware: true  # Reduce load if thermal throttling detected
+
+  # Recommendations displayed at startup
+  recommendations:
+    - "Running on M3 MacBook Air (8GB RAM) - Optimized configuration loaded"
+    - "Deep Swarm mode limited to 4-6 symbols to prevent memory pressure"
+    - "FP16 precision enabled - saves 40% memory with minimal accuracy loss"
+    - "Consider closing other apps for optimal performance"
+    - "Monitor memory usage at http://localhost:8001/metrics/memory"
+
+# DEPLOYMENT PROFILES
+deployment_profiles:
+  # Conservative: Maximum stability, minimal memory usage
+  conservative:
+    max_symbols: 4
+    swarm_mode: "light"       # 100 agents
+    diffusion_samples: 250
+    transformer_layers: 3
+    cache_size: 50
+    estimated_memory: "3.5GB"
+
+  # Balanced: Good performance, moderate memory usage (RECOMMENDED)
+  balanced:
+    max_symbols: 6
+    swarm_mode: "medium"      # 500 agents
+    diffusion_samples: 500
+    transformer_layers: 4
+    cache_size: 100
+    estimated_memory: "5GB"
+
+  # Aggressive: Maximum performance, high memory usage
+  aggressive:
+    max_symbols: 12
+    swarm_mode: "light"       # 100 agents (light mode for 12 symbols)
+    diffusion_samples: 500
+    transformer_layers: 4
+    cache_size: 100
+    estimated_memory: "6.5GB"
+
+  # Single-Symbol Deep: Maximum accuracy for one symbol
+  single_deep:
+    max_symbols: 1
+    swarm_mode: "deep"        # 1000 agents
+    diffusion_samples: 1000
+    transformer_layers: 6
+    cache_size: 200
+    estimated_memory: "4GB"
+
+# ACTIVE PROFILE
+active_profile: "balanced"  # RECOMMENDED for M3 8GB

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crucix-Inspired Intelligence Brief - AtomicX</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-primary: #020408;
+      --bg-card: rgba(6, 14, 22, 0.82);
+      --bg-elevated: rgba(10, 20, 32, 0.55);
+      --border: rgba(100, 240, 200, 0.12);
+      --text-primary: #e8f4f0;
+      --text-secondary: #6a8a82;
+      --accent: #64f0c8;
+      --accent2: #44ccff;
+      --font-sans: 'Space Grotesk', sans-serif;
+      --font-mono: 'IBM Plex Mono', monospace;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      padding: 40px 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .title {
+      font-size: 36px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      letter-spacing: 0.05em;
+    }
+
+    .comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    .section {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      backdrop-filter: blur(20px);
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge {
+      padding: 4px 10px;
+      font-size: 10px;
+      border-radius: 4px;
+      font-weight: 600;
+      font-family: var(--font-mono);
+    }
+
+    .badge.old {
+      background: rgba(239, 83, 80, 0.15);
+      border: 1px solid rgba(239, 83, 80, 0.3);
+      color: #ef5350;
+    }
+
+    .badge.new {
+      background: rgba(100, 240, 200, 0.15);
+      border: 1px solid rgba(100, 240, 200, 0.3);
+      color: var(--accent);
+    }
+
+    .vague-info {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 2;
+      color: var(--text-secondary);
+    }
+
+    .vague-info div {
+      padding: 8px;
+      border-left: 2px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 6px;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    @media (max-width: 968px) {
+      .comparison {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .note {
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-secondary);
+      padding: 16px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-top: 24px;
+    }
+
+    .note strong {
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="title">🎯 Crucix-Inspired Intelligence Brief</div>
+      <div class="subtitle">REAL INFO vs VAGUE INFO</div>
+    </div>
+
+    <div class="comparison">
+      <!-- BEFORE: Vague Info -->
+      <div class="section">
+        <div class="section-title">
+          <span>❌ Before (Vague Info)</span>
+          <span class="badge old">GENERIC</span>
+        </div>
+        <div class="vague-info">
+          <div>→ Market is trending</div>
+          <div>→ High confidence</div>
+          <div>→ Sentiment positive</div>
+          <div>→ Volume elevated</div>
+          <div>→ Volatility increasing</div>
+          <div>→ Order book balanced</div>
+          <div>→ Momentum strong</div>
+          <div>→ Risk moderate</div>
+        </div>
+      </div>
+
+      <!-- AFTER: Real Info -->
+      <div class="section">
+        <div class="section-title">
+          <span>✅ After (Real Info)</span>
+          <span class="badge new">CRUCIX STYLE</span>
+        </div>
+        <div id="intel-container"></div>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>DIFFERENCE:</strong> Left shows generic descriptions. Right shows specific values with deltas, severity, sources, and cross-correlations.
+      <br><br>
+      <strong>PHILOSOPHY:</strong> "Don't tell me 'high confidence.' Show me 92% confidence, RSI at 72.3 [+2.1], OB at +0.68."
+    </div>
+  </div>
+
+  <script>
+    // Load the Intelligence Brief component
+    fetch('/static/components/intelligence_brief.html')
+      .then(r => r.text())
+      .then(html => {
+        document.getElementById('intel-container').innerHTML = html;
+
+        // Wait for component to load, then fetch data
+        setTimeout(async () => {
+          try {
+            const response = await fetch('/api/god_mode/predictions?symbol=BTC/USDT');
+            const data = await response.json();
+
+            // Manually trigger update since we're not in god_mode.html
+            if (typeof updateIntelligenceBrief === 'function') {
+              updateIntelligenceBrief(data);
+            }
+          } catch (error) {
+            console.error('Error loading data:', error);
+          }
+        }, 500);
+      });
+  </script>
+</body>
+</html>

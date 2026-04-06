@@ -1,0 +1,247 @@
+"""Technical indicator computation engine.
+
+Computes standard trading indicators from OHLCV data using pandas.
+All indicators are pure functions: (DataFrame) → Series.
+
+Supported indicators (VAR-01):
+- RSI (Relative Strength Index)
+- MACD (Moving Average Convergence Divergence)
+- Bollinger Bands (upper, middle, lower, %B, bandwidth)
+- EMA (Exponential Moving Average) — multiple periods
+- SMA (Simple Moving Average)
+- VWAP (Volume Weighted Average Price)
+- ATR (Average True Range)
+- ADX (Average Directional Index)
+- Stochastic RSI
+- OBV (On-Balance Volume)
+- Volume Profile (relative volume)
+- Rate of Change (ROC)
+"""
+
+from __future__ import annotations
+
+import numpy as np
+import pandas as pd
+
+
+# ── Trend Indicators ──────────────────────────────────────────
+
+
+def ema(series: pd.Series, period: int = 14) -> pd.Series:
+    """Exponential Moving Average."""
+    return series.ewm(span=period, adjust=False).mean()
+
+
+def sma(series: pd.Series, period: int = 14) -> pd.Series:
+    """Simple Moving Average."""
+    return series.rolling(window=period).mean()
+
+
+def vwap(df: pd.DataFrame) -> pd.Series:
+    """Volume Weighted Average Price (intraday reset)."""
+    typical_price = (df["high"] + df["low"] + df["close"]) / 3
+    cumulative_tp_vol = (typical_price * df["volume"]).cumsum()
+    cumulative_vol = df["volume"].cumsum()
+    return cumulative_tp_vol / cumulative_vol
+
+
+# ── Momentum Indicators ──────────────────────────────────────
+
+
+def rsi(series: pd.Series, period: int = 14) -> pd.Series:
+    """Relative Strength Index."""
+    delta = series.diff()
+    gain = delta.where(delta > 0, 0.0)
+    loss = (-delta).where(delta < 0, 0.0)
+    avg_gain = gain.ewm(alpha=1 / period, min_periods=period).mean()
+    avg_loss = loss.ewm(alpha=1 / period, min_periods=period).mean()
+    rs = avg_gain / avg_loss.replace(0, np.nan)
+    return 100 - (100 / (1 + rs))
+
+
+def macd(
+    series: pd.Series,
+    fast: int = 12,
+    slow: int = 26,
+    signal: int = 9,
+) -> dict[str, pd.Series]:
+    """MACD — returns line, signal, and histogram."""
+    fast_ema = ema(series, fast)
+    slow_ema = ema(series, slow)
+    macd_line = fast_ema - slow_ema
+    signal_line = ema(macd_line, signal)
+    histogram = macd_line - signal_line
+    return {
+        "macd": macd_line,
+        "signal": signal_line,
+        "histogram": histogram,
+    }
+
+
+def stochastic_rsi(
+    series: pd.Series, rsi_period: int = 14, stoch_period: int = 14
+) -> dict[str, pd.Series]:
+    """Stochastic RSI — %K and %D."""
+    rsi_values = rsi(series, rsi_period)
+    rsi_min = rsi_values.rolling(window=stoch_period).min()
+    rsi_max = rsi_values.rolling(window=stoch_period).max()
+    stoch_rsi = (rsi_values - rsi_min) / (rsi_max - rsi_min).replace(0, np.nan)
+    k = stoch_rsi * 100
+    d = k.rolling(window=3).mean()
+    return {"k": k, "d": d}
+
+
+def roc(series: pd.Series, period: int = 12) -> pd.Series:
+    """Rate of Change (percentage)."""
+    return ((series - series.shift(period)) / series.shift(period)) * 100
+
+
+# ── Volatility Indicators ────────────────────────────────────
+
+
+def bollinger_bands(
+    series: pd.Series, period: int = 20, std_dev: float = 2.0
+) -> dict[str, pd.Series]:
+    """Bollinger Bands — upper, middle, lower, %B, bandwidth."""
+    middle = sma(series, period)
+    std = series.rolling(window=period).std()
+    upper = middle + (std * std_dev)
+    lower = middle - (std * std_dev)
+    band_range = upper - lower
+    percent_b = (series - lower) / band_range.replace(0, np.nan)
+    bandwidth = band_range / middle.replace(0, np.nan)
+    return {
+        "upper": upper,
+        "middle": middle,
+        "lower": lower,
+        "percent_b": percent_b,
+        "bandwidth": bandwidth,
+    }
+
+
+def atr(df: pd.DataFrame, period: int = 14) -> pd.Series:
+    """Average True Range — volatility measure."""
+    high_low = df["high"] - df["low"]
+    high_close = (df["high"] - df["close"].shift(1)).abs()
+    low_close = (df["low"] - df["close"].shift(1)).abs()
+    true_range = pd.concat([high_low, high_close, low_close], axis=1).max(axis=1)
+    return true_range.ewm(alpha=1 / period, min_periods=period).mean()
+
+
+def garch_volatility(series: pd.Series, window: int = 20) -> pd.Series:
+    """Simplified GARCH-like volatility estimate using rolling variance.
+
+    For production, upgrade to arch library's GARCH(1,1).
+    """
+    returns = series.pct_change()
+    return returns.rolling(window=window).std() * np.sqrt(252)  # Annualized
+
+
+# ── Volume Indicators ────────────────────────────────────────
+
+
+def obv(df: pd.DataFrame) -> pd.Series:
+    """On-Balance Volume."""
+    direction = np.sign(df["close"].diff())
+    return (direction * df["volume"]).cumsum()
+
+
+def relative_volume(df: pd.DataFrame, period: int = 20) -> pd.Series:
+    """Relative volume vs rolling average."""
+    avg_vol = df["volume"].rolling(window=period).mean()
+    return df["volume"] / avg_vol.replace(0, np.nan)
+
+
+def volume_price_trend(df: pd.DataFrame) -> pd.Series:
+    """Volume Price Trend (VPT)."""
+    pct_change = df["close"].pct_change()
+    return (pct_change * df["volume"]).cumsum()
+
+
+# ── Trend Strength ────────────────────────────────────────────
+
+
+def adx(df: pd.DataFrame, period: int = 14) -> dict[str, pd.Series]:
+    """Average Directional Index — trend strength."""
+    plus_dm = df["high"].diff()
+    minus_dm = -df["low"].diff()
+
+    plus_dm = plus_dm.where((plus_dm > minus_dm) & (plus_dm > 0), 0.0)
+    minus_dm = minus_dm.where((minus_dm > plus_dm) & (minus_dm > 0), 0.0)
+
+    atr_val = atr(df, period)
+
+    plus_di = 100 * ema(plus_dm, period) / atr_val.replace(0, np.nan)
+    minus_di = 100 * ema(minus_dm, period) / atr_val.replace(0, np.nan)
+
+    dx = 100 * (plus_di - minus_di).abs() / (plus_di + minus_di).replace(0, np.nan)
+    adx_val = ema(dx, period)
+
+    return {"adx": adx_val, "plus_di": plus_di, "minus_di": minus_di}
+
+
+# ── Multi-Indicator Computation ──────────────────────────────
+
+
+def compute_all_indicators(df: pd.DataFrame) -> pd.DataFrame:
+    """Compute ALL standard technical indicators from OHLCV data.
+
+    Args:
+        df: DataFrame with columns [timestamp, open, high, low, close, volume]
+
+    Returns:
+        DataFrame with all computed indicator columns added.
+    """
+    result = df.copy()
+
+    # Trend
+    result["ema_9"] = ema(df["close"], 9)
+    result["ema_21"] = ema(df["close"], 21)
+    result["ema_50"] = ema(df["close"], 50)
+    result["ema_200"] = ema(df["close"], 200)
+    result["sma_20"] = sma(df["close"], 20)
+    result["sma_50"] = sma(df["close"], 50)
+
+    # VWAP
+    if "volume" in df.columns:
+        result["vwap"] = vwap(df)
+
+    # Momentum
+    result["rsi_14"] = rsi(df["close"], 14)
+    result["rsi_7"] = rsi(df["close"], 7)
+
+    macd_result = macd(df["close"])
+    result["macd_line"] = macd_result["macd"]
+    result["macd_signal"] = macd_result["signal"]
+    result["macd_histogram"] = macd_result["histogram"]
+
+    stoch = stochastic_rsi(df["close"])
+    result["stoch_rsi_k"] = stoch["k"]
+    result["stoch_rsi_d"] = stoch["d"]
+
+    result["roc_12"] = roc(df["close"], 12)
+
+    # Volatility
+    bb = bollinger_bands(df["close"])
+    result["bb_upper"] = bb["upper"]
+    result["bb_middle"] = bb["middle"]
+    result["bb_lower"] = bb["lower"]
+    result["bb_percent_b"] = bb["percent_b"]
+    result["bb_bandwidth"] = bb["bandwidth"]
+
+    result["atr_14"] = atr(df, 14)
+    result["garch_vol"] = garch_volatility(df["close"])
+
+    # Volume
+    if "volume" in df.columns:
+        result["obv"] = obv(df)
+        result["relative_volume"] = relative_volume(df)
+        result["vpt"] = volume_price_trend(df)
+
+    # Trend strength
+    adx_result = adx(df)
+    result["adx"] = adx_result["adx"]
+    result["plus_di"] = adx_result["plus_di"]
+    result["minus_di"] = adx_result["minus_di"]
+
+    return result

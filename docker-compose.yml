@@ -1,0 +1,102 @@
+services:
+  # ============================================================
+  # PostgreSQL + TimescaleDB — Time-series optimized storage
+  # ============================================================
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    container_name: atomicx-timescaledb
+    environment:
+      POSTGRES_DB: atomicx
+      POSTGRES_USER: atomicx
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-atomicx_dev}
+    ports:
+      - "5432:5432"
+    volumes:
+      - timescaledb_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U atomicx"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ============================================================
+  # Redis — In-memory cache, pub/sub for real-time data
+  # ============================================================
+  redis:
+    image: redis:7-alpine
+    container_name: atomicx-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ============================================================
+  # Apache Kafka (KRaft mode — no Zookeeper)
+  # ============================================================
+  kafka:
+    image: apache/kafka:latest
+    container_name: atomicx-kafka
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+    ports:
+      - "9092:9092"
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 > /dev/null 2>&1"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  # ============================================================
+  # Qdrant — Vector database for memory retrieval
+  # ============================================================
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: atomicx-qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:6333/healthz || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ============================================================
+  # Crucix OSINT Terminal — Runs alongside AtomicX
+  # ============================================================
+  crucix:
+    build: ./src/crucix
+    container_name: atomicx-crucix
+    ports:
+      - "3117:3117"
+    volumes:
+      - ./src/crucix/runs:/app/runs
+      - ./src/crucix/.env:/app/.env
+    restart: unless-stopped
+
+volumes:
+  timescaledb_data:
+  redis_data:
+  kafka_data:
+  qdrant_data:

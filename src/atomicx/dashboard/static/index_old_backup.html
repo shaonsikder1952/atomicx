@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AtomicX — Intelligence Terminal</title>
+  <!-- Instant Navigation -->
+  <script src="/static/instant-nav.js" type="module"></script>
+
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/styles/core.css">
+  <style>
+    /* Page-specific custom variables and overrides */
+    :root {
+      --bg-card-hover: #1a1b24;
+      --red: #ff4466;
+      --red-dim: rgba(255,68,102,0.08);
+      --amber: #f0b429;
+      --amber-dim: rgba(240,180,41,0.08);
+      --blue: #4da6ff;
+      --blue-dim: rgba(77,166,255,0.08);
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Inter', sans-serif;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: var(--sans);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: auto;
+    }
+    ::-webkit-scrollbar { width:8px; height:8px; }
+    ::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.1); border-radius:4px; }
+    ::-webkit-scrollbar-thumb:hover { background:rgba(255,255,255,0.15); }
+    ::-webkit-scrollbar-track { background:transparent; }
+
+    /* ── Header ─────────────────────────────── */
+    .header {
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      z-index: 20;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-name { font-weight: 800; font-size: 16px; letter-spacing: 1.5px; }
+    .brand-name span { color: var(--accent); }
+    .status-pills { display: flex; gap: 8px; align-items: center; }
+    .pill {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 100px;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      border: 1px solid var(--border);
+      background: var(--bg-elevated);
+      color: var(--text-secondary);
+    }
+    .pill-regime { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(16,185,129,0.15); }
+    .pill-ws .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+    .pill-ws .dot.off { background: var(--red); box-shadow: 0 0 6px var(--red); }
+    .pill-cycle { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(77,166,255,0.15); }
+    .btn-add { cursor: pointer; transition: all 0.2s; }
+    .btn-add:hover { background: var(--accent-dim); color: var(--accent); border-color: var(--accent); }
+
+    /* ── Toast Notifications ────────────────── */
+    .toast-container { position: fixed; top: 70px; right: 24px; z-index: 100; display: flex; flex-direction: column; gap: 8px; }
+    .toast {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      min-width: 280px;
+      font-family: var(--mono);
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      animation: slideIn 0.3s ease;
+    }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .toast.success { border-left: 3px solid var(--accent); }
+    .toast.error { border-left: 3px solid var(--red); }
+    .toast-icon { font-size: 14px; }
+
+    /* ── Main Layout ────────────────────────── */
+    .main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 320px 1fr 380px;
+      gap: 1px;
+      background: var(--border);
+      min-height: 0;
+      overflow: hidden;
+    }
+    .col {
+      background: var(--bg-primary);
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 20px;
+      height: 100%;
+    }
+
+    /* ── Section Headers ────────────────────── */
+    .section-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .section-label .toggle { margin-left: auto; color: var(--text-muted); font-size: 12px; }
+
+    /* ── Left Column: Signal + Variables ───── */
+    .signal-hero {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+      transition: border-color 0.3s;
+    }
+    .signal-hero.long { border-color: rgba(16,185,129,0.25); }
+    .signal-hero.short { border-color: rgba(255,68,102,0.25); }
+    .sh-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .sh-symbol { font-size: 22px; font-weight: 800; letter-spacing: 0.5px; }
+    .sh-badge {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+    .badge-long { background: var(--accent-dim); color: var(--accent); }
+    .badge-short { background: var(--red-dim); color: var(--red); }
+    .badge-watch { background: var(--amber-dim); color: var(--amber); }
+    .sh-price { font-family: var(--mono); font-size: 28px; font-weight: 700; margin-bottom: 4px; }
+    .sh-regime { font-family: var(--mono); font-size: 11px; color: var(--text-secondary); }
+    .sh-chart { height: 70px; margin: 12px -20px -20px; border-radius: 0 0 var(--radius) var(--radius); overflow: hidden; }
+
+    /* ── Variables Grid ─────────────────────── */
+    .var-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; max-height: 400px; overflow-y: auto; }
+    .var-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 10px;
+      transition: all 0.2s;
+    }
+    .var-item:hover { background: var(--bg-card-hover); border-color: var(--border-hover); }
+    .var-name { font-family: var(--mono); font-size: 9px; color: var(--text-muted); letter-spacing: 0.5px; margin-bottom: 3px; }
+    .var-value { font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--text-primary); }
+    .var-meta { font-family: var(--mono); font-size: 8px; color: var(--text-muted); margin-top: 2px; }
+    .sparkline {
+      height: 16px;
+      margin-top: 4px;
+      display: flex;
+      align-items: flex-end;
+      gap: 1px;
+    }
+    .spark-bar {
+      flex: 1;
+      background: var(--accent-dim);
+      min-height: 2px;
+      border-radius: 1px;
+      transition: all 0.3s;
+    }
+
+    /* ── Key Metrics ────────────────────────── */
+    .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+    .metric { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+    .metric-label { font-family: var(--mono); font-size: 9px; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+    .metric-value { font-family: var(--mono); font-size: 16px; font-weight: 700; }
+    .metric-value.green { color: var(--accent); }
+    .metric-value.red { color: var(--red); }
+    .metric-value.amber { color: var(--amber); }
+    .metric-value.blue { color: var(--blue); }
+
+    /* ── Layer Stack ────────────────────────── */
+    .layer-stack { display: flex; flex-direction: column; gap: 4px; }
+    .layer-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .layer-item:hover { background: var(--bg-card-hover); border-color: var(--border-hover); }
+    .layer-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .layer-dot.active { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+    .layer-dot.partial { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+    .layer-dot.offline { background: var(--text-muted); }
+    .layer-name { font-family: var(--mono); font-size: 11px; font-weight: 500; flex: 1; }
+    .layer-value { font-family: var(--mono); font-size: 10px; color: var(--text-secondary); }
+    .layer-detail {
+      padding: 8px 12px 12px 30px;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 6px 6px;
+      margin-top: -4px;
+      margin-bottom: 4px;
+    }
+
+    /* ── Center Column: Predictions ─────────── */
+    .pred-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+    .pred-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .pred-title { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--accent); letter-spacing: 1px; }
+    .pred-conf { font-family: var(--mono); font-size: 12px; color: var(--text-secondary); }
+
+    .tf-tabs { display: flex; gap: 4px; margin-bottom: 20px; flex-wrap: wrap; }
+    .tf-tab {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 6px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tf-tab:hover { background: var(--bg-card-hover); color: var(--text-primary); }
+    .tf-tab.active { background: var(--accent-dim); color: var(--accent); border-color: rgba(16,185,129,0.2); }
+    .tf-custom-input {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+      padding: 10px;
+      background: var(--bg-elevated);
+      border-radius: 6px;
+    }
+    .tf-custom-input input {
+      flex: 1;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 6px 8px;
+      color: var(--text-primary);
+      font-family: var(--mono);
+      font-size: 10px;
+    }
+    .tf-custom-input button {
+      background: var(--accent);
+      color: var(--bg-primary);
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .target-display { text-align: center; padding: 24px 0; }
+    .target-label { font-family: var(--mono); font-size: 10px; color: var(--text-muted); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+    .target-price { font-family: var(--mono); font-size: 42px; font-weight: 700; letter-spacing: -1px; margin-bottom: 6px; }
+    .target-move {
+      font-family: var(--mono);
+      font-size: 15px;
+      font-weight: 600;
+      padding: 4px 14px;
+      border-radius: 100px;
+      display: inline-block;
+    }
+    .target-move.up { color: var(--accent); background: var(--accent-dim); }
+    .target-move.down { color: var(--red); background: var(--red-dim); }
+
+    .levels-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .level { text-align: center; }
+    .level-label { font-family: var(--mono); font-size: 9px; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 2px; }
+    .level-val { font-family: var(--mono); font-size: 13px; font-weight: 600; }
+
+    /* ── Weight Matrix ──────────────────────── */
+    .weight-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+    .w-cell { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 14px; text-align: center; }
+    .w-pct { font-family: var(--mono); font-size: 22px; font-weight: 700; margin-bottom: 2px; }
+    .w-label { font-family: var(--mono); font-size: 9px; color: var(--text-muted); letter-spacing: 0.8px; text-transform: uppercase; }
+
+    /* ── Confirmation Gate ───────────────────── */
+    .gate-row { display: flex; gap: 8px; margin-bottom: 16px; }
+    .gate-item {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    .gate-icon { font-size: 14px; }
+    .gate-text { font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: 0.5px; }
+    .gate-pass { color: var(--accent); border-color: rgba(16,185,129,0.15); background: var(--accent-dim); }
+    .gate-fail { color: var(--red); border-color: rgba(255,68,102,0.15); background: var(--red-dim); }
+
+    /* ── Chart Area ─────────────────────────── */
+    .chart-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      margin-bottom: 16px;
+      position: relative;
+      padding: 10px;
+    }
+    .chart-container svg { width: 100%; height: 100%; }
+    .candlestick { stroke-width: 1.5; }
+    .candle-up { fill: var(--accent); stroke: var(--accent); }
+    .candle-down { fill: var(--red); stroke: var(--red); }
+
+    /* ── Reasoning ──────────────────────────── */
+    .reasoning-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .reasoning-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+    .reasoning-toggle { font-family: var(--mono); font-size: 10px; color: var(--text-muted); letter-spacing: 0.5px; }
+    .reasoning-content {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      white-space: pre-wrap;
+    }
+    .reasoning-section { margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+    .reasoning-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .reasoning-label {
+      font-size: 9px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    /* ── Database Panel ─────────────────────── */
+    .db-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .db-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+    .db-stat {
+      padding: 10px;
+      background: var(--bg-elevated);
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+    .db-stat-label { font-family: var(--mono); font-size: 9px; color: var(--text-muted); margin-bottom: 4px; }
+    .db-stat-value { font-family: var(--mono); font-size: 14px; font-weight: 700; color: var(--text-primary); }
+
+    /* ── Right Column: Agents ───────────────── */
+    .agent-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .agent-card:hover { background: var(--bg-card-hover); border-color: var(--border-hover); }
+    .agent-card.bullish { border-left: 3px solid var(--accent); }
+    .agent-card.bearish { border-left: 3px solid var(--red); }
+    .agent-card.neutral { border-left: 3px solid var(--text-muted); }
+    .ac-top { display: flex; justify-content: space-between; align-items: center; }
+    .ac-name { font-family: var(--mono); font-size: 11px; font-weight: 600; }
+    .ac-sig { font-family: var(--mono); font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; }
+    .ac-sig-bull { color: var(--accent); background: var(--accent-dim); }
+    .ac-sig-bear { color: var(--red); background: var(--red-dim); }
+    .ac-sig-neut { color: var(--text-secondary); background: var(--bg-elevated); }
+    .ac-trace {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── Footer ─────────────────────────────── */
+    .footer {
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      background: var(--bg-card);
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .footer-stats { display: flex; gap: 32px; }
+    .fs { display: flex; align-items: center; gap: 8px; }
+    .fs-label { font-family: var(--mono); font-size: 9px; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; }
+    .fs-value { font-family: var(--mono); font-size: 14px; font-weight: 700; }
+
+    /* ── Chat ───────────────────────────────── */
+    .chat-fab {
+      position: fixed;
+      bottom: 60px;
+      right: 24px;
+      width: 48px;
+      height: 48px;
+      background: var(--accent);
+      color: var(--bg-primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 30;
+      box-shadow: 0 4px 20px rgba(0,229,160,0.3);
+      transition: transform 0.2s;
+    }
+    .chat-fab:hover { transform: scale(1.08); }
+    .chat-panel {
+      position: fixed;
+      bottom: 120px;
+      right: 24px;
+      width: 360px;
+      height: 460px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      z-index: 29;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .chat-head {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 1px;
+    }
+    .chat-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .chat-msg {
+      max-width: 85%;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .chat-msg.assistant {
+      align-self: flex-start;
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+    }
+    .chat-msg.assistant[data-loading="true"] {
+      opacity: 0.7;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    .chat-msg.assistant[data-error="true"] {
+      background: var(--red-dim);
+      border: 1px solid var(--red);
+      color: var(--red);
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.7; }
+      50% { opacity: 1; }
+      border-bottom-left-radius: 2px;
+    }
+    .chat-msg.user {
+      align-self: flex-end;
+      background: var(--accent-dim);
+      color: var(--accent);
+      border-bottom-right-radius: 2px;
+    }
+    .chat-foot {
+      padding: 12px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 8px;
+    }
+    .chat-input {
+      flex: 1;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 12px;
+      color: var(--text-primary);
+      font-size: 12px;
+      outline: none;
+      font-family: var(--sans);
+    }
+    .chat-input:focus { border-color: var(--accent); }
+    .chat-input:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .chat-send {
+      background: var(--accent);
+      color: var(--bg-primary);
+      border: none;
+      padding: 0 14px;
+      border-radius: 6px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: var(--mono);
+      transition: all 0.2s;
+    }
+    .chat-send:hover:not(:disabled) {
+      background: #00ffb3;
+      transform: scale(1.05);
+    }
+    .chat-send:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      font-size: 11px;
+    }
+
+    /* ── Waiting State ──────────────────────── */
+    .waiting-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .waiting-text { font-family: var(--mono); font-size: 11px; letter-spacing: 1px; }
+
+    /* ── Pulse Animation ────────────────────── */
+    @keyframes pulse-glow { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+    .pulse { animation: pulse-glow 2s ease-in-out infinite; }
+
+    /* ── Collapsible Sections ───────────────── */
+    .collapsible-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+    .collapsible-content.open { max-height: 1000px; }
+  </style>
+</head>
+<body>
+<div id="app">
+  <!-- Toast Notifications -->
+  <div class="toast-container">
+    <div v-for="toast in toasts" :key="toast.id" :class="['toast', toast.type]">
+      <div class="toast-icon">{{ toast.type === 'success' ? '✓' : '✗' }}</div>
+      <div>{{ toast.message }}</div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="brand">
+      <div class="brand-name">ATOMIC<span>X</span></div>
+      <div class="pill pill-regime">{{ regime }}</div>
+      <div class="pill pill-cycle" v-if="cycleCount > 0">CYCLE #{{ cycleCount }}</div>
+    </div>
+    <div class="status-pills">
+      <div class="pill pill-ws">
+        <div class="dot" :class="{off: !ws}"></div>
+        {{ ws ? 'LIVE' : 'OFFLINE' }}
+      </div>
+      <button class="pill btn-add" @click="addAsset">+ ADD</button>
+    </div>
+  </div>
+
+  <!-- Main Grid -->
+  <div class="main">
+    <!-- LEFT: Signal + Variables + Layers -->
+    <div class="col">
+      <!-- Signal Hero -->
+      <div class="signal-hero" :class="sig?.toLowerCase()" v-if="hasData">
+        <div class="sh-top">
+          <div class="sh-symbol">{{ sym }}</div>
+          <div class="sh-badge" :class="'badge-' + sig?.toLowerCase()">{{ sig }} {{ conf }}%</div>
+        </div>
+        <div class="sh-price">{{ price }}</div>
+        <div class="sh-regime">{{ regime }} · Cycle: {{ d?.cycle_time_ms || '~1200' }}ms</div>
+        <div class="sh-chart" v-html="chartSVG"></div>
+      </div>
+      <div class="signal-hero" v-else>
+        <div class="waiting-state">
+          <div class="spinner"></div>
+          <div class="waiting-text">ANALYZING {{ sym }}...</div>
+        </div>
+      </div>
+
+      <!-- Key Metrics -->
+      <div class="section-label">Key Metrics</div>
+      <div class="metrics-grid">
+        <div class="metric">
+          <div class="metric-label">Support</div>
+          <div class="metric-value">{{ d?.support || '—' }}</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Resistance</div>
+          <div class="metric-value">{{ d?.resist || '—' }}</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">RSI (14)</div>
+          <div class="metric-value" :class="rsiClass">{{ rsi }}</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Pattern</div>
+          <div class="metric-value" :class="sig === 'LONG' ? 'green' : sig === 'SHORT' ? 'red' : 'amber'">
+            {{ d?.pattern_signal || d?.signal || '—' }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Variables Panel -->
+      <div class="section-label" @click="showVariables = !showVariables">
+        All Variables ({{ Object.keys(variables).length }})
+        <span class="toggle">{{ showVariables ? '▴' : '▾' }}</span>
+      </div>
+      <div v-if="showVariables">
+        <div class="var-grid" v-if="Object.keys(variables).length > 0">
+          <div v-for="(val, key) in variables" :key="key" class="var-item">
+            <div class="var-name">{{ key }}</div>
+            <div class="var-value">{{ formatVarValue(val) }}</div>
+            <div class="var-meta">Live · Conf: {{ getVarConfidence(key) }}%</div>
+            <div class="sparkline" v-if="varHistory[key]">
+              <div
+                v-for="(h, i) in varHistory[key]"
+                :key="i"
+                class="spark-bar"
+                :style="{height: getSparkHeight(varHistory[key], h)}"
+              ></div>
+            </div>
+          </div>
+        </div>
+        <div v-else class="waiting-state" style="padding:20px">
+          <div class="spinner"></div>
+          <div class="waiting-text">COMPUTING VARIABLES...</div>
+        </div>
+      </div>
+
+      <!-- Pipeline Architecture -->
+      <div class="section-label">Pipeline Layers</div>
+      <div class="layer-stack">
+        <div v-for="l in layers" :key="l.id">
+          <div class="layer-item" @click="l.open = !l.open">
+            <div class="layer-dot" :class="l.status"></div>
+            <div class="layer-name">{{ l.name }}</div>
+            <div class="layer-value">{{ l.value }}</div>
+          </div>
+          <div class="layer-detail" v-if="l.open">{{ l.detail }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CENTER: Intelligence Engine -->
+    <div class="col">
+      <div class="section-label">Intelligence Engine</div>
+
+      <!-- Prediction Card -->
+      <div class="pred-card" v-if="pred">
+        <div class="pred-header">
+          <div class="pred-title">TARGET PREDICTION</div>
+          <div class="pred-conf">Confidence: {{ conf }}%</div>
+        </div>
+        <div class="tf-tabs">
+          <div
+            v-for="tf in timeframes"
+            :key="tf"
+            class="tf-tab"
+            :class="{active: activeTF === tf}"
+            @click="selectTimeframe(tf)"
+          >
+            {{ tf }}
+          </div>
+        </div>
+        <div v-if="activeTF === 'Custom'" class="tf-custom-input">
+          <input v-model="customRange.start" type="text" placeholder="Start (e.g., 2024-01-01)">
+          <input v-model="customRange.end" type="text" placeholder="End (e.g., 2024-12-31)">
+          <button @click="applyCustomRange">Apply</button>
+        </div>
+        <div class="target-display">
+          <div class="target-label">{{ activeTF }} PROJECTED TARGET</div>
+          <div class="target-price">{{ pred?.price || '—' }}</div>
+          <div class="target-move" :class="pred?.dir === 'up' ? 'up' : 'down'">
+            {{ pred?.dir === 'up' ? '▲' : '▼' }} {{ pred?.move || '—' }}
+          </div>
+        </div>
+        <div class="levels-row" v-if="pred">
+          <div class="level">
+            <div class="level-label">Low</div>
+            <div class="level-val" style="color:var(--red)">{{ pred.low }}</div>
+          </div>
+          <div class="level">
+            <div class="level-label">Mid</div>
+            <div class="level-val">{{ pred.mid }}</div>
+          </div>
+          <div class="level">
+            <div class="level-label">High</div>
+            <div class="level-val" style="color:var(--accent)">{{ pred.high }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="pred-card" v-else>
+        <div class="waiting-state">
+          <div class="spinner"></div>
+          <div class="waiting-text">COMPUTING PREDICTION...</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-top:8px;">
+            First cycle takes ~25 seconds
+          </div>
+        </div>
+      </div>
+
+      <!-- Confirmation Gate -->
+      <div class="section-label">Dual Confirmation Gate</div>
+      <div class="gate-row">
+        <div class="gate-item" :class="d?.math_passed ? 'gate-pass' : 'gate-fail'">
+          <div class="gate-icon">{{ d?.math_passed ? '✓' : '✗' }}</div>
+          <div class="gate-text">PATTERN {{ d?.math_passed ? 'PASSED' : 'FAILED' }}</div>
+        </div>
+        <div class="gate-item" :class="d?.causal_passed ? 'gate-pass' : 'gate-fail'">
+          <div class="gate-icon">{{ d?.causal_passed ? '✓' : '✗' }}</div>
+          <div class="gate-text">CAUSAL {{ d?.causal_passed ? 'PASSED' : 'FAILED' }}</div>
+        </div>
+      </div>
+
+      <!-- Weight Matrix -->
+      <div class="section-label">Decision Weights (Normalized)</div>
+      <div class="weight-row">
+        <div class="w-cell">
+          <div class="w-pct" style="color:var(--accent)">{{ weights.math || 0 }}%</div>
+          <div class="w-label">Technical</div>
+        </div>
+        <div class="w-cell">
+          <div class="w-pct" style="color:var(--amber)">{{ weights.swarm || 0 }}%</div>
+          <div class="w-label">Swarm/Narr</div>
+        </div>
+        <div class="w-cell">
+          <div class="w-pct" style="color:var(--blue)">{{ weights.causal || 0 }}%</div>
+          <div class="w-label">Causal LLM</div>
+        </div>
+      </div>
+
+      <!-- Chart -->
+      <div class="section-label">Price Trajectory</div>
+      <div class="chart-container">
+        <svg viewBox="0 0 300 180" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" :stop-color="chartColor" stop-opacity="0.2"/>
+              <stop offset="100%" :stop-color="chartColor" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <polygon v-if="chartPoints" :points="chartPolygon" fill="url(#cg)"/>
+          <polyline v-if="chartPoints" :points="chartPoints" fill="none" :stroke="chartColor" stroke-width="2"/>
+        </svg>
+      </div>
+
+      <!-- Database Transparency -->
+      <div class="section-label" @click="showDB = !showDB">
+        Database Transparency
+        <span class="toggle">{{ showDB ? '▴' : '▾' }}</span>
+      </div>
+      <div v-if="showDB">
+        <div class="db-panel" v-if="Object.keys(dbStats).length > 0">
+          <div class="db-stats">
+            <div class="db-stat">
+              <div class="db-stat-label">OHLCV Candles</div>
+              <div class="db-stat-value">{{ dbStats.ohlcv_count?.toLocaleString() || '—' }}</div>
+            </div>
+            <div class="db-stat">
+              <div class="db-stat-label">Variables Computed</div>
+              <div class="db-stat-value">{{ dbStats.var_count?.toLocaleString() || '—' }}</div>
+            </div>
+            <div class="db-stat">
+              <div class="db-stat-label">Patterns Detected</div>
+              <div class="db-stat-value">{{ dbStats.pattern_total || '—' }}</div>
+            </div>
+            <div class="db-stat">
+              <div class="db-stat-label">Patterns Verified</div>
+              <div class="db-stat-value">{{ dbStats.pattern_verified || '—' }}</div>
+            </div>
+            <div class="db-stat">
+              <div class="db-stat-label">Win Rate</div>
+              <div class="db-stat-value" style="color:var(--accent)">{{ dbStats.pattern_win_rate || '—' }}</div>
+            </div>
+            <div class="db-stat">
+              <div class="db-stat-label">Last Update</div>
+              <div class="db-stat-value" style="font-size:10px;">{{ dbStats.last_update || '—' }}</div>
+            </div>
+            <div class="db-stat">
+              <div class="db-stat-label">Memory Tier 1</div>
+              <div class="db-stat-value">{{ dbStats.mem_tier1 || '—' }}</div>
+            </div>
+            <div class="db-stat">
+              <div class="db-stat-label">Memory Tier 2-4</div>
+              <div class="db-stat-value">{{ dbStats.mem_tier234 || '—' }}</div>
+            </div>
+          </div>
+        </div>
+        <div v-else class="db-panel">
+          <div class="waiting-state" style="padding:20px">
+            <div class="spinner"></div>
+            <div class="waiting-text">LOADING DATABASE STATS...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reasoning -->
+      <div class="reasoning-box">
+        <div class="reasoning-header" @click="showReasoning = !showReasoning">
+          <div class="section-label" style="margin:0">Decision Reasoning</div>
+          <div class="reasoning-toggle">{{ showReasoning ? 'HIDE ▴' : 'SHOW ▾' }}</div>
+        </div>
+        <div class="reasoning-content" v-if="showReasoning">
+          <div class="reasoning-section">
+            <div class="reasoning-label">⚡ Agent Votes ({{ debugAgents.length }})</div>
+            <div v-if="debugAgents.length > 0">
+              <div v-for="agent in debugAgents" :key="agent.name" style="margin-bottom:4px;">
+                <span style="color:var(--accent);font-weight:600;">{{ agent.name }}</span>:
+                <span :style="{color: agent.stance === 'bullish' ? 'var(--accent)' : agent.stance === 'bearish' ? 'var(--red)' : 'var(--amber)'}">
+                  {{ agent.stance.toUpperCase() }}
+                </span>
+                <span style="color:var(--text-muted);">({{ (agent.conviction * 100).toFixed(0) }}% conviction)</span>
+              </div>
+            </div>
+            <div v-else style="color:var(--text-muted);">No agent votes recorded yet. Waiting for first debate cycle...</div>
+          </div>
+          <div class="reasoning-section">
+            <div class="reasoning-label">📊 Triggering Variables</div>
+            <div v-if="triggeringVars && triggeringVars !== 'No specific triggers identified'" style="line-height:1.8;">{{ triggeringVars }}</div>
+            <div v-else style="color:var(--text-muted);">No specific triggers identified - decision based on consensus</div>
+          </div>
+          <div class="reasoning-section">
+            <div class="reasoning-label">🔗 Causal Chain</div>
+            <div style="line-height:1.8;white-space:pre-wrap;">{{ d?.reasoning || 'Awaiting first cognitive cycle...' }}</div>
+          </div>
+          <div class="reasoning-section">
+            <div class="reasoning-label">📍 Data Sources</div>
+            <div style="line-height:1.8;">{{ dataSources }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Agent Traces -->
+    <div class="col">
+      <div class="section-label">LLM Debate ({{ debateAgents?.length || 0 }})</div>
+      <div v-for="a in debateAgents" :key="a.name" class="agent-card" :class="agentClass(a)" @click="toggleAgent(a.name)">
+        <div class="ac-top">
+          <div class="ac-name">{{ cleanName(a.name) }}</div>
+          <div class="ac-sig" :class="sigClass(a.sig)">{{ a.sig }}</div>
+        </div>
+        <div class="ac-trace" v-if="openAgents[a.name]">{{ a.logic || 'Evaluating...' }}</div>
+      </div>
+
+      <div class="section-label" style="margin-top:20px">Group Leaders ({{ rollupAgents?.length || 0 }})</div>
+      <div v-for="a in rollupAgents" :key="a.name" class="agent-card" :class="agentClass(a)" @click="toggleAgent(a.name)">
+        <div class="ac-top">
+          <div class="ac-name">{{ cleanName(a.name) }}</div>
+          <div class="ac-sig" :class="sigClass(a.sig)">{{ a.sig }}</div>
+        </div>
+        <div class="ac-trace" v-if="openAgents[a.name]">{{ a.logic || 'Computing...' }}</div>
+      </div>
+
+      <div class="section-label" style="margin-top:20px">Atomic Agents ({{ atomicAgents?.length || 0 }})</div>
+      <div v-for="a in atomicAgents" :key="a.name" class="agent-card" :class="agentClass(a)" @click="toggleAgent(a.name)">
+        <div class="ac-top">
+          <div class="ac-name">{{ cleanName(a.name) }}</div>
+          <div class="ac-sig" :class="sigClass(a.sig)">{{ a.sig }}</div>
+        </div>
+        <div class="ac-trace" v-if="openAgents[a.name]">{{ a.logic || 'Trace pending...' }}</div>
+      </div>
+
+      <div v-if="!allAgents || allAgents.length === 0" class="waiting-state" style="padding:40px">
+        <div class="spinner"></div>
+        <div class="waiting-text">LOADING AGENTS...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="footer-stats">
+      <div class="fs">
+        <div class="fs-label">Win Rate</div>
+        <div class="fs-value" style="color:var(--accent)">{{ ((perf?.win_rate || 0) * 100).toFixed(1) }}%</div>
+      </div>
+      <div class="fs">
+        <div class="fs-label">Predictions</div>
+        <div class="fs-value" style="color:var(--blue)">{{ perf?.total_predictions || 0 }}</div>
+      </div>
+      <div class="fs">
+        <div class="fs-label">IQ Score</div>
+        <div class="fs-value" style="color:var(--amber)">{{ perf?.intelligence_score ? perf.intelligence_score.toFixed(1) : '0.0' }}</div>
+      </div>
+    </div>
+    <div class="fs">
+      <div class="fs-label">Lesson</div>
+      <div class="fs-value" style="color:var(--text-secondary);font-size:11px;max-width:400px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+        {{ perf?.last_lesson || 'Awaiting first outcome...' }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat -->
+  <div class="chat-fab" @click="chatOpen = !chatOpen">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+    </svg>
+  </div>
+  <div class="chat-panel" v-if="chatOpen">
+    <div class="chat-head">💬 CHAT WITH ATOMICX</div>
+    <div class="chat-body" ref="chatBody">
+      <div v-for="(m, i) in chatMsgs" :key="i" class="chat-msg" :class="m.role" :data-loading="m.loading || false" :data-error="m.error || false" style="white-space: pre-wrap;">{{ m.content }}</div>
+    </div>
+    <div class="chat-foot">
+      <input class="chat-input" v-model="chatText" @keyup.enter="sendChat" placeholder="Ask me anything..." :disabled="chatLoading">
+      <button class="chat-send" @click="sendChat" :disabled="chatLoading">{{ chatLoading ? '⏳' : '↵' }}</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const {createApp, ref, reactive, computed, watch, onMounted, onBeforeUnmount, nextTick} = Vue;
+
+createApp({
+  setup() {
+    // Core state
+    const wsRef = ref(false);
+    const sym = ref('BTC/USDT');
+    const data = ref({});
+    const allData = ref({});
+    const perf = ref({win_rate: 0, total_predictions: 0, intelligence_score: 0, last_lesson: 'Awaiting first outcome...'});
+    const activeTF = ref('1d');
+    const timeframes = ref(['1h', '1d', '1w', 'Custom']);
+    const customRange = reactive({start: '', end: ''});
+    const showReasoning = ref(false);
+    const showVariables = ref(true);
+    const showDB = ref(false);
+    const openAgents = reactive({});
+    const chatOpen = ref(false);
+    const chatText = ref('');
+    const chatMsgs = ref([{role: 'assistant', content: 'Hey! 👋 I\'m AtomicX, your AI trading assistant. Ask me about prices, predictions, market analysis, or anything crypto-related!'}]);
+    const chatBody = ref(null);
+    const cycleCount = ref(0);
+    const toasts = ref([]);
+    const varHistory = ref({});
+    let socket = null;
+    let toastId = 0;
+
+    // Derived
+    const d = computed(() => allData.value[sym.value] || {});
+    const hasData = computed(() => {
+      const price = d.value?.current_price;
+      return price && price !== '$0.0000' && price !== '$0.00';
+    });
+    const price = computed(() => d.value?.current_price || '—');
+    const sig = computed(() => d.value?.signal || 'WATCH');
+    const conf = computed(() => d.value?.confidence || 0);
+    const regime = computed(() => d.value?.regime || 'INITIALIZING');
+
+    // Variables from backend
+    const variables = computed(() => {
+      const vars = d.value?.all_variables || {};
+      return vars;
+    });
+
+    // Database stats
+    const dbStats = computed(() => d.value?.db_stats || {});
+
+    // RSI computed from agents or variables
+    const rsi = computed(() => {
+      const agents = d.value?.agents || [];
+      const rsiAgent = agents.find(a => a.name === 'RSI_14');
+      if (rsiAgent) return rsiAgent.sig;
+
+      const vars = variables.value;
+      if (vars.RSI_14) return vars.RSI_14.toFixed(1);
+      return '—';
+    });
+
+    const rsiClass = computed(() => {
+      const v = parseFloat(rsi.value);
+      if (isNaN(v)) return '';
+      return v < 30 ? 'green' : v > 70 ? 'red' : 'amber';
+    });
+
+    const weights = computed(() => d.value?.weights || {math: 0, swarm: 0, causal: 0});
+
+    const pred = computed(() => {
+      const p = d.value?.preds;
+      if (!p) return null;
+      return p[activeTF.value] || null;
+    });
+
+    // Error-safe agent lists with null checks
+    const allAgents = computed(() => d.value?.agents || []);
+    const debateAgents = computed(() => allAgents.value.filter(a => a?.name?.includes('Debate:')));
+    const rollupAgents = computed(() => allAgents.value.filter(a => a?.name && (a.name.includes('Group Leader') || a.name.includes('Super Group'))));
+    const atomicAgents = computed(() => allAgents.value.filter(a => a?.name && !a.name.includes('Debate:') && !a.name.includes('Group Leader') && !a.name.includes('Super Group')));
+
+    // Debug info for reasoning
+    const debugAgents = computed(() => {
+      const debate = d.value?.debate_args || [];
+      return debate;
+    });
+
+    const triggeringVars = computed(() => {
+      const vars = d.value?.triggering_vars;
+      if (!vars || vars.length === 0) return 'No specific triggers identified';
+      return vars.join(', ');
+    });
+
+    const dataSources = computed(() => {
+      const sources = [];
+      if (d.value?.data_sources) {
+        sources.push(...d.value.data_sources);
+      } else {
+        sources.push('Binance WebSocket (OHLCV)', 'TimescaleDB (Historical)', 'Variable Engine (Indicators)');
+      }
+      return sources.join(' • ');
+    });
+
+    // Chart building
+    const chartColor = computed(() => {
+      if (sig.value === 'LONG') return '#00e5a0';
+      if (sig.value === 'SHORT') return '#ff4466';
+      return '#888';
+    });
+
+    const chartPoints = computed(() => {
+      const pts = d.value?.chart_points;
+      if (!pts) return null;
+      return pts;
+    });
+
+    const chartPolygon = computed(() => {
+      if (!chartPoints.value) return '';
+      return `${chartPoints.value} 300,180 0,180`;
+    });
+
+    const buildSVG = (pts, color, h, fill) => {
+      if (!pts) return '';
+      return `<svg width="100%" height="100%" viewBox="0 0 300 ${h}" preserveAspectRatio="none">
+        <defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${color}" stop-opacity="0.2"/><stop offset="100%" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>
+        ${fill ? `<polygon points="${pts} 300,${h} 0,${h}" fill="url(#cg)"/>` : ''}
+        <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.5"/>
+      </svg>`;
+    };
+
+    const chartSVG = computed(() => buildSVG(d.value?.chart_points, chartColor.value, 100, true));
+
+    // Layers
+    const layers = computed(() => {
+      const v = d.value;
+      const agents = allAgents.value || [];
+      const debate = debateAgents.value || [];
+      return [
+        {id: 'l1', name: 'L1 Data Ingestion', status: 'active', value: v?.cycle_time_ms ? `~${v.cycle_time_ms}ms` : '—', detail: `CCXT REST + WebSocket\nCycle Time: ${v?.cycle_time_ms || '~1200'}ms\nSource: Binance`, open: false},
+        {id: 'l2', name: 'L2-L3 Variable Engine', status: 'active', value: `${Object.keys(variables.value).length || 0} vars`, detail: `EMA, RSI, MACD, BB, ATR, VWAP, OBV...\nSupport: ${v?.support || '—'}\nResistance: ${v?.resist || '—'}`, open: false},
+        {id: 'l4', name: 'L4-L6 Agent Hierarchy', status: atomicAgents.value.length > 0 ? 'active' : 'offline', value: `${agents.length} agents`, detail: `46 Atomic → 10 Group Leaders → 3 Super Groups\nLevel 5: Commander nodes\nLevel 6: Final Arbiter`, open: false},
+        {id: 'l7', name: 'L7 Microstructure', status: v?.ob_imbalance && v.ob_imbalance !== '0.000' ? 'active' : 'partial', value: v?.ob_imbalance || '—', detail: `Order Book Imbalance: ${v?.ob_imbalance || 'No WS data'}\nSpread: ${v?.spread || '—'}`, open: false},
+        {id: 'l8', name: 'L8 Narrative', status: v?.narrative_sentiment && v.narrative_sentiment !== 'NEUTRAL' ? 'active' : 'partial', value: v?.narrative_sentiment || 'OFF', detail: `Sentiment: ${v?.narrative_sentiment || 'No feeds connected'}\nConfidence: ${v?.narrative_conf || '0.0%'}\nRequires: Reddit/Twitter API keys`, open: false},
+        {id: 'l9', name: 'L9 Swarm Sim', status: v?.swarm_dir && v.swarm_dir !== 'WATCH' ? 'active' : 'partial', value: v?.swarm_dir || '—', detail: `Direction: ${v?.swarm_dir || 'WATCH'}\nStrength: ${v?.swarm_strength || '0.0%'}\n500-10K agent ABM simulation`, open: false},
+        {id: 'l10', name: 'L10 LLM Debate', status: debate.length > 0 ? 'active' : 'offline', value: `${debate.length} voices`, detail: `CausalPurist + NarrativeHeretic + RiskParanoid\nPowered by Claude 3.5 Sonnet`, open: false},
+        {id: 'l11', name: 'L11 Dual Confirm', status: v?.math_passed || v?.causal_passed ? 'active' : 'offline', value: v?.math_passed && v?.causal_passed ? 'PASS' : 'HOLD', detail: `Pattern: ${v?.math_passed ? 'PASSED' : 'FAILED'}\nCausal: ${v?.causal_passed ? 'PASSED' : 'FAILED'}\nBoth must agree for execution`, open: false},
+      ];
+    });
+
+    // Helpers
+    const cleanName = n => n?.replace('Debate: ', '').replace('Group Leader: ', 'GL: ').replace('Super Group: ', 'SG: ') || '';
+
+    const agentClass = a => {
+      if (!a || !a.sig) return 'neutral';
+      const s = a.sig.toLowerCase();
+      if (s.includes('bull') || s === 'buy' || s === 'long') return 'bullish';
+      if (s.includes('bear') || s === 'sell' || s === 'short') return 'bearish';
+      return 'neutral';
+    };
+
+    const sigClass = s => {
+      if (!s) return 'ac-sig-neut';
+      const sl = s.toLowerCase();
+      if (sl.includes('bull') || sl === 'buy' || sl === 'long') return 'ac-sig-bull';
+      if (sl.includes('bear') || sl === 'sell' || sl === 'short') return 'ac-sig-bear';
+      return 'ac-sig-neut';
+    };
+
+    const toggleAgent = name => {
+      if (!name) return;
+      openAgents[name] = !openAgents[name];
+    };
+
+    const formatVarValue = val => {
+      if (typeof val === 'number') {
+        if (Math.abs(val) > 1000) return val.toFixed(0);
+        if (Math.abs(val) > 1) return val.toFixed(2);
+        return val.toFixed(4);
+      }
+      return String(val);
+    };
+
+    const getVarConfidence = key => {
+      // All live variables have 100% confidence for now
+      return 100;
+    };
+
+    const getSparkHeight = (history, value) => {
+      if (!history || history.length === 0) return '2px';
+      const min = Math.min(...history);
+      const max = Math.max(...history);
+      const range = max - min;
+      if (range === 0) return '8px';
+      const pct = ((value - min) / range) * 100;
+      return `${Math.max(2, pct)}%`;
+    };
+
+    const selectTimeframe = tf => {
+      activeTF.value = tf;
+    };
+
+    const applyCustomRange = () => {
+      if (!customRange.start || !customRange.end) {
+        showToast('Please enter both start and end dates', 'error');
+        return;
+      }
+
+      // Send custom range to backend via WebSocket
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({
+          type: 'custom_prediction',
+          symbol: sym.value,
+          start_date: customRange.start,
+          end_date: customRange.end
+        }));
+        showToast(`Custom range applied: ${customRange.start} to ${customRange.end}`, 'success');
+      } else {
+        showToast('Connection offline. Please try again.', 'error');
+      }
+    };
+
+    // Toast system
+    const showToast = (message, type = 'success') => {
+      const id = toastId++;
+      toasts.value.push({id, message, type});
+      setTimeout(() => {
+        toasts.value = toasts.value.filter(t => t.id !== id);
+      }, 3000);
+    };
+
+    // WebSocket
+    const connect = () => {
+      try {
+        socket = new WebSocket(`ws://${location.host}/ws`);
+        socket.onopen = () => {
+          wsRef.value = true;
+          console.log('[WS] Connected');
+        };
+        socket.onclose = () => {
+          wsRef.value = false;
+          console.log('[WS] Disconnected, reconnecting in 2s');
+          setTimeout(connect, 2000);
+        };
+        socket.onmessage = e => {
+          try {
+            const msg = JSON.parse(e.data);
+            if (msg.monitored_symbols?.length) {
+              sym.value = msg.monitored_symbols[0];
+            }
+            if (msg.all_symbols_data) {
+              for (const [k, v] of Object.entries(msg.all_symbols_data)) {
+                allData.value[k] = {...(allData.value[k] || {}), ...v};
+
+                // Update variable history for sparklines
+                if (v.all_variables) {
+                  for (const [varKey, varVal] of Object.entries(v.all_variables)) {
+                    if (typeof varVal === 'number') {
+                      if (!varHistory.value[varKey]) {
+                        varHistory.value[varKey] = [];
+                      }
+                      varHistory.value[varKey].push(varVal);
+                      if (varHistory.value[varKey].length > 20) {
+                        varHistory.value[varKey].shift();
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            if (msg.performance) perf.value = msg.performance;
+            if (msg.chat) {
+              // Handle chat response
+              if (chatLoading.value) {
+                // Replace loading message with actual response
+                const loadingIndex = chatMsgs.value.findIndex(m => m.loading);
+                if (loadingIndex !== -1) {
+                  // Get the last message from server (should be the assistant's response)
+                  const serverMsgs = msg.chat;
+                  const lastServerMsg = serverMsgs[serverMsgs.length - 1];
+                  if (lastServerMsg && lastServerMsg.role === 'assistant') {
+                    chatMsgs.value[loadingIndex] = {
+                      role: 'assistant',
+                      content: lastServerMsg.content,
+                      loading: false
+                    };
+                  }
+                }
+                chatLoading.value = false;
+
+                // Scroll to bottom
+                nextTick(() => {
+                  if (chatBody.value) chatBody.value.scrollTop = chatBody.value.scrollHeight;
+                });
+              } else {
+                // Initial load or full sync
+                chatMsgs.value = msg.chat;
+              }
+            }
+            cycleCount.value++;
+          } catch (err) {
+            console.error('[WS] Parse error:', err);
+          }
+        };
+        socket.onerror = err => {
+          console.error('[WS] Error:', err);
+        };
+      } catch (err) {
+        console.error('[WS] Connection error:', err);
+        setTimeout(connect, 2000);
+      }
+    };
+
+    const chatLoading = ref(false);
+    const chatError = ref(null);
+
+    const sendChat = async () => {
+      if (!chatText.value.trim() || !socket || chatLoading.value) return;
+
+      const userMessage = chatText.value;
+      chatText.value = '';
+
+      // Add user message immediately
+      chatMsgs.value.push({role: 'user', content: userMessage});
+
+      // Add loading indicator
+      const loadingIndex = chatMsgs.value.length;
+      chatMsgs.value.push({role: 'assistant', content: '⏳ Thinking...', loading: true});
+      chatLoading.value = true;
+      chatError.value = null;
+
+      // Scroll to bottom
+      nextTick(() => {
+        if (chatBody.value) chatBody.value.scrollTop = chatBody.value.scrollHeight;
+      });
+
+      try {
+        // Send to backend
+        socket.send(JSON.stringify({type: 'chat', content: userMessage}));
+
+        // Timeout after 30 seconds
+        const timeout = setTimeout(() => {
+          if (chatLoading.value) {
+            chatMsgs.value[loadingIndex] = {
+              role: 'assistant',
+              content: '⚠️ Response timeout. The AI is taking longer than expected. Please try again.',
+              error: true
+            };
+            chatLoading.value = false;
+            chatError.value = 'timeout';
+          }
+        }, 30000);
+
+        // Response will come via WebSocket message handler
+        // The handler will update chatMsgs and set chatLoading = false
+
+      } catch (err) {
+        console.error('[CHAT] Send error:', err);
+        chatMsgs.value[loadingIndex] = {
+          role: 'assistant',
+          content: '❌ Failed to send message. Please check your connection and try again.',
+          error: true
+        };
+        chatLoading.value = false;
+        chatError.value = err.message;
+      }
+    };
+
+    const addAsset = async () => {
+      const s = prompt('Enter trading pair (e.g., ETH/USDT):');
+      if (!s) return;
+
+      const normalized = s.toUpperCase().trim();
+
+      // Basic validation
+      if (!normalized.includes('/')) {
+        showToast('Invalid format. Use: SYMBOL/USDT', 'error');
+        return;
+      }
+
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({type: 'add_symbol', symbol: normalized}));
+        showToast(`Adding ${normalized} to monitoring...`, 'success');
+      } else {
+        showToast('Connection offline. Please try again.', 'error');
+      }
+    };
+
+    // Lifecycle
+    onMounted(() => {
+      connect();
+    });
+
+    onBeforeUnmount(() => {
+      if (socket) {
+        socket.close();
+        socket = null;
+      }
+    });
+
+    return {
+      ws: wsRef, sym, d, allData, hasData, price, sig, conf, regime, rsi, rsiClass, weights, pred, perf,
+      activeTF, timeframes, customRange, selectTimeframe, applyCustomRange,
+      showReasoning, showVariables, showDB, openAgents, layers,
+      allAgents, debateAgents, rollupAgents, atomicAgents,
+      chartSVG, chartColor, chartPoints, chartPolygon, cycleCount,
+      chatOpen, chatText, chatMsgs, chatBody, chatLoading, chatError,
+      variables, varHistory, dbStats, debugAgents, triggeringVars, dataSources,
+      toasts,
+      cleanName, agentClass, sigClass, toggleAgent, sendChat, addAsset,
+      formatVarValue, getVarConfidence, getSparkHeight
+    };
+  }
+}).mount('#app');
+</script>
+</body>
+</html>

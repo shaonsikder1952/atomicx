@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AtomicX Portfolio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles/core.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Page-specific styles */
+        .header {
+            background: var(--bg-elevated);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: var(--space-4) var(--space-8);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            font-size: var(--text-lg);
+            font-weight: var(--font-semibold);
+            color: var(--text-primary);
+        }
+
+        .summary-section {
+            margin-bottom: var(--space-8);
+        }
+
+        .summary-title {
+            font-size: var(--text-2xl);
+            font-weight: var(--font-semibold);
+            color: var(--text-primary);
+            margin-bottom: var(--space-5);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-4);
+            margin-bottom: var(--space-8);
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: var(--space-5);
+            transition: all 150ms ease;
+        }
+
+        .stat-card:hover {
+            border-color: var(--border-medium);
+            box-shadow: var(--shadow);
+        }
+
+        .stat-label {
+            font-size: var(--text-xs);
+            font-weight: var(--font-semibold);
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: var(--space-2);
+        }
+
+        .stat-value {
+            font-size: var(--text-3xl);
+            font-weight: var(--font-semibold);
+            font-family: var(--font-mono);
+            color: var(--text-primary);
+            margin-bottom: var(--space-1);
+        }
+
+        .stat-value.positive { color: var(--success); }
+        .stat-value.negative { color: var(--error); }
+
+        .stat-change {
+            font-size: var(--text-sm);
+            color: var(--text-muted);
+        }
+
+        .assets-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-5);
+        }
+
+        .section-title {
+            font-size: var(--text-xl);
+            font-weight: var(--font-semibold);
+            color: var(--text-primary);
+        }
+
+        .btn-add {
+            padding: var(--space-2) var(--space-4);
+            background: var(--accent);
+            border: none;
+            border-radius: var(--radius);
+            color: white;
+            font-size: var(--text-sm);
+            font-weight: var(--font-medium);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            transition: all 150ms ease;
+        }
+
+        .btn-add:hover {
+            background: var(--accent-hover);
+        }
+
+        .assets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: var(--space-4);
+        }
+
+        .asset-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: var(--space-5);
+            transition: all 150ms ease;
+        }
+
+        .asset-card:hover {
+            border-color: var(--border-medium);
+            box-shadow: var(--shadow);
+        }
+
+        .asset-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: var(--space-4);
+        }
+
+        .asset-info {
+            flex: 1;
+        }
+
+        .asset-symbol {
+            font-size: var(--text-lg);
+            font-weight: var(--font-semibold);
+            font-family: var(--font-mono);
+            color: var(--text-primary);
+            margin-bottom: var(--space-1);
+        }
+
+        .asset-type {
+            font-size: var(--text-xs);
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .asset-actions {
+            display: flex;
+            gap: var(--space-2);
+        }
+
+        .btn-action {
+            padding: var(--space-2) var(--space-3);
+            border-radius: var(--radius);
+            font-size: var(--text-sm);
+            font-weight: var(--font-medium);
+            cursor: pointer;
+            border: 1px solid var(--border-subtle);
+            text-decoration: none;
+            display: inline-block;
+            transition: all 150ms ease;
+        }
+
+        .btn-view {
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+        }
+
+        .btn-view:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .asset-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-3);
+            margin-bottom: var(--space-4);
+        }
+
+        .asset-stat {
+            background: rgba(255, 255, 255, 0.03);
+            padding: var(--space-3);
+            border-radius: var(--radius);
+        }
+
+        .asset-stat-label {
+            font-size: var(--text-xs);
+            color: var(--text-muted);
+            margin-bottom: var(--space-1);
+        }
+
+        .asset-stat-value {
+            font-size: var(--text-base);
+            font-weight: var(--font-semibold);
+            font-family: var(--font-mono);
+            color: var(--text-primary);
+        }
+
+        .asset-stat-value.positive { color: var(--success); }
+        .asset-stat-value.negative { color: var(--error); }
+
+        .asset-signal {
+            padding: var(--space-3);
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: var(--radius);
+            font-size: var(--text-sm);
+            color: var(--text-secondary);
+        }
+
+        .signal-badge {
+            display: inline-block;
+            padding: var(--space-1) var(--space-2);
+            border-radius: var(--radius-full);
+            font-size: var(--text-xs);
+            font-weight: var(--font-semibold);
+            text-transform: uppercase;
+            margin-left: var(--space-2);
+        }
+
+        .signal-badge.long {
+            background: var(--success-dim);
+            color: var(--success);
+        }
+
+        .signal-badge.short {
+            background: var(--error-dim);
+            color: var(--error);
+        }
+
+        .signal-badge.neutral {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: var(--space-16) var(--space-5);
+            color: var(--text-muted);
+        }
+
+        .empty-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto var(--space-4);
+            color: var(--text-muted);
+            opacity: 0.5;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            align-items: center;
+            justify-content: center;
+            z-index: var(--z-modal);
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            max-width: 500px;
+            width: 90%;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .modal-title {
+            font-size: var(--text-xl);
+            font-weight: var(--font-semibold);
+            color: var(--text-primary);
+            margin-bottom: var(--space-5);
+        }
+
+        .form-group {
+            margin-bottom: var(--space-4);
+        }
+
+        .form-label {
+            display: block;
+            font-size: var(--text-xs);
+            font-weight: var(--font-semibold);
+            color: var(--text-secondary);
+            margin-bottom: var(--space-2);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: var(--space-3);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius);
+            color: var(--text-primary);
+            font-size: var(--text-sm);
+            font-family: var(--font-sans);
+            transition: all 150ms ease;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: var(--space-3);
+            margin-top: var(--space-5);
+        }
+
+        .btn-secondary {
+            flex: 1;
+            padding: var(--space-3);
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius);
+            color: var(--text-primary);
+            font-size: var(--text-sm);
+            font-weight: var(--font-medium);
+            cursor: pointer;
+            transition: all 150ms ease;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--border-medium);
+        }
+
+        .btn-primary {
+            flex: 1;
+            padding: var(--space-3);
+            background: var(--accent);
+            border: none;
+            border-radius: var(--radius);
+            color: white;
+            font-size: var(--text-sm);
+            font-weight: var(--font-medium);
+            cursor: pointer;
+            transition: all 150ms ease;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i data-lucide="zap" style="width: 20px; height: 20px; color: #5B6AF0;"></i>
+                AtomicX
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="summary-section">
+            <h1 class="summary-title">Portfolio</h1>
+            <div class="stats-grid" id="statsGrid">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+
+        <div class="assets-section-header">
+            <h2 class="section-title">Your Assets</h2>
+            <button class="btn-add" onclick="showAddAssetModal()">
+                <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
+                Add Asset
+            </button>
+        </div>
+
+        <div class="assets-grid" id="assetsGrid">
+            <!-- Populated by JS -->
+        </div>
+    </div>
+
+    <!-- Add Asset Modal -->
+    <div class="modal" id="addAssetModal">
+        <div class="modal-content">
+            <div class="modal-title">Add New Asset</div>
+            <form id="addAssetForm">
+                <div class="form-group">
+                    <label class="form-label">Symbol</label>
+                    <input type="text" class="form-input" id="assetSymbol" placeholder="e.g., BTC/USDT, ETH/USDT, AAPL" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Asset Type</label>
+                    <select class="form-select" id="assetType">
+                        <option value="crypto">Cryptocurrency</option>
+                        <option value="stock">Stock</option>
+                        <option value="commodity">Commodity</option>
+                        <option value="forex">Forex</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeAddAssetModal()">Cancel</button>
+                    <button type="submit" class="btn-primary">Add Asset</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        async function loadPortfolio() {
+            try {
+                // Load global stats
+                const statsRes = await fetch('/api/portfolio/stats');
+                const stats = await statsRes.json();
+                renderStats(stats);
+
+                // Load assets
+                const assetsRes = await fetch('/api/portfolio/assets');
+                const assetsData = await assetsRes.json();
+                renderAssets(assetsData.assets);
+            } catch (error) {
+                console.error('Failed to load portfolio:', error);
+            }
+        }
+
+        function renderStats(stats) {
+            const pnlSign = stats.total_pnl >= 0 ? '+' : '';
+            const pnlClass = stats.total_pnl >= 0 ? 'positive' : 'negative';
+            const pnlPercent = stats.total_pnl_percentage || 0;
+
+            document.getElementById('statsGrid').innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-label">Total Balance</div>
+                    <div class="stat-value">$${(stats.total_invested + stats.total_pnl).toFixed(2)}</div>
+                    <div class="stat-change">${stats.total_invested.toFixed(2)} invested</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total P&L</div>
+                    <div class="stat-value ${pnlClass}">${pnlSign}$${Math.abs(stats.total_pnl).toFixed(2)}</div>
+                    <div class="stat-change">${pnlSign}${pnlPercent.toFixed(2)}%</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Win Rate</div>
+                    <div class="stat-value">${stats.win_rate.toFixed(1)}%</div>
+                    <div class="stat-change">${stats.winning_positions}W / ${stats.losing_positions}L</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Open Positions</div>
+                    <div class="stat-value">${stats.open_positions}</div>
+                    <div class="stat-change">${stats.closed_positions} closed</div>
+                </div>
+            `;
+        }
+
+        function renderAssets(assets) {
+            const grid = document.getElementById('assetsGrid');
+
+            if (!assets || assets.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <i data-lucide="inbox" class="empty-icon"></i>
+                        <h3 style="font-size: 15px; color: #5E5E5E; margin-bottom: 8px; font-weight: 500;">No Assets Yet</h3>
+                        <p style="color: #8B8B8B; font-size: 13px;">Add your first asset to start tracking and trading</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            grid.innerHTML = assets.map(asset => {
+                const pnlSign = asset.stats.total_pnl >= 0 ? '+' : '';
+                const pnlClass = asset.stats.total_pnl >= 0 ? 'positive' : 'negative';
+
+                // Placeholder signal (will be fetched from cache)
+                const signalText = 'No signal';
+                const signalClass = 'neutral';
+
+                return `
+                    <div class="asset-card">
+                        <div class="asset-header">
+                            <div class="asset-info">
+                                <div class="asset-symbol">${asset.symbol}</div>
+                                <div class="asset-type">${asset.asset_type}</div>
+                            </div>
+                            <div class="asset-actions">
+                                <a href="/force-reload.html?symbol=${encodeURIComponent(asset.symbol)}" class="btn-action btn-view">View</a>
+                            </div>
+                        </div>
+
+                        <div class="asset-stats">
+                            <div class="asset-stat">
+                                <div class="asset-stat-label">Balance</div>
+                                <div class="asset-stat-value">$${asset.stats.total_invested.toFixed(2)}</div>
+                            </div>
+                            <div class="asset-stat">
+                                <div class="asset-stat-label">P&L</div>
+                                <div class="asset-stat-value ${pnlClass}">${pnlSign}$${Math.abs(asset.stats.total_pnl).toFixed(2)}</div>
+                            </div>
+                            <div class="asset-stat">
+                                <div class="asset-stat-label">Open</div>
+                                <div class="asset-stat-value">${asset.stats.open_positions}</div>
+                            </div>
+                            <div class="asset-stat">
+                                <div class="asset-stat-label">Win Rate</div>
+                                <div class="asset-stat-value">${asset.stats.win_rate.toFixed(1)}%</div>
+                            </div>
+                        </div>
+
+                        <div class="asset-signal">
+                            Last Signal: <span class="signal-badge ${signalClass}">${signalText}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        function showAddAssetModal() {
+            document.getElementById('addAssetModal').classList.add('active');
+        }
+
+        function closeAddAssetModal() {
+            document.getElementById('addAssetModal').classList.remove('active');
+            document.getElementById('addAssetForm').reset();
+        }
+
+        // Format symbol based on asset type
+        function formatSymbol(symbol, assetType) {
+            symbol = symbol.trim().toUpperCase();
+
+            // For crypto, ensure it has a trading pair (add /USDT if missing)
+            if (assetType === 'crypto' && !symbol.includes('/')) {
+                symbol = symbol + '/USDT';
+            }
+
+            return symbol;
+        }
+
+        document.getElementById('addAssetForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            let symbol = document.getElementById('assetSymbol').value;
+            const assetType = document.getElementById('assetType').value;
+
+            // Format symbol based on asset type
+            symbol = formatSymbol(symbol, assetType);
+
+            try {
+                const response = await fetch('/api/portfolio/assets/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ symbol, asset_type: assetType })
+                });
+
+                if (response.ok) {
+                    closeAddAssetModal();
+                    loadPortfolio();
+                } else {
+                    const result = await response.json();
+                    alert('Failed to add asset: ' + (result.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Failed to add asset:', error);
+                alert('Failed to add asset');
+            }
+        });
+
+        // Initial load
+        loadPortfolio();
+
+        // Refresh every 30 seconds
+        setInterval(loadPortfolio, 30000);
+    </script>
+</body>
+</html>

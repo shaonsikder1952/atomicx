@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Database - AtomicX</title>
+    <link rel="stylesheet" href="/static/styles/core.css">
+    <style>
+        /* Page-specific styles */
+        header {
+            background: linear-gradient(135deg, var(--accent-hover) 0%, var(--accent) 100%);
+            padding: var(--space-8);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--space-8);
+        }
+        h1 { font-size: var(--text-4xl); margin-bottom: var(--space-3); }
+        .subtitle { opacity: 0.9; font-size: var(--text-lg); }
+
+        .nav {
+            display: flex;
+            gap: var(--space-3);
+            margin-bottom: var(--space-8);
+            flex-wrap: wrap;
+        }
+
+        .section {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: var(--space-6);
+            margin-bottom: var(--space-6);
+            border: 1px solid var(--border-subtle);
+        }
+        h2 {
+            color: var(--accent);
+            margin-bottom: var(--space-5);
+            padding-bottom: var(--space-4);
+            border-bottom: 2px solid var(--border-subtle);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-4);
+            margin-bottom: var(--space-5);
+        }
+        .stat-num { font-size: var(--text-4xl); font-weight: var(--font-bold); color: var(--accent); }
+        .stat-label { color: var(--text-secondary); margin-top: var(--space-2); }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: var(--space-4);
+        }
+        th {
+            background: var(--bg-primary);
+            padding: var(--space-4);
+            text-align: left;
+            font-weight: var(--font-semibold);
+            color: var(--accent);
+            border-bottom: 2px solid var(--border-subtle);
+        }
+        td {
+            padding: var(--space-4);
+            border-bottom: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+        }
+        tr:hover { background: var(--bg-primary); }
+
+        .badge-high { background: var(--success-dim); color: var(--success); border: 1px solid rgba(34, 197, 94, 0.3); }
+        .badge-med { background: var(--warning-dim); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); }
+        .badge-low { background: var(--error-dim); color: var(--error); border: 1px solid rgba(239, 68, 68, 0.3); }
+
+        .loading {
+            text-align: center;
+            padding: var(--space-12);
+            color: var(--text-muted);
+            font-size: var(--text-lg);
+        }
+        .loading:before {
+            content: "⏳ ";
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: var(--error-dim);
+            color: var(--error);
+            padding: var(--space-5);
+            border-radius: var(--radius);
+            margin: var(--space-5) 0;
+        }
+        .empty {
+            text-align: center;
+            padding: var(--space-10);
+            color: var(--text-muted);
+        }
+
+        .timestamp { color: var(--text-muted); font-size: var(--text-sm); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Database Viewer</h1>
+            <p class="subtitle">Real-time PostgreSQL data - Auto-refreshes every 10s</p>
+        </header>
+
+        <div class="nav">
+            <a href="/" class="btn">← Main Dashboard</a>
+            <a href="/db.html" class="btn btn-primary">📊 Database</a>
+            <a href="/mem.html" class="btn">🧠 Memory</a>
+            <button onclick="loadAllData()" class="btn">🔄 Refresh Now</button>
+        </div>
+
+        <div class="section">
+            <h2>📊 Table Statistics</h2>
+            <div id="stats" class="stats">
+                <div class="loading">Loading stats...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📰 Recent News Events</h2>
+            <div id="news">
+                <div class="loading">Loading news events...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🧠 Learned Patterns</h2>
+            <div id="patterns">
+                <div class="loading">Loading patterns...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔮 Pending Predictions</h2>
+            <div id="predictions">
+                <div class="loading">Loading predictions...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>✅ Recent Outcomes</h2>
+            <div id="outcomes">
+                <div class="loading">Loading outcomes...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function loadAllData() {
+            try {
+                const res = await fetch('/api/database');
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                
+                // Stats
+                const stats = data.table_counts || {};
+                document.getElementById('stats').innerHTML = Object.entries(stats)
+                    .map(([table, count]) => `
+                        <div class="stat-card">
+                            <div class="stat-num">${count.toLocaleString()}</div>
+                            <div class="stat-label">${table.replace(/_/g, ' ')}</div>
+                        </div>
+                    `).join('');
+                
+                // News
+                const news = data.news_events || [];
+                document.getElementById('news').innerHTML = news.length ? `
+                    <table>
+                        <tr>
+                            <th>Title</th>
+                            <th>Source</th>
+                            <th>Significance</th>
+                            <th>Time</th>
+                        </tr>
+                        ${news.map(e => `
+                            <tr>
+                                <td>${e.title.substring(0, 80)}...</td>
+                                <td>${e.source}</td>
+                                <td><span class="badge ${e.significance_score > 0.7 ? 'badge-high' : e.significance_score > 0.5 ? 'badge-med' : 'badge-low'}">${Math.round(e.significance_score * 100)}%</span></td>
+                                <td class="timestamp">${new Date(e.discovered_at).toLocaleString()}</td>
+                            </tr>
+                        `).join('')}
+                    </table>
+                ` : '<div class="empty">No news events yet. System will store events on next intelligence scan.</div>';
+                
+                // Patterns
+                const patterns = data.news_patterns || [];
+                document.getElementById('patterns').innerHTML = patterns.length ? `
+                    <table>
+                        <tr>
+                            <th>Pattern Type</th>
+                            <th>Count</th>
+                            <th>Win Rate</th>
+                            <th>Confidence</th>
+                            <th>Avg Impact</th>
+                        </tr>
+                        ${patterns.map(p => `
+                            <tr>
+                                <td>${p.pattern_type.replace(/_/g, ' ')}</td>
+                                <td>${p.occurrences}</td>
+                                <td>${Math.round(p.win_rate * 100)}%</td>
+                                <td><span class="badge ${p.confidence > 0.7 ? 'badge-high' : p.confidence > 0.5 ? 'badge-med' : 'badge-low'}">${Math.round(p.confidence * 100)}%</span></td>
+                                <td>${p.avg_price_impact ? (p.avg_price_impact > 0 ? '+' : '') + p.avg_price_impact.toFixed(2) + '%' : 'N/A'}</td>
+                            </tr>
+                        `).join('')}
+                    </table>
+                ` : '<div class="empty">No patterns learned yet. Need 3+ occurrences per pattern type.</div>';
+                
+                // Predictions
+                const preds = data.predictions || [];
+                document.getElementById('predictions').innerHTML = preds.length ? `
+                    <table>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Direction</th>
+                            <th>Confidence</th>
+                            <th>Entry Price</th>
+                            <th>Created</th>
+                        </tr>
+                        ${preds.map(p => `
+                            <tr>
+                                <td>${p.symbol}</td>
+                                <td>${p.direction}</td>
+                                <td><span class="badge ${p.confidence > 0.7 ? 'badge-high' : 'badge-med'}">${Math.round(p.confidence * 100)}%</span></td>
+                                <td>$${parseFloat(p.entry_price).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                <td class="timestamp">${new Date(p.created_at).toLocaleString()}</td>
+                            </tr>
+                        `).join('')}
+                    </table>
+                ` : '<div class="empty">No pending predictions.</div>';
+                
+                // Outcomes
+                const outcomes = data.outcomes || [];
+                document.getElementById('outcomes').innerHTML = outcomes.length ? `
+                    <table>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Direction</th>
+                            <th>Result</th>
+                            <th>Confidence</th>
+                            <th>Return</th>
+                            <th>Time</th>
+                        </tr>
+                        ${outcomes.map(o => `
+                            <tr>
+                                <td>${o.symbol}</td>
+                                <td>${o.predicted_direction}</td>
+                                <td>${o.was_correct ? '✅ Correct' : '❌ Wrong'}</td>
+                                <td>${Math.round(o.predicted_confidence * 100)}%</td>
+                                <td>${o.outcome_return ? (o.outcome_return > 0 ? '+' : '') + (o.outcome_return * 100).toFixed(2) + '%' : 'N/A'}</td>
+                                <td class="timestamp">${new Date(o.predicted_at).toLocaleString()}</td>
+                            </tr>
+                        `).join('')}
+                    </table>
+                ` : '<div class="empty">No prediction outcomes yet.</div>';
+                
+            } catch (err) {
+                console.error('Error:', err);
+                document.getElementById('stats').innerHTML = `<div class="error">⚠️ Error loading data: ${err.message}<br><small>The system might still be initializing. Wait 10s and refresh.</small></div>`;
+            }
+        }
+        
+        // Load immediately
+        loadAllData();
+        
+        // Auto-refresh every 10 seconds
+        setInterval(loadAllData, 10000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atomic Diary | AtomicX</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #F8F7F4;
+            color: #1F1F1F;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: #FFFFFF;
+            border-bottom: 1px solid #E8E6E1;
+            padding: 16px 32px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #1F1F1F;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #5B6AF0 0%, #8B5CF6 100%);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .nav {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav-link {
+            padding: 6px 12px;
+            color: #5E5E5E;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 6px;
+            transition: all 150ms ease;
+        }
+
+        .nav-link:hover {
+            background: #F3F3F1;
+            color: #1F1F1F;
+        }
+
+        .nav-link.active {
+            background: #F3F3F1;
+            color: #1F1F1F;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px;
+        }
+
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1F1F1F;
+            margin-bottom: 8px;
+        }
+
+        .page-subtitle {
+            font-size: 15px;
+            color: #5E5E5E;
+            line-height: 1.5;
+        }
+
+        .filters {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            background: #FFFFFF;
+            border: 1px solid #E8E6E1;
+            border-radius: 6px;
+            color: #5E5E5E;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 150ms ease;
+        }
+
+        .filter-btn:hover {
+            border-color: #5B6AF0;
+            color: #5B6AF0;
+        }
+
+        .filter-btn.active {
+            background: #5B6AF0;
+            border-color: #5B6AF0;
+            color: #FFFFFF;
+        }
+
+        .timeline {
+            position: relative;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 32px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #E8E6E1;
+        }
+
+        .diary-entry {
+            position: relative;
+            margin-bottom: 24px;
+            padding-left: 80px;
+            opacity: 0;
+            animation: fadeInUp 0.4s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .diary-entry:nth-child(1) { animation-delay: 0.05s; }
+        .diary-entry:nth-child(2) { animation-delay: 0.1s; }
+        .diary-entry:nth-child(3) { animation-delay: 0.15s; }
+        .diary-entry:nth-child(4) { animation-delay: 0.2s; }
+        .diary-entry:nth-child(5) { animation-delay: 0.25s; }
+
+        .entry-timestamp {
+            position: absolute;
+            left: 0;
+            top: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #8B8B8B;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .entry-dot {
+            position: absolute;
+            left: 26px;
+            top: 8px;
+            width: 14px;
+            height: 14px;
+            background: #FFFFFF;
+            border: 3px solid #5B6AF0;
+            border-radius: 50%;
+            z-index: 10;
+        }
+
+        .entry-dot.correct {
+            border-color: #16A34A;
+        }
+
+        .entry-dot.incorrect {
+            border-color: #DC2626;
+        }
+
+        .entry-card {
+            background: #FFFFFF;
+            border: 1px solid #E8E6E1;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 150ms ease;
+        }
+
+        .entry-card:hover {
+            border-color: #D4D2CB;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .entry-title {
+            flex: 1;
+        }
+
+        .entry-symbol {
+            font-size: 12px;
+            font-weight: 600;
+            color: #8B8B8B;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .entry-decision {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1F1F1F;
+            margin-bottom: 4px;
+        }
+
+        .entry-summary {
+            font-size: 14px;
+            color: #5E5E5E;
+            line-height: 1.4;
+        }
+
+        .entry-badges {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-bullish {
+            background: #DCFCE7;
+            color: #166534;
+        }
+
+        .badge-bearish {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+
+        .badge-neutral {
+            background: #F3F4F6;
+            color: #4B5563;
+        }
+
+        .badge-correct {
+            background: #DCFCE7;
+            color: #166534;
+        }
+
+        .badge-incorrect {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+
+        .entry-section {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #F3F3F1;
+        }
+
+        .section-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #8B8B8B;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .reasoning-chain {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .reasoning-step {
+            display: flex;
+            gap: 12px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .reasoning-step-number {
+            flex-shrink: 0;
+            width: 24px;
+            height: 24px;
+            background: #5B6AF0;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .reasoning-step-text {
+            flex: 1;
+            color: #1F1F1F;
+            padding-top: 2px;
+        }
+
+        .factors-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .factor-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .factor-weight {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: #8B8B8B;
+            min-width: 40px;
+        }
+
+        .factor-name {
+            flex: 1;
+            color: #1F1F1F;
+        }
+
+        .context-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+        }
+
+        .context-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .context-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #8B8B8B;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .context-value {
+            font-size: 14px;
+            color: #1F1F1F;
+            font-weight: 500;
+        }
+
+        .outcome-box {
+            background: #F9FAFB;
+            border-radius: 6px;
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .outcome-predicted, .outcome-actual {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .outcome-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #8B8B8B;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .outcome-value {
+            font-size: 16px;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .outcome-arrow {
+            color: #D4D2CB;
+            font-size: 20px;
+        }
+
+        .expand-btn {
+            margin-top: 16px;
+            padding: 8px 16px;
+            background: #F9FAFB;
+            border: 1px solid #E8E6E1;
+            border-radius: 6px;
+            color: #5E5E5E;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+            transition: all 150ms ease;
+        }
+
+        .expand-btn:hover {
+            background: #F3F3F1;
+            border-color: #D4D2CB;
+        }
+
+        .expanded-content {
+            display: none;
+            margin-top: 16px;
+            padding: 16px;
+            background: #FAFAFA;
+            border-radius: 6px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #3C3C3C;
+        }
+
+        .expanded-content.visible {
+            display: block;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #8B8B8B;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #8B8B8B;
+        }
+
+        .empty-state-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 16px;
+            opacity: 0.3;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">A</div>
+                <span>AtomicX</span>
+            </div>
+            <nav class="nav">
+                <a href="/index.html" class="nav-link">Portfolio</a>
+                <a href="/dashboard.html" class="nav-link">Intelligence</a>
+                <a href="/diary.html" class="nav-link active">Diary</a>
+                <a href="/causality.html" class="nav-link">Causality</a>
+                <a href="/evolution.html" class="nav-link">Evolution</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="page-header">
+            <h1 class="page-title">📓 Atomic Diary</h1>
+            <p class="page-subtitle">
+                Complete transparency into every trading decision. See the exact reasoning chain,
+                which simulations led to each trade, and how the system learns from outcomes.
+            </p>
+        </div>
+
+        <div class="filters">
+            <button class="filter-btn active" data-filter="all">All Decisions</button>
+            <button class="filter-btn" data-filter="prediction">Predictions</button>
+            <button class="filter-btn" data-filter="trade">Trades</button>
+            <button class="filter-btn" data-filter="correct">✓ Correct</button>
+            <button class="filter-btn" data-filter="incorrect">✗ Incorrect</button>
+        </div>
+
+        <div class="timeline" id="timeline">
+            <div class="loading">Loading diary entries...</div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        let allEntries = [];
+        let currentFilter = 'all';
+
+        // Fetch diary entries from API
+        async function loadDiary() {
+            try {
+                const response = await fetch('/api/diary?limit=50');
+                const data = await response.json();
+
+                if (data.error) {
+                    showError(data.error);
+                    return;
+                }
+
+                allEntries = data.entries;
+                renderEntries(allEntries);
+            } catch (error) {
+                console.error('Failed to load diary:', error);
+                showError('Failed to load diary entries');
+            }
+        }
+
+        function renderEntries(entries) {
+            const timeline = document.getElementById('timeline');
+
+            if (entries.length === 0) {
+                timeline.innerHTML = `
+                    <div class="empty-state">
+                        <i data-lucide="book-open" class="empty-state-icon"></i>
+                        <p>No diary entries yet. The system will create entries as decisions are made.</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            timeline.innerHTML = entries.map((entry, index) => {
+                const timestamp = new Date(entry.timestamp);
+                const timeStr = timestamp.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+                const correctnessClass = entry.outcome.was_correct === true ? 'correct' :
+                                        entry.outcome.was_correct === false ? 'incorrect' : '';
+
+                const decisionBadge = entry.decision === 'BULLISH' ? 'badge-bullish' :
+                                     entry.decision === 'BEARISH' ? 'badge-bearish' : 'badge-neutral';
+
+                const outcomeDisplay = entry.outcome.actual ? `
+                    <div class="entry-section">
+                        <div class="section-label">Outcome</div>
+                        <div class="outcome-box">
+                            <div class="outcome-predicted">
+                                <div class="outcome-label">Predicted</div>
+                                <div class="outcome-value">${entry.outcome.predicted || 'N/A'}</div>
+                            </div>
+                            <div class="outcome-arrow">→</div>
+                            <div class="outcome-actual">
+                                <div class="outcome-label">Actual</div>
+                                <div class="outcome-value" style="color: ${entry.outcome.was_correct ? '#16A34A' : '#DC2626'}">
+                                    ${entry.outcome.actual}
+                                    ${entry.outcome.return ? ` (${(entry.outcome.return * 100).toFixed(2)}%)` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        ${entry.outcome.was_correct !== null ? `
+                            <div class="badge ${entry.outcome.was_correct ? 'badge-correct' : 'badge-incorrect'}" style="margin-top: 8px; display: inline-block;">
+                                ${entry.outcome.was_correct ? '✓ Correct' : '✗ Incorrect'}
+                            </div>
+                        ` : ''}
+                    </div>
+                ` : '';
+
+                const reasoningChain = entry.reasoning.chain && entry.reasoning.chain.length > 0 ? `
+                    <div class="entry-section">
+                        <div class="section-label">Reasoning Chain</div>
+                        <div class="reasoning-chain">
+                            ${entry.reasoning.chain.slice(0, 4).map((step, i) => `
+                                <div class="reasoning-step">
+                                    <div class="reasoning-step-number">${i + 1}</div>
+                                    <div class="reasoning-step-text">
+                                        ${step.what || step.step || JSON.stringify(step)}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : '';
+
+                const keyFactors = entry.reasoning.key_factors && entry.reasoning.key_factors.length > 0 ? `
+                    <div class="entry-section">
+                        <div class="section-label">Key Factors</div>
+                        <div class="factors-list">
+                            ${entry.reasoning.key_factors.map(factor => {
+                                if (typeof factor === 'object' && factor.factor) {
+                                    return `
+                                        <div class="factor-item">
+                                            <span class="factor-weight">${(factor.weight * 100).toFixed(0)}%</span>
+                                            <span class="factor-name">${factor.factor}: ${factor.value || ''}</span>
+                                        </div>
+                                    `;
+                                }
+                                return `<div class="factor-item"><span class="factor-name">${factor}</span></div>`;
+                            }).join('')}
+                        </div>
+                    </div>
+                ` : '';
+
+                const context = `
+                    <div class="entry-section">
+                        <div class="section-label">Context</div>
+                        <div class="context-grid">
+                            ${entry.context.regime ? `
+                                <div class="context-item">
+                                    <div class="context-label">Regime</div>
+                                    <div class="context-value">${entry.context.regime}</div>
+                                </div>
+                            ` : ''}
+                            ${entry.context.confidence ? `
+                                <div class="context-item">
+                                    <div class="context-label">Confidence</div>
+                                    <div class="context-value">${(entry.context.confidence * 100).toFixed(0)}%</div>
+                                </div>
+                            ` : ''}
+                            ${entry.context.entry_price ? `
+                                <div class="context-item">
+                                    <div class="context-label">Entry Price</div>
+                                    <div class="context-value">$${entry.context.entry_price.toFixed(2)}</div>
+                                </div>
+                            ` : ''}
+                            ${entry.context.news_trigger ? `
+                                <div class="context-item">
+                                    <div class="context-label">News Trigger</div>
+                                    <div class="context-value">${entry.context.news_trigger}</div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+
+                return `
+                    <div class="diary-entry" data-type="${entry.type}" data-correct="${entry.outcome.was_correct}">
+                        <div class="entry-timestamp">${timeStr}</div>
+                        <div class="entry-dot ${correctnessClass}"></div>
+                        <div class="entry-card">
+                            <div class="entry-header">
+                                <div class="entry-title">
+                                    <div class="entry-symbol">${entry.symbol}</div>
+                                    <div class="entry-decision">${entry.type === 'prediction' ? 'Prediction' : entry.type}</div>
+                                    <div class="entry-summary">${entry.summary}</div>
+                                </div>
+                                <div class="entry-badges">
+                                    <div class="badge ${decisionBadge}">${entry.decision}</div>
+                                </div>
+                            </div>
+
+                            ${reasoningChain}
+                            ${keyFactors}
+                            ${context}
+                            ${outcomeDisplay}
+
+                            ${entry.raw.reasoning_text ? `
+                                <button class="expand-btn" onclick="toggleExpanded(${index})">
+                                    View Full Reasoning
+                                </button>
+                                <div class="expanded-content" id="expanded-${index}">
+                                    <strong>Complete Reasoning:</strong><br>
+                                    ${entry.raw.reasoning_text || 'No detailed reasoning available'}
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        function toggleExpanded(index) {
+            const content = document.getElementById(`expanded-${index}`);
+            content.classList.toggle('visible');
+        }
+
+        function filterEntries(filter) {
+            currentFilter = filter;
+
+            // Update button states
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.filter === filter) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // Filter entries
+            let filtered = allEntries;
+            if (filter === 'prediction') {
+                filtered = allEntries.filter(e => e.type === 'prediction');
+            } else if (filter === 'trade') {
+                filtered = allEntries.filter(e => e.type === 'trade');
+            } else if (filter === 'correct') {
+                filtered = allEntries.filter(e => e.outcome.was_correct === true);
+            } else if (filter === 'incorrect') {
+                filtered = allEntries.filter(e => e.outcome.was_correct === false);
+            }
+
+            renderEntries(filtered);
+        }
+
+        function showError(message) {
+            const timeline = document.getElementById('timeline');
+            timeline.innerHTML = `
+                <div class="empty-state">
+                    <i data-lucide="alert-circle" class="empty-state-icon" style="color: #DC2626;"></i>
+                    <p style="color: #DC2626;">${message}</p>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        // Event listeners
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterEntries(btn.dataset.filter);
+            });
+        });
+
+        // Initial load
+        loadDiary();
+
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            loadDiary();
+        }, 30000);
+    </script>
+</body>
+</html>

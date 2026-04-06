@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AtomicX God Mode - Lightning Fast</title>
+
+  <!-- External Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.44.0/dist/apexcharts.min.js"></script>
+
+  <!-- Instant Navigation - Load first for max speed -->
+  <script src="/static/instant-nav.js" type="module"></script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ========================================
+       ATOMICX GOD MODE - ULTRA-FAST DASHBOARD
+       Instant Transitions + Component Caching
+       ======================================== */
+
+    :root {
+      /* Core Colors */
+      --bg-primary: #0a0b0f;
+      --bg-card: #13141b;
+      --bg-elevated: #1a1b24;
+      --border: rgba(255, 255, 255, 0.08);
+
+      /* Accent */
+      --accent: #10b981;
+      --accent-hover: #059669;
+      --accent-dim: rgba(16, 185, 129, 0.1);
+
+      /* Trading Colors */
+      --bullish: #22c55e;
+      --bullish-dim: rgba(34, 197, 94, 0.1);
+      --bearish: #ef4444;
+      --bearish-dim: rgba(239, 68, 68, 0.1);
+      --neutral: #f59e0b;
+      --neutral-dim: rgba(245, 158, 11, 0.1);
+      --warning: #f59e0b;
+
+      /* Text */
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+
+      /* Typography */
+      --font-sans: 'Inter', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      /* Spacing */
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+
+      /* Radius */
+      --radius-sm: 6px;
+      --radius-md: 8px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      overflow-x: hidden;
+      line-height: 1.5;
+    }
+
+    /* Header */
+    .header {
+      height: 60px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--space-lg);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .header-status {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+    }
+
+    .status-pill {
+      padding: 6px 12px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 12px;
+      font-family: var(--font-mono);
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .status-pill.active {
+      background: var(--bullish-dim);
+      border-color: var(--bullish);
+      color: var(--bullish);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* Tab Navigation */
+    .tab-nav {
+      display: flex;
+      gap: var(--space-sm);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      padding: 8px 16px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+      font-family: var(--font-sans);
+    }
+
+    .tab-btn:hover {
+      background: var(--bg-elevated);
+      border-color: rgba(255, 255, 255, 0.12);
+      color: var(--text-primary);
+    }
+
+    .tab-btn.active {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Main Container */
+    .main-container {
+      padding: var(--space-lg);
+      max-width: 1800px;
+      margin: 0 auto;
+    }
+
+    /* View Container - INSTANT transitions */
+    .view-container {
+      position: relative;
+      min-height: 600px;
+    }
+
+    .view {
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      display: none;
+    }
+
+    .view.active {
+      opacity: 1;
+      transform: translateY(0);
+      display: block;
+      position: relative;
+    }
+
+    /* Loading States */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 400px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .loading::before {
+      content: '';
+      width: 24px;
+      height: 24px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      margin-right: var(--space-sm);
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-primary);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Performance - use GPU acceleration */
+    .tab-btn, .view {
+      will-change: transform, opacity;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">
+      <span>⚡</span>
+      <span>AtomicX God Mode</span>
+    </div>
+    <div class="header-status">
+      <div class="status-pill active" id="system-status">
+        <span class="status-dot"></span>
+        <span>System Active</span>
+      </div>
+      <div class="status-pill" id="models-active">
+        <span>Loading...</span>
+      </div>
+      <div class="status-pill" id="symbol-display">
+        <span>BTC/USDT</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="tab-nav">
+    <button class="tab-btn active" data-view="trade-now">💰 Trade Now</button>
+    <button class="tab-btn" data-view="intelligence">⚡ Intel Brief</button>
+    <button class="tab-btn" data-view="ensemble">🎯 Ensemble</button>
+    <button class="tab-btn" data-view="predictions">🔮 Predictions</button>
+    <button class="tab-btn" data-view="swarm">🐝 Swarm</button>
+    <button class="tab-btn" data-view="orderbook">📊 Order Book</button>
+    <button class="tab-btn" data-view="altdata">📡 Alt Data</button>
+    <button class="tab-btn" data-view="causal">🔗 Causal Graph</button>
+    <button class="tab-btn" data-view="neurosymbolic">🧩 Neurosymbolic</button>
+  </div>
+
+  <!-- Main Container -->
+  <div class="main-container">
+    <div class="view-container">
+      <!-- Views will be loaded here -->
+      <div id="view-trade-now" class="view active">
+        <div class="loading">Loading Trade Dashboard...</div>
+      </div>
+      <div id="view-intelligence" class="view">
+        <div class="loading">Loading Intelligence Brief...</div>
+      </div>
+      <div id="view-ensemble" class="view">
+        <div class="loading">Loading Ensemble Intelligence...</div>
+      </div>
+      <div id="view-predictions" class="view">
+        <div class="loading">Loading Predictions...</div>
+      </div>
+      <div id="view-swarm" class="view">
+        <div class="loading">Loading Swarm...</div>
+      </div>
+      <div id="view-orderbook" class="view">
+        <div class="loading">Loading Order Book...</div>
+      </div>
+      <div id="view-altdata" class="view">
+        <div class="loading">Loading Alternative Data...</div>
+      </div>
+      <div id="view-causal" class="view">
+        <div class="loading">Loading Causal Graph...</div>
+      </div>
+      <div id="view-neurosymbolic" class="view">
+        <div class="loading">Loading Neurosymbolic...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ========================================
+    // ULTRA-FAST COMPONENT LOADER
+    // With Caching + Prefetching
+    // ========================================
+
+    class FastComponentLoader {
+      constructor() {
+        this.cache = new Map();
+        this.loading = new Map();
+        this.prefetching = new Set();
+      }
+
+      // Prefetch component (in background)
+      async prefetch(url) {
+        if (this.cache.has(url) || this.prefetching.has(url)) return;
+
+        this.prefetching.add(url);
+        try {
+          const response = await fetch(url);
+          if (response.ok) {
+            const html = await response.text();
+            this.cache.set(url, html);
+            console.log(`✅ Prefetched: ${url}`);
+          }
+        } catch (error) {
+          console.warn(`Prefetch failed for ${url}:`, error);
+        } finally {
+          this.prefetching.delete(url);
+        }
+      }
+
+      // Load component (instant if cached)
+      async load(url, containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        // Check cache first
+        if (this.cache.has(url)) {
+          console.log(`⚡ Instant load from cache: ${url}`);
+          this.render(this.cache.get(url), container);
+          return;
+        }
+
+        // Avoid duplicate requests
+        if (this.loading.has(url)) {
+          await this.loading.get(url);
+          return;
+        }
+
+        // Fetch component
+        const promise = this.fetchAndCache(url, container);
+        this.loading.set(url, promise);
+
+        try {
+          await promise;
+        } finally {
+          this.loading.delete(url);
+        }
+      }
+
+      async fetchAndCache(url, container) {
+        try {
+          const response = await fetch(url);
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+
+          const html = await response.text();
+          this.cache.set(url, html);
+          this.render(html, container);
+
+          console.log(`✅ Loaded: ${url}`);
+        } catch (error) {
+          console.error(`Error loading ${url}:`, error);
+          container.innerHTML = `
+            <div style="padding: 24px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; text-align: center;">
+              <div style="color: var(--bearish); font-size: 16px; margin-bottom: 8px;">⚠️ Failed to Load</div>
+              <div style="color: var(--text-muted); font-size: 12px;">${error.message}</div>
+              <div style="color: var(--text-muted); font-size: 11px; margin-top: 4px;">Check: ${url}</div>
+            </div>
+          `;
+        }
+      }
+
+      render(html, container) {
+        container.innerHTML = html;
+
+        // Execute scripts
+        const scripts = container.getElementsByTagName('script');
+        for (let i = 0; i < scripts.length; i++) {
+          const script = scripts[i];
+          const newScript = document.createElement('script');
+
+          if (script.src) {
+            newScript.src = script.src;
+          } else {
+            newScript.textContent = script.textContent;
+          }
+
+          document.body.appendChild(newScript);
+        }
+      }
+
+      clearCache() {
+        this.cache.clear();
+        console.log('🗑️ Cache cleared');
+      }
+    }
+
+    // Initialize loader
+    const loader = new FastComponentLoader();
+
+    // Component mapping
+    const COMPONENTS = {
+      'trade-now': '/static/components/trade_now_unified.html',
+      'intelligence': '/static/components/intelligence_brief.html',
+      'ensemble': '/static/components/ensemble_voting.html',
+      'predictions': '/static/components/diffusion_chart.html',
+      'swarm': '/static/components/swarm_visualization.html',
+      'orderbook': '/static/components/orderbook_heatmap.html',
+      'altdata': '/static/components/alternative_data_feed.html',
+      'causal': '/static/components/causal_graph.html',
+      'neurosymbolic': '/static/components/neurosymbolic_explainer.html'
+    };
+
+    // ========================================
+    // INSTANT VIEW SWITCHING
+    // ========================================
+
+    let currentView = 'trade-now';
+
+    function switchView(viewName) {
+      if (currentView === viewName) return;
+
+      // Deactivate current
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+
+      // Activate new
+      document.getElementById(`view-${viewName}`).classList.add('active');
+      document.querySelector(`[data-view="${viewName}"]`).classList.add('active');
+
+      currentView = viewName;
+
+      // Load component if not loaded
+      const viewEl = document.getElementById(`view-${viewName}`);
+      if (viewEl.querySelector('.loading')) {
+        loader.load(COMPONENTS[viewName], `view-${viewName}`);
+      }
+
+      // Prefetch adjacent views
+      const views = Object.keys(COMPONENTS);
+      const currentIndex = views.indexOf(viewName);
+      if (currentIndex > 0) {
+        loader.prefetch(COMPONENTS[views[currentIndex - 1]]);
+      }
+      if (currentIndex < views.length - 1) {
+        loader.prefetch(COMPONENTS[views[currentIndex + 1]]);
+      }
+    }
+
+    // Tab click handlers
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        switchView(btn.dataset.view);
+      });
+    });
+
+    // Expose switchView globally for components
+    window.switchView = switchView;
+
+    // ========================================
+    // GLOBAL EVENT BUS - ELIMINATE THUNDERING HERD
+    // ========================================
+
+    // PERFORMANCE FIX:
+    // - Before: 7 components each poll API independently (7 concurrent requests)
+    // - After: 1 global loop polls API, dispatches to all components via events
+
+    class GodModeEventBus {
+      constructor() {
+        this.listeners = [];
+        this.lastData = null;
+        this.polling = false;
+      }
+
+      // Subscribe to data updates
+      subscribe(callback) {
+        this.listeners.push(callback);
+        // Immediately send last data if available
+        if (this.lastData) {
+          callback(this.lastData);
+        }
+      }
+
+      // Dispatch data to all subscribers
+      dispatch(data) {
+        this.lastData = data;
+        this.listeners.forEach(callback => {
+          try {
+            callback(data);
+          } catch (error) {
+            console.error('Event bus callback error:', error);
+          }
+        });
+      }
+
+      // Start global polling
+      async startPolling(intervalMs = 30000) {
+        if (this.polling) return;
+        this.polling = true;
+
+        const poll = async () => {
+          if (!this.polling) return;
+
+          try {
+            const response = await fetch('/api/god_mode/predictions?symbol=BTC/USDT');
+            const data = await response.json();
+
+            // Dispatch to all subscribers
+            this.dispatch(data);
+
+            // Update header
+            this.updateHeader(data);
+
+          } catch (error) {
+            console.error('[EVENT-BUS] Polling error:', error);
+            this.updateHeader(null);
+          }
+
+          // Schedule next poll
+          if (this.polling) {
+            setTimeout(poll, intervalMs);
+          }
+        };
+
+        // Initial poll
+        await poll();
+      }
+
+      stopPolling() {
+        this.polling = false;
+      }
+
+      updateHeader(data) {
+        if (data && data.models_active !== undefined) {
+          document.getElementById('models-active').innerHTML =
+            `<span>${data.models_active}/${data.total_models || 11} Models</span>`;
+        }
+
+        const statusPill = document.getElementById('system-status');
+        if (data && data.ensemble && data.ensemble.data_source === "REAL") {
+          statusPill.classList.add('active');
+          statusPill.innerHTML = '<span class="status-dot"></span><span>System Active</span>';
+        } else if (data && data.ensemble && data.ensemble.data_source === "WARMING_UP") {
+          statusPill.classList.remove('active');
+          statusPill.innerHTML = '<span>Warming Up...</span>';
+        } else {
+          statusPill.classList.remove('active');
+          statusPill.innerHTML = '<span>Initializing</span>';
+        }
+      }
+    }
+
+    // Global singleton (expose to window for components)
+    window.godModeEventBus = new GodModeEventBus();
+
+    // Legacy function for backward compatibility
+    async function updateHeaderStatus() {
+      // Now handled by event bus
+      console.log('[DEPRECATED] updateHeaderStatus() is now handled by event bus');
+    }
+
+    // ========================================
+    // INITIALIZE - FAST START
+    // ========================================
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      console.log('🚀 AtomicX God Mode - Lightning Fast Edition');
+      console.log('⚡ Instant transitions + Global event bus enabled');
+      console.log('🔧 Performance: Single API poll → Event dispatch to all components');
+
+      // Load first view immediately (Trade Now - Unified Actionable Dashboard)
+      loader.load(COMPONENTS['trade-now'], 'view-trade-now');
+
+      // Prefetch next 2 views in background
+      setTimeout(() => {
+        loader.prefetch(COMPONENTS['intelligence']);
+        loader.prefetch(COMPONENTS['ensemble']);
+      }, 100);
+
+      // PERFORMANCE FIX: Start global event bus (eliminates thundering herd)
+      await window.godModeEventBus.startPolling(30000);  // Poll every 30s
+
+      console.log('✅ Dashboard ready - Event bus active');
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.key >= '1' && e.key <= '7') {
+        const views = Object.keys(COMPONENTS);
+        const index = parseInt(e.key) - 1;
+        if (index < views.length) {
+          switchView(views[index]);
+        }
+      }
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,763 @@
+<!-- NEUROSYMBOLIC REASONING EXPLAINER -->
+<!-- Shows how logic rules combine with neural predictions -->
+<!-- REAL DATA - No mock -->
+
+<div class="neurosymbolic-container">
+  <div class="component-header">
+    <h3 class="component-title">🧠 Neurosymbolic Reasoning</h3>
+    <div class="component-info">
+      <span class="info-pill" id="ns-rules-active">12 Rules Active</span>
+      <span class="info-pill" id="ns-confidence">High Confidence</span>
+    </div>
+  </div>
+
+  <!-- Final Decision -->
+  <div class="final-decision">
+    <div class="decision-header">
+      <span class="decision-label">Final Decision</span>
+      <span class="decision-method">Neural + Symbolic Fusion</span>
+    </div>
+    <div class="decision-content">
+      <div class="decision-direction" id="ns-direction">
+        <span class="direction-icon">📈</span>
+        <span class="direction-text">BULLISH</span>
+      </div>
+      <div class="decision-confidence">
+        <span class="confidence-label">Combined Confidence</span>
+        <div class="confidence-bar-wrapper">
+          <div class="confidence-bar" id="ns-confidence-bar" style="width: 82%"></div>
+        </div>
+        <span class="confidence-value" id="ns-confidence-value">82%</span>
+      </div>
+    </div>
+    <div class="decision-explanation" id="ns-explanation">
+      Neural network predicts bullish trend (76%), validated by 3 symbolic rules: trend continuation, volume confirmation, support level holding.
+    </div>
+  </div>
+
+  <!-- Reasoning Breakdown -->
+  <div class="reasoning-section">
+    <div class="section-label">Reasoning Breakdown</div>
+
+    <!-- Neural Component -->
+    <div class="reasoning-card neural">
+      <div class="card-header">
+        <span class="card-icon">🤖</span>
+        <span class="card-title">Neural Network</span>
+        <span class="card-confidence" id="neural-conf">76%</span>
+      </div>
+      <div class="card-prediction">
+        <span class="pred-label">Raw Prediction:</span>
+        <span class="pred-value bullish" id="neural-pred">BULLISH</span>
+      </div>
+      <div class="card-features">
+        <span class="features-label">Key Features Detected:</span>
+        <div class="feature-list" id="neural-features">
+          <div class="feature-item">
+            <span class="feature-name">Price momentum</span>
+            <span class="feature-weight">0.89</span>
+          </div>
+          <div class="feature-item">
+            <span class="feature-name">Volume surge</span>
+            <span class="feature-weight">0.76</span>
+          </div>
+          <div class="feature-item">
+            <span class="feature-name">RSI divergence</span>
+            <span class="feature-weight">0.62</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Symbolic Component -->
+    <div class="reasoning-card symbolic">
+      <div class="card-header">
+        <span class="card-icon">⚡</span>
+        <span class="card-title">Symbolic Logic</span>
+        <span class="card-confidence" id="symbolic-conf">88%</span>
+      </div>
+      <div class="card-prediction">
+        <span class="pred-label">Rule-Based Decision:</span>
+        <span class="pred-value bullish" id="symbolic-pred">BULLISH</span>
+      </div>
+      <div class="rules-fired" id="rules-fired">
+        <span class="rules-label">Rules Triggered:</span>
+        <div class="rule-list">
+          <div class="rule-item active">
+            <span class="rule-check">✓</span>
+            <span class="rule-text">IF price > MA(50) AND volume > avg THEN bullish</span>
+          </div>
+          <div class="rule-item active">
+            <span class="rule-check">✓</span>
+            <span class="rule-text">IF support_level_holds AND rsi > 50 THEN bullish</span>
+          </div>
+          <div class="rule-item active">
+            <span class="rule-check">✓</span>
+            <span class="rule-text">IF trend = up AND macd_cross THEN bullish</span>
+          </div>
+          <div class="rule-item inactive">
+            <span class="rule-check">✗</span>
+            <span class="rule-text">IF resistance_broken AND volume_spike THEN very_bullish</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fusion Process -->
+  <div class="fusion-section">
+    <div class="section-label">Fusion Process</div>
+    <div class="fusion-flow">
+      <div class="fusion-step">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <div class="step-title">Neural Prediction</div>
+          <div class="step-value">76% Bullish</div>
+        </div>
+      </div>
+      <div class="fusion-arrow">→</div>
+      <div class="fusion-step">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <div class="step-title">Rule Validation</div>
+          <div class="step-value">3/4 Rules Match</div>
+        </div>
+      </div>
+      <div class="fusion-arrow">→</div>
+      <div class="fusion-step">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <div class="step-title">Confidence Boost</div>
+          <div class="step-value">+6% from rules</div>
+        </div>
+      </div>
+      <div class="fusion-arrow">→</div>
+      <div class="fusion-step highlight">
+        <div class="step-number">4</div>
+        <div class="step-content">
+          <div class="step-title">Final Output</div>
+          <div class="step-value">82% Bullish</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interpretability -->
+  <div class="interpretability-section">
+    <div class="section-label">Why This Decision?</div>
+    <div class="reason-grid" id="reason-grid">
+      <div class="reason-item">
+        <span class="reason-icon">📊</span>
+        <div class="reason-content">
+          <div class="reason-title">Strong Technical Setup</div>
+          <div class="reason-detail">Price above key moving averages, momentum increasing</div>
+        </div>
+      </div>
+      <div class="reason-item">
+        <span class="reason-icon">🔊</span>
+        <div class="reason-content">
+          <div class="reason-title">Volume Confirmation</div>
+          <div class="reason-detail">Volume 43% above average, confirms price move</div>
+        </div>
+      </div>
+      <div class="reason-item">
+        <span class="reason-icon">🛡️</span>
+        <div class="reason-content">
+          <div class="reason-title">Support Holding</div>
+          <div class="reason-detail">$51,000 support tested and held, buyers active</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.neurosymbolic-container {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+}
+
+.component-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
+}
+
+.component-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.component-info {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.info-pill {
+  padding: 4px 10px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+}
+
+/* Final Decision */
+.final-decision {
+  background: linear-gradient(135deg, var(--bg-elevated) 0%, var(--bg-card) 100%);
+  border: 2px solid var(--accent);
+  border-radius: var(--radius-sm);
+  padding: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.decision-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-sm);
+}
+
+.decision-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.decision-method {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--accent);
+  padding: 2px 6px;
+  background: var(--accent-dim);
+  border-radius: 3px;
+}
+
+.decision-content {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-sm);
+}
+
+.decision-direction {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.direction-icon {
+  font-size: 32px;
+}
+
+.direction-text {
+  font-size: 28px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--bullish);
+}
+
+.decision-direction.bearish .direction-text {
+  color: var(--bearish);
+}
+
+.decision-confidence {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.confidence-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.confidence-bar-wrapper {
+  height: 8px;
+  background: var(--bg-primary);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.confidence-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--bullish));
+  border-radius: 4px;
+  transition: width 300ms ease;
+}
+
+.confidence-value {
+  font-size: 16px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+}
+
+.decision-explanation {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--border);
+}
+
+/* Reasoning Section */
+.reasoning-section {
+  margin-bottom: var(--space-md);
+}
+
+.section-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-bottom: var(--space-sm);
+}
+
+.reasoning-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-md);
+  margin-bottom: var(--space-sm);
+}
+
+.reasoning-card.neural {
+  border-left: 3px solid #3b82f6;
+}
+
+.reasoning-card.symbolic {
+  border-left: 3px solid #a855f7;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.card-icon {
+  font-size: 20px;
+}
+
+.card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+.card-confidence {
+  font-size: 16px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--accent);
+}
+
+.card-prediction {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--border);
+}
+
+.pred-label {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.pred-value {
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.pred-value.bullish {
+  background: var(--bullish-dim);
+  color: var(--bullish);
+}
+
+.pred-value.bearish {
+  background: var(--bearish-dim);
+  color: var(--bearish);
+}
+
+/* Features */
+.card-features {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.features-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.feature-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.feature-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 8px;
+  background: var(--bg-primary);
+  border-radius: 4px;
+}
+
+.feature-name {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.feature-weight {
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--accent);
+}
+
+/* Rules */
+.rules-fired {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rules-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.rule-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rule-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: 6px 8px;
+  background: var(--bg-primary);
+  border-radius: 4px;
+}
+
+.rule-item.inactive {
+  opacity: 0.4;
+}
+
+.rule-check {
+  font-size: 14px;
+  color: var(--bullish);
+  min-width: 16px;
+}
+
+.rule-item.inactive .rule-check {
+  color: var(--text-muted);
+}
+
+.rule-text {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* Fusion Process */
+.fusion-section {
+  margin-bottom: var(--space-md);
+}
+
+.fusion-flow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow-x: auto;
+}
+
+.fusion-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  min-width: 140px;
+}
+
+.fusion-step.highlight {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.step-number {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--bg-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+}
+
+.step-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-align: center;
+}
+
+.step-title {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.step-value {
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+}
+
+.fusion-arrow {
+  font-size: 20px;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* Interpretability */
+.interpretability-section {
+}
+
+.reason-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-sm);
+}
+
+.reason-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.reason-icon {
+  font-size: 20px;
+}
+
+.reason-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.reason-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.reason-detail {
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+</style>
+
+<script>
+// NEUROSYMBOLIC EXPLAINER - REAL DATA
+async function initNeurosymbolicExplainer() {
+  // Fetch REAL neurosymbolic reasoning data
+  async function fetchNeurosymbolicData() {
+    try {
+      const response = await fetch('/api/god_mode/predictions?symbol=BTC/USDT');
+      const data = await response.json();
+
+      const neurosymbolic = data.predictions?.neurosymbolic;
+
+      if (neurosymbolic && neurosymbolic.data_source === 'REAL') {
+        return {
+          direction: neurosymbolic.direction || 'neutral',
+          confidence: neurosymbolic.confidence || 0.5,
+          neural_prediction: neurosymbolic.neural_prediction || {},
+          symbolic_decision: neurosymbolic.symbolic_decision || {},
+          rules_fired: neurosymbolic.rules_fired || [],
+          explanation: neurosymbolic.explanation || 'N/A',
+          reasons: neurosymbolic.reasons || [],
+          fusion_steps: neurosymbolic.fusion_steps || [],
+          source: 'REAL'
+        };
+      }
+
+      return null;
+
+    } catch (error) {
+      console.error('Error fetching neurosymbolic data:', error);
+      return null;
+    }
+  }
+
+  // Render neurosymbolic explainer
+  function renderNeurosymbolic(data) {
+    if (!data) {
+      document.querySelector('.final-decision').innerHTML =
+        '<div style="text-align: center; color: var(--text-muted); padding: var(--space-lg);">Neurosymbolic reasoning unavailable</div>';
+      return;
+    }
+
+    // Update final decision
+    const directionEl = document.getElementById('ns-direction');
+    directionEl.className = `decision-direction ${data.direction}`;
+    directionEl.querySelector('.direction-text').textContent = data.direction.toUpperCase();
+    directionEl.querySelector('.direction-icon').textContent =
+      data.direction === 'bullish' ? '📈' : data.direction === 'bearish' ? '📉' : '➡️';
+
+    const confidencePct = Math.round(data.confidence * 100);
+    document.getElementById('ns-confidence-bar').style.width = `${confidencePct}%`;
+    document.getElementById('ns-confidence-value').textContent = `${confidencePct}%`;
+    document.getElementById('ns-explanation').textContent = data.explanation || 'No explanation available';
+
+    // Update header pills
+    const rulesCount = data.rules_fired ? data.rules_fired.filter(r => r.triggered).length : 0;
+    document.getElementById('ns-rules-active').textContent = `${rulesCount} Rules Active`;
+
+    const confLevel = confidencePct >= 75 ? 'High Confidence' : confidencePct >= 50 ? 'Medium Confidence' : 'Low Confidence';
+    document.getElementById('ns-confidence').textContent = confLevel;
+
+    // Update neural component
+    if (data.neural_prediction && Object.keys(data.neural_prediction).length > 0) {
+      const neuralConf = Math.round((data.neural_prediction.confidence || 0.5) * 100);
+      document.getElementById('neural-conf').textContent = `${neuralConf}%`;
+
+      const neuralPred = document.getElementById('neural-pred');
+      neuralPred.textContent = (data.neural_prediction.direction || 'neutral').toUpperCase();
+      neuralPred.className = `pred-value ${data.neural_prediction.direction || 'neutral'}`;
+
+      // Update features
+      const featuresContainer = document.getElementById('neural-features');
+      if (data.neural_prediction.key_features && data.neural_prediction.key_features.length > 0) {
+        featuresContainer.innerHTML = data.neural_prediction.key_features.map(f => `
+          <div class="feature-item">
+            <span class="feature-name">${f.name}</span>
+            <span class="feature-weight">${f.weight.toFixed(2)}</span>
+          </div>
+        `).join('');
+      }
+    }
+
+    // Update symbolic component
+    if (data.symbolic_decision && Object.keys(data.symbolic_decision).length > 0) {
+      const symbolicConf = Math.round((data.symbolic_decision.confidence || 0.5) * 100);
+      document.getElementById('symbolic-conf').textContent = `${symbolicConf}%`;
+
+      const symbolicPred = document.getElementById('symbolic-pred');
+      symbolicPred.textContent = (data.symbolic_decision.direction || 'neutral').toUpperCase();
+      symbolicPred.className = `pred-value ${data.symbolic_decision.direction || 'neutral'}`;
+
+      // Update rules
+      const rulesContainer = document.getElementById('rules-fired').querySelector('.rule-list');
+      if (data.rules_fired && data.rules_fired.length > 0) {
+        rulesContainer.innerHTML = data.rules_fired.slice(0, 4).map(rule => `
+          <div class="rule-item ${rule.triggered ? 'active' : 'inactive'}">
+            <span class="rule-check">${rule.triggered ? '✓' : '✗'}</span>
+            <span class="rule-text">${rule.rule_text}</span>
+          </div>
+        `).join('');
+      }
+    }
+
+    // Update reasons
+    if (data.reasons && data.reasons.length > 0) {
+      const reasonsContainer = document.getElementById('reason-grid');
+      reasonsContainer.innerHTML = data.reasons.slice(0, 3).map(reason => `
+        <div class="reason-item">
+          <span class="reason-icon">${reason.icon || '📊'}</span>
+          <div class="reason-content">
+            <div class="reason-title">${reason.title}</div>
+            <div class="reason-detail">${reason.detail}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+  }
+
+  // PERFORMANCE FIX: Connect to global event bus
+  if (window.godModeEventBus) {
+    window.godModeEventBus.subscribe((apiData) => {
+      if (apiData && apiData.predictions && apiData.predictions.neurosymbolic) {
+        const neuroData = apiData.predictions.neurosymbolic;
+        if (neuroData.data_source === "REAL") {
+          renderNeurosymbolic(neuroData);
+        } else {
+          document.querySelector('.neurosymbolic-container').innerHTML = `
+            <div style="padding: 48px; text-align: center; color: var(--text-muted);">
+              <div style="font-size: 48px; margin-bottom: 16px;">🧩</div>
+              <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">Neurosymbolic Explainer Unavailable</div>
+              <div style="font-size: 14px;">Explainability engine not yet implemented</div>
+            </div>
+          `;
+        }
+      }
+    });
+    console.log('[NEUROSYMBOLIC] Connected to global event bus');
+  } else {
+    console.warn('[NEUROSYMBOLIC] Event bus not found, using fallback');
+    const data = await fetchNeurosymbolicData();
+    renderNeurosymbolic(data);
+
+    setInterval(async () => {
+      const data = await fetchNeurosymbolicData();
+      renderNeurosymbolic(data);
+    }, 30000);
+  }
+}
+
+// Auto-init when loaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initNeurosymbolicExplainer);
+} else {
+  initNeurosymbolicExplainer();
+}
+</script>

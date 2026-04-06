@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Debug Test</title>
+  <style>
+    body {
+      font-family: monospace;
+      background: #0a0b0f;
+      color: #f8fafc;
+      padding: 20px;
+    }
+    .test-section {
+      background: #13141b;
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 20px;
+      margin: 10px 0;
+      border-radius: 8px;
+    }
+    .success { color: #22c55e; }
+    .error { color: #ef4444; }
+    .loading { color: #f59e0b; }
+    pre {
+      background: #0a0b0f;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🔍 AtomicX Dashboard Debug</h1>
+
+<div class="test-section">
+  <h2>Test 1: API Connection</h2>
+  <p id="test1-status" class="loading">Testing...</p>
+  <pre id="test1-result"></pre>
+</div>
+
+<div class="test-section">
+  <h2>Test 2: Predictions Data</h2>
+  <p id="test2-status" class="loading">Testing...</p>
+  <pre id="test2-result"></pre>
+</div>
+
+<div class="test-section">
+  <h2>Test 3: Component Loading</h2>
+  <p id="test3-status" class="loading">Testing...</p>
+  <pre id="test3-result"></pre>
+</div>
+
+<script>
+console.log('🚀 Dashboard Debug Test Starting...');
+
+// Test 1: Check API connection
+async function test1() {
+  try {
+    console.log('Test 1: Fetching API...');
+    const response = await fetch('/api/god_mode/predictions?symbol=BTC/USDT');
+    console.log('Response status:', response.status);
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log('API Response:', data);
+
+    document.getElementById('test1-status').className = 'success';
+    document.getElementById('test1-status').textContent = '✅ API Connected Successfully';
+    document.getElementById('test1-result').textContent = JSON.stringify(data, null, 2);
+
+    return data;
+  } catch (error) {
+    console.error('Test 1 Failed:', error);
+    document.getElementById('test1-status').className = 'error';
+    document.getElementById('test1-status').textContent = '❌ API Connection Failed';
+    document.getElementById('test1-result').textContent = `Error: ${error.message}`;
+    return null;
+  }
+}
+
+// Test 2: Check predictions structure
+async function test2(apiData) {
+  try {
+    if (!apiData) {
+      throw new Error('No API data from Test 1');
+    }
+
+    console.log('Test 2: Checking data structure...');
+
+    const checks = {
+      'has ensemble': !!apiData.ensemble,
+      'has predictions': !!apiData.predictions,
+      'models_active': apiData.models_active || 0,
+      'total_models': apiData.total_models || 0,
+      'ensemble.direction': apiData.ensemble?.direction,
+      'ensemble.confidence': apiData.ensemble?.confidence,
+    };
+
+    console.log('Data checks:', checks);
+
+    const allGood = checks['has ensemble'] && checks['has predictions'];
+
+    document.getElementById('test2-status').className = allGood ? 'success' : 'error';
+    document.getElementById('test2-status').textContent = allGood
+      ? '✅ Data Structure Valid'
+      : '⚠️ Data Structure Issues';
+    document.getElementById('test2-result').textContent = JSON.stringify(checks, null, 2);
+
+  } catch (error) {
+    console.error('Test 2 Failed:', error);
+    document.getElementById('test2-status').className = 'error';
+    document.getElementById('test2-status').textContent = '❌ Data Check Failed';
+    document.getElementById('test2-result').textContent = `Error: ${error.message}`;
+  }
+}
+
+// Test 3: Check component loading
+async function test3() {
+  try {
+    console.log('Test 3: Loading component...');
+    const response = await fetch('/static/components/ensemble_voting.html');
+    console.log('Component response status:', response.status);
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const html = await response.text();
+    const hasScript = html.includes('<script>');
+    const hasStyle = html.includes('<style>');
+    const size = html.length;
+
+    console.log('Component loaded:', { size, hasScript, hasStyle });
+
+    document.getElementById('test3-status').className = 'success';
+    document.getElementById('test3-status').textContent = '✅ Component Loads Successfully';
+    document.getElementById('test3-result').textContent = `Size: ${size} bytes\nHas <script>: ${hasScript}\nHas <style>: ${hasStyle}`;
+
+  } catch (error) {
+    console.error('Test 3 Failed:', error);
+    document.getElementById('test3-status').className = 'error';
+    document.getElementById('test3-status').textContent = '❌ Component Load Failed';
+    document.getElementById('test3-result').textContent = `Error: ${error.message}`;
+  }
+}
+
+// Run all tests
+(async () => {
+  console.log('Running tests...');
+  const apiData = await test1();
+  await test2(apiData);
+  await test3();
+  console.log('All tests complete!');
+})();
+</script>
+
+</body>
+</html>

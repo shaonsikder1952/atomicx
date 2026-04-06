@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AtomicX God Mode - Professional Trading Intelligence</title>
+
+  <!-- External Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.44.0/dist/apexcharts.min.js"></script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ========================================
+       PROFESSIONAL TRADING DASHBOARD
+       Inspired by Bloomberg Terminal, TradingView, ThinkOrSwim
+       ======================================== */
+
+    :root {
+      /* Dark Theme Colors */
+      --bg-primary: #0a0b0f;
+      --bg-elevated: #13141b;
+      --bg-card: #1a1b24;
+      --bg-card-hover: #1f2029;
+
+      /* Borders */
+      --border: rgba(255,255,255,0.06);
+      --border-hover: rgba(255,255,255,0.12);
+
+      /* Text */
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+
+      /* Trading Colors */
+      --bullish: #10b981;
+      --bullish-dim: rgba(16,185,129,0.1);
+      --bearish: #ef4444;
+      --bearish-dim: rgba(239,68,68,0.1);
+      --neutral: #f59e0b;
+      --neutral-dim: rgba(245,158,11,0.1);
+
+      /* Status Colors */
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --info: #3b82f6;
+
+      /* Typography */
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+
+      /* Spacing */
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
+
+      /* Radius */
+      --radius-sm: 4px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+
+      /* Shadows */
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+      --shadow-lg: 0 10px 15px rgba(0,0,0,0.2);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ========================================
+       HEADER / TOP BAR
+       ======================================== */
+
+    .header {
+      height: 60px;
+      background: var(--bg-elevated);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--space-lg);
+      flex-shrink: 0;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: var(--space-lg);
+    }
+
+    .logo {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    .logo-accent {
+      color: var(--bullish);
+    }
+
+    .header-tabs {
+      display: flex;
+      gap: var(--space-sm);
+    }
+
+    .tab {
+      padding: var(--space-sm) var(--space-md);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      transition: all 0.2s;
+      border: 1px solid transparent;
+    }
+
+    .tab:hover {
+      color: var(--text-primary);
+      background: var(--bg-card);
+    }
+
+    .tab.active {
+      color: var(--bullish);
+      background: var(--bullish-dim);
+      border-color: var(--bullish);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+    }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--space-md);
+      background: var(--bg-card);
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-family: var(--font-mono);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--bullish);
+      box-shadow: 0 0 8px var(--bullish);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* ========================================
+       MAIN LAYOUT
+       ======================================== */
+
+    .main-container {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 320px 1fr 400px;
+      gap: 1px;
+      background: var(--border);
+      overflow: hidden;
+    }
+
+    .panel {
+      background: var(--bg-primary);
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.1);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255,255,255,0.15);
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    /* ========================================
+       LEFT PANEL - ASSET OVERVIEW
+       ======================================== */
+
+    .panel-left {
+      padding: var(--space-lg);
+    }
+
+    .asset-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: var(--space-lg);
+      margin-bottom: var(--space-md);
+      transition: all 0.2s;
+    }
+
+    .asset-card:hover {
+      border-color: var(--border-hover);
+      background: var(--bg-card-hover);
+    }
+
+    .asset-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: var(--space-md);
+    }
+
+    .asset-symbol {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    .signal-badge {
+      padding: 4px 12px;
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      letter-spacing: 0.5px;
+    }
+
+    .signal-badge.long {
+      background: var(--bullish-dim);
+      color: var(--bullish);
+      border: 1px solid var(--bullish);
+    }
+
+    .signal-badge.short {
+      background: var(--bearish-dim);
+      color: var(--bearish);
+      border: 1px solid var(--bearish);
+    }
+
+    .signal-badge.neutral {
+      background: var(--neutral-dim);
+      color: var(--neutral);
+      border: 1px solid var(--neutral);
+    }
+
+    .asset-price {
+      font-size: 32px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      margin-bottom: var(--space-xs);
+    }
+
+    .asset-change {
+      font-size: 14px;
+      font-family: var(--font-mono);
+      font-weight: 600;
+    }
+
+    .asset-change.positive {
+      color: var(--bullish);
+    }
+
+    .asset-change.negative {
+      color: var(--bearish);
+    }
+
+    .asset-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-sm);
+      margin-top: var(--space-md);
+    }
+
+    .meta-item {
+      background: var(--bg-elevated);
+      padding: var(--space-sm);
+      border-radius: var(--radius-sm);
+    }
+
+    .meta-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .meta-value {
+      font-size: 14px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+    }
+
+    /* Section Headers */
+    .section-header {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin: var(--space-lg) 0 var(--space-md) 0;
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .section-header::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ========================================
+       CENTER PANEL - MAIN TRADING VIEW
+       ======================================== */
+
+    .panel-center {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chart-container {
+      flex: 1;
+      padding: var(--space-lg);
+      background: var(--bg-elevated);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-md);
+    }
+
+    .chart-title {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .chart-controls {
+      display: flex;
+      gap: var(--space-sm);
+    }
+
+    .chart-btn {
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .chart-btn:hover {
+      background: var(--bg-card-hover);
+      color: var(--text-primary);
+    }
+
+    .chart-btn.active {
+      background: var(--bullish-dim);
+      color: var(--bullish);
+      border-color: var(--bullish);
+    }
+
+    #main-chart {
+      width: 100%;
+      height: 500px;
+    }
+
+    /* God Mode Intelligence Panel */
+    .intelligence-panel {
+      height: 300px;
+      padding: var(--space-lg);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-md);
+      overflow-y: auto;
+    }
+
+    .intel-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .intel-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-sm);
+    }
+
+    .intel-icon {
+      font-size: 20px;
+    }
+
+    .intel-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+
+    .intel-value {
+      font-size: 24px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      margin-bottom: var(--space-xs);
+    }
+
+    .intel-subtitle {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .intel-progress {
+      margin-top: auto;
+      height: 4px;
+      background: var(--bg-elevated);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .intel-progress-bar {
+      height: 100%;
+      background: var(--bullish);
+      transition: width 0.3s ease;
+    }
+
+    /* ========================================
+       RIGHT PANEL - AI CHAT & INSIGHTS
+       ======================================== */
+
+    .panel-right {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: var(--space-lg);
+      overflow: hidden;
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      margin-bottom: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+
+    .message {
+      padding: var(--space-md);
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .message.user {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      margin-left: var(--space-lg);
+    }
+
+    .message.assistant {
+      background: var(--bullish-dim);
+      border: 1px solid var(--bullish);
+      margin-right: var(--space-lg);
+    }
+
+    .message.loading {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .typing-indicator {
+      display: flex;
+      gap: 4px;
+    }
+
+    .typing-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--bullish);
+      animation: typing 1.4s infinite;
+    }
+
+    .typing-dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .typing-dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes typing {
+      0%, 60%, 100% { opacity: 0.3; }
+      30% { opacity: 1; }
+    }
+
+    .chat-input-container {
+      display: flex;
+      gap: var(--space-sm);
+    }
+
+    .chat-input {
+      flex: 1;
+      padding: var(--space-md);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 14px;
+      font-family: var(--font-sans);
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .chat-input:focus {
+      border-color: var(--bullish);
+      background: var(--bg-elevated);
+    }
+
+    .chat-send-btn {
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bullish);
+      border: none;
+      border-radius: var(--radius-md);
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .chat-send-btn:hover {
+      background: #059669;
+      transform: translateY(-1px);
+    }
+
+    .chat-send-btn:active {
+      transform: translateY(0);
+    }
+
+    /* ========================================
+       UTILITIES
+       ======================================== */
+
+    .hidden {
+      display: none !important;
+    }
+
+    .text-bullish {
+      color: var(--bullish);
+    }
+
+    .text-bearish {
+      color: var(--bearish);
+    }
+
+    .text-neutral {
+      color: var(--neutral);
+    }
+
+    /* Loading State */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(10, 11, 15, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid var(--border);
+      border-top-color: var(--bullish);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <div class="logo">
+          ATOMIC<span class="logo-accent">X</span>
+        </div>
+
+        <div class="header-tabs">
+          <div class="tab active">God Mode</div>
+          <div class="tab">Performance</div>
+          <div class="tab">Risk</div>
+          <div class="tab">Evolution</div>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <div class="status-indicator">
+          <div class="status-dot"></div>
+          <span>LIVE</span>
+        </div>
+
+        <div class="status-indicator">
+          <span>⚡ {{ modelsActive }}/11 Models Active</span>
+        </div>
+
+        <div class="status-indicator">
+          <span>🎯 {{ accuracy }}% Accuracy</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+      <!-- Left Panel: Assets -->
+      <div class="panel panel-left">
+        <div class="asset-card" v-for="asset in assets" :key="asset.symbol">
+          <div class="asset-header">
+            <div class="asset-symbol">{{ asset.symbol }}</div>
+            <div class="signal-badge" :class="asset.signal.toLowerCase()">
+              {{ asset.signal }}
+            </div>
+          </div>
+
+          <div class="asset-price">{{ formatPrice(asset.price) }}</div>
+          <div class="asset-change" :class="asset.change >= 0 ? 'positive' : 'negative'">
+            {{ asset.change >= 0 ? '+' : '' }}{{ asset.change.toFixed(2) }}%
+          </div>
+
+          <div class="asset-meta">
+            <div class="meta-item">
+              <div class="meta-label">Confidence</div>
+              <div class="meta-value">{{ asset.confidence }}%</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Regime</div>
+              <div class="meta-value">{{ asset.regime }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-header">Quick Stats</div>
+
+        <div class="intel-card">
+          <div class="intel-header">
+            <span class="intel-icon">💰</span>
+            <span class="intel-title">Portfolio PnL</span>
+          </div>
+          <div class="intel-value" :class="portfolio.pnl >= 0 ? 'text-bullish' : 'text-bearish'">
+            {{ portfolio.pnl >= 0 ? '+' : '' }}${{ portfolio.pnl.toLocaleString() }}
+          </div>
+          <div class="intel-subtitle">{{ portfolio.pnlPercent >= 0 ? '+' : '' }}{{ portfolio.pnlPercent.toFixed(2) }}% today</div>
+        </div>
+      </div>
+
+      <!-- Center Panel: Chart & Intelligence -->
+      <div class="panel panel-center">
+        <div class="chart-container">
+          <div class="chart-header">
+            <div class="chart-title">BTC/USDT - God Mode Analysis</div>
+            <div class="chart-controls">
+              <button class="chart-btn active">1H</button>
+              <button class="chart-btn">4H</button>
+              <button class="chart-btn">1D</button>
+              <button class="chart-btn">1W</button>
+            </div>
+          </div>
+          <div id="main-chart"></div>
+        </div>
+
+        <div class="intelligence-panel">
+          <div class="intel-card">
+            <div class="intel-header">
+              <span class="intel-icon">🌊</span>
+              <span class="intel-title">Diffusion</span>
+            </div>
+            <div class="intel-value text-bullish">+2.4%</div>
+            <div class="intel-subtitle">P90: +4.1% | P10: -0.3%</div>
+            <div class="intel-progress">
+              <div class="intel-progress-bar" style="width: 78%"></div>
+            </div>
+          </div>
+
+          <div class="intel-card">
+            <div class="intel-header">
+              <span class="intel-icon">🤖</span>
+              <span class="intel-title">Transformer</span>
+            </div>
+            <div class="intel-value text-bullish">LONG</div>
+            <div class="intel-subtitle">87% Confidence</div>
+            <div class="intel-progress">
+              <div class="intel-progress-bar" style="width: 87%"></div>
+            </div>
+          </div>
+
+          <div class="intel-card">
+            <div class="intel-header">
+              <span class="intel-icon">🕸️</span>
+              <span class="intel-title">Graph Neural Net</span>
+            </div>
+            <div class="intel-value text-neutral">NEUTRAL</div>
+            <div class="intel-subtitle">Cross-asset signals mixed</div>
+            <div class="intel-progress">
+              <div class="intel-progress-bar" style="width: 52%"></div>
+            </div>
+          </div>
+
+          <div class="intel-card">
+            <div class="intel-header">
+              <span class="intel-icon">🐝</span>
+              <span class="intel-title">Swarm (500 agents)</span>
+            </div>
+            <div class="intel-value text-bullish">72%</div>
+            <div class="intel-subtitle">Bullish consensus</div>
+            <div class="intel-progress">
+              <div class="intel-progress-bar" style="width: 72%"></div>
+            </div>
+          </div>
+
+          <div class="intel-card">
+            <div class="intel-header">
+              <span class="intel-icon">📊</span>
+              <span class="intel-title">Order Book</span>
+            </div>
+            <div class="intel-value text-bullish">+0.18</div>
+            <div class="intel-subtitle">Imbalance (bid heavy)</div>
+            <div class="intel-progress">
+              <div class="intel-progress-bar" style="width: 65%"></div>
+            </div>
+          </div>
+
+          <div class="intel-card">
+            <div class="intel-header">
+              <span class="intel-icon">⚡</span>
+              <span class="intel-title">Ensemble</span>
+            </div>
+            <div class="intel-value text-bullish">LONG</div>
+            <div class="intel-subtitle">8/11 models agree (85%)</div>
+            <div class="intel-progress">
+              <div class="intel-progress-bar" style="width: 85%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel: Chat -->
+      <div class="panel panel-right">
+        <div class="chat-container">
+          <div class="chat-messages" ref="chatMessages">
+            <div v-for="(message, index) in messages" :key="index"
+                 :class="['message', message.role]">
+              {{ message.content }}
+            </div>
+
+            <div v-if="isLoading" class="message assistant loading">
+              <div class="typing-indicator">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+              </div>
+              <span>Analyzing with God Mode...</span>
+            </div>
+          </div>
+
+          <div class="chat-input-container">
+            <input
+              v-model="chatInput"
+              @keyup.enter="sendMessage"
+              class="chat-input"
+              placeholder="Ask about predictions, risk, or market analysis..."
+            />
+            <button @click="sendMessage" class="chat-send-btn">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div v-if="initialLoading" class="loading-overlay">
+      <div class="loading-spinner"></div>
+    </div>
+  </div>
+
+  <script>
+    const { createApp } = Vue;
+
+    createApp({
+      data() {
+        return {
+          initialLoading: true,
+          isLoading: false,
+          modelsActive: 11,
+          accuracy: 87,
+
+          assets: [
+            {
+              symbol: 'BTC/USDT',
+              price: 67234.50,
+              change: 2.34,
+              signal: 'LONG',
+              confidence: 85,
+              regime: 'Bull Market'
+            },
+            {
+              symbol: 'ETH/USDT',
+              price: 3456.78,
+              change: 1.89,
+              signal: 'LONG',
+              confidence: 78,
+              regime: 'Bull Market'
+            }
+          ],
+
+          portfolio: {
+            pnl: 12450,
+            pnlPercent: 8.34
+          },
+
+          messages: [
+            {
+              role: 'assistant',
+              content: '👋 Hey! I\'m your AI trading assistant powered by God Mode (11 ML models). Ask me anything about predictions, risk, or market analysis!'
+            }
+          ],
+
+          chatInput: '',
+          ws: null,
+          chart: null
+        };
+      },
+
+      methods: {
+        formatPrice(price) {
+          return '$' + price.toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          });
+        },
+
+        async sendMessage() {
+          if (!this.chatInput.trim()) return;
+
+          // Add user message
+          this.messages.push({
+            role: 'user',
+            content: this.chatInput
+          });
+
+          const query = this.chatInput;
+          this.chatInput = '';
+          this.isLoading = true;
+
+          // Scroll to bottom
+          this.$nextTick(() => {
+            const container = this.$refs.chatMessages;
+            container.scrollTop = container.scrollHeight;
+          });
+
+          // Send to backend with streaming
+          try {
+            const response = await fetch('/api/chat', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ message: query })
+            });
+
+            const data = await response.json();
+
+            this.isLoading = false;
+            this.messages.push({
+              role: 'assistant',
+              content: data.response
+            });
+
+            this.$nextTick(() => {
+              const container = this.$refs.chatMessages;
+              container.scrollTop = container.scrollHeight;
+            });
+          } catch (error) {
+            this.isLoading = false;
+            this.messages.push({
+              role: 'assistant',
+              content: '❌ Error: ' + error.message
+            });
+          }
+        },
+
+        initializeWebSocket() {
+          const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+          this.ws = new WebSocket(`${protocol}//${window.location.host}/ws`);
+
+          this.ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+
+            // Update data from WebSocket
+            if (data.all_symbols_data) {
+              // Update assets
+              this.assets = Object.values(data.all_symbols_data).map(asset => ({
+                symbol: asset.name || asset.symbol,
+                price: asset.price || 0,
+                change: asset.change || 0,
+                signal: asset.signal || 'WATCH',
+                confidence: asset.confidence || 0,
+                regime: asset.regime || 'Unknown'
+              }));
+            }
+
+            if (data.performance) {
+              this.accuracy = Math.round(data.performance.win_rate * 100);
+            }
+          };
+
+          this.ws.onerror = (error) => {
+            console.error('WebSocket error:', error);
+          };
+        },
+
+        initializeChart() {
+          // Initialize ApexCharts
+          const options = {
+            series: [{
+              name: 'BTC Price',
+              data: this.generateMockData()
+            }],
+            chart: {
+              type: 'candlestick',
+              height: 500,
+              background: 'transparent',
+              toolbar: {
+                show: true,
+                tools: {
+                  download: true,
+                  selection: true,
+                  zoom: true,
+                  zoomin: true,
+                  zoomout: true,
+                  pan: true
+                }
+              }
+            },
+            theme: {
+              mode: 'dark'
+            },
+            xaxis: {
+              type: 'datetime',
+              labels: {
+                style: {
+                  colors: '#64748b',
+                  fontFamily: 'JetBrains Mono'
+                }
+              }
+            },
+            yaxis: {
+              tooltip: {
+                enabled: true
+              },
+              labels: {
+                style: {
+                  colors: '#64748b',
+                  fontFamily: 'JetBrains Mono'
+                },
+                formatter: (value) => '$' + value.toFixed(2)
+              }
+            },
+            grid: {
+              borderColor: 'rgba(255,255,255,0.06)'
+            },
+            plotOptions: {
+              candlestick: {
+                colors: {
+                  upward: '#10b981',
+                  downward: '#ef4444'
+                }
+              }
+            }
+          };
+
+          this.chart = new ApexCharts(document.querySelector('#main-chart'), options);
+          this.chart.render();
+        },
+
+        generateMockData() {
+          const data = [];
+          let basePrice = 67000;
+          const now = Date.now();
+
+          for (let i = 100; i >= 0; i--) {
+            const timestamp = now - (i * 3600000); // 1 hour intervals
+            const open = basePrice + (Math.random() - 0.5) * 500;
+            const high = open + Math.random() * 300;
+            const low = open - Math.random() * 300;
+            const close = low + Math.random() * (high - low);
+
+            data.push({
+              x: new Date(timestamp),
+              y: [open, high, low, close]
+            });
+
+            basePrice = close;
+          }
+
+          return data;
+        }
+      },
+
+      mounted() {
+        // Initialize chart
+        this.initializeChart();
+
+        // Connect WebSocket
+        this.initializeWebSocket();
+
+        // Hide loading overlay
+        setTimeout(() => {
+          this.initialLoading = false;
+        }, 1000);
+      },
+
+      beforeUnmount() {
+        if (this.ws) {
+          this.ws.close();
+        }
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

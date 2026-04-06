@@ -1,0 +1,525 @@
+<!-- ORDER BOOK L2 DEPTH HEATMAP -->
+<!-- Shows real-time bid/ask ladder with volume visualization -->
+<!-- REAL DATA - No mock -->
+
+<div class="orderbook-container">
+  <div class="component-header">
+    <h3 class="component-title">📊 Order Book L2 Depth</h3>
+    <div class="component-info">
+      <span class="info-pill" id="ob-symbol">BTCUSDT</span>
+      <span class="info-pill" id="ob-spread">Spread: 0.01%</span>
+    </div>
+  </div>
+
+  <!-- Microstructure Metrics -->
+  <div class="microstructure-metrics">
+    <div class="metric-item">
+      <span class="metric-label">Imbalance</span>
+      <span class="metric-value" id="ob-imbalance">+0.23</span>
+      <div class="metric-bar">
+        <div class="metric-bar-fill" id="imbalance-bar" style="width: 61.5%; background: var(--bullish)"></div>
+      </div>
+    </div>
+    <div class="metric-item">
+      <span class="metric-label">Toxicity</span>
+      <span class="metric-value" id="ob-toxicity">0.42</span>
+      <div class="metric-bar">
+        <div class="metric-bar-fill" id="toxicity-bar" style="width: 42%; background: var(--warning)"></div>
+      </div>
+    </div>
+    <div class="metric-item">
+      <span class="metric-label">Spoofing</span>
+      <span class="metric-value" id="ob-spoofing">0.15</span>
+      <div class="metric-bar">
+        <div class="metric-bar-fill" id="spoofing-bar" style="width: 15%; background: var(--bearish)"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Book Visualization -->
+  <div class="orderbook-viz">
+    <div class="ob-header">
+      <span class="ob-header-price">Price</span>
+      <span class="ob-header-size">Size</span>
+      <span class="ob-header-total">Total</span>
+    </div>
+
+    <!-- Asks (Sell Orders) -->
+    <div class="ob-asks" id="ob-asks">
+      <!-- Dynamically populated -->
+    </div>
+
+    <!-- Current Price -->
+    <div class="ob-current-price">
+      <span class="current-price-label">Last</span>
+      <span class="current-price-value" id="current-price">$51,234.50</span>
+      <span class="current-price-change positive" id="price-change">+0.23%</span>
+    </div>
+
+    <!-- Bids (Buy Orders) -->
+    <div class="ob-bids" id="ob-bids">
+      <!-- Dynamically populated -->
+    </div>
+  </div>
+
+  <!-- Order Flow Summary -->
+  <div class="order-flow-summary">
+    <div class="flow-stat">
+      <span class="flow-icon">📈</span>
+      <div class="flow-info">
+        <span class="flow-label">Bid Liquidity</span>
+        <span class="flow-value" id="bid-liquidity">$2.4M</span>
+      </div>
+    </div>
+    <div class="flow-stat">
+      <span class="flow-icon">📉</span>
+      <div class="flow-info">
+        <span class="flow-label">Ask Liquidity</span>
+        <span class="flow-value" id="ask-liquidity">$1.9M</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.orderbook-container {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+}
+
+.component-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
+}
+
+.component-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.component-info {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.info-pill {
+  padding: 4px 10px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+}
+
+/* Microstructure Metrics */
+.microstructure-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+  padding: var(--space-md);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.metric-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.metric-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.metric-value {
+  font-size: 16px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+}
+
+.metric-bar {
+  height: 4px;
+  background: var(--bg-primary);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 2px;
+}
+
+.metric-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 200ms ease;
+}
+
+/* Order Book Visualization */
+.orderbook-viz {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  margin-bottom: var(--space-md);
+}
+
+.ob-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.ob-header-price {
+  text-align: left;
+}
+
+.ob-header-size {
+  text-align: right;
+}
+
+.ob-header-total {
+  text-align: right;
+}
+
+/* Asks Section */
+.ob-asks {
+  max-height: 200px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+/* Bids Section */
+.ob-bids {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.ob-level {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  padding: 4px var(--space-md);
+  font-size: 12px;
+  font-family: var(--font-mono);
+  position: relative;
+  cursor: pointer;
+  transition: background 100ms ease;
+}
+
+.ob-level:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.ob-level-bg {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  opacity: 0.15;
+  pointer-events: none;
+}
+
+.ob-level.ask .ob-level-bg {
+  background: var(--bearish);
+}
+
+.ob-level.bid .ob-level-bg {
+  background: var(--bullish);
+}
+
+.ob-level-price {
+  text-align: left;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.ob-level.ask .ob-level-price {
+  color: var(--bearish);
+}
+
+.ob-level.bid .ob-level-price {
+  color: var(--bullish);
+}
+
+.ob-level-size {
+  text-align: right;
+  color: var(--text-secondary);
+}
+
+.ob-level-total {
+  text-align: right;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+/* Current Price */
+.ob-current-price {
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-primary);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-family: var(--font-mono);
+}
+
+.current-price-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.current-price-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.current-price-change {
+  font-size: 12px;
+  font-weight: 600;
+  margin-left: auto;
+}
+
+.current-price-change.positive {
+  color: var(--bullish);
+}
+
+.current-price-change.negative {
+  color: var(--bearish);
+}
+
+/* Order Flow Summary */
+.order-flow-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+
+.flow-stat {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.flow-icon {
+  font-size: 20px;
+}
+
+.flow-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.flow-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.flow-value {
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+}
+
+/* Scrollbar styling */
+.ob-asks::-webkit-scrollbar,
+.ob-bids::-webkit-scrollbar {
+  width: 4px;
+}
+
+.ob-asks::-webkit-scrollbar-track,
+.ob-bids::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+.ob-asks::-webkit-scrollbar-thumb,
+.ob-bids::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+</style>
+
+<script>
+// ORDER BOOK HEATMAP - REAL DATA
+async function initOrderBookHeatmap() {
+  const symbol = 'BTCUSDT';
+  let currentPrice = 0;
+
+  // Fetch REAL order book data
+  async function fetchOrderBookData() {
+    try {
+      // Get order book from API
+      const obResponse = await fetch(`/api/god_mode/orderbook?symbol=${symbol}`);
+      const obData = await obResponse.json();
+
+      // Get microstructure features from predictions
+      const predResponse = await fetch(`/api/god_mode/predictions?symbol=${symbol}`);
+      const predData = await predResponse.json();
+
+      const microstructure = predData.predictions?.orderbook;
+
+      if (obData && obData.data_source === 'REAL') {
+        return {
+          bids: obData.bids || [],
+          asks: obData.asks || [],
+          microstructure: microstructure || {},
+          source: 'REAL'
+        };
+      }
+
+      return null;
+
+    } catch (error) {
+      console.error('Error fetching order book data:', error);
+      return null;
+    }
+  }
+
+  // Render order book
+  function renderOrderBook(data) {
+    if (!data || !data.bids.length || !data.asks.length) {
+      document.getElementById('ob-bids').innerHTML =
+        '<div style="padding: var(--space-md); text-align: center; color: var(--text-muted);">Order book data unavailable</div>';
+      document.getElementById('ob-asks').innerHTML = '';
+      return;
+    }
+
+    const { bids, asks, microstructure } = data;
+
+    // Calculate current price (mid-point)
+    if (bids.length && asks.length) {
+      currentPrice = (parseFloat(bids[0][0]) + parseFloat(asks[0][0])) / 2;
+      document.getElementById('current-price').textContent = `$${currentPrice.toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      })}`;
+
+      // Calculate spread
+      const spread = asks[0][0] - bids[0][0];
+      const spreadPct = (spread / currentPrice) * 100;
+      document.getElementById('ob-spread').textContent = `Spread: ${spreadPct.toFixed(3)}%`;
+    }
+
+    // Update microstructure metrics
+    if (microstructure && microstructure.data_source === 'REAL') {
+      const imbalance = microstructure.imbalance || 0;
+      const toxicity = microstructure.toxicity || 0;
+      const spoofing = microstructure.spoofing_score || 0;
+
+      document.getElementById('ob-imbalance').textContent = imbalance >= 0 ? `+${imbalance.toFixed(2)}` : imbalance.toFixed(2);
+      document.getElementById('ob-toxicity').textContent = toxicity.toFixed(2);
+      document.getElementById('ob-spoofing').textContent = spoofing.toFixed(2);
+
+      // Update bars
+      const imbalanceBar = document.getElementById('imbalance-bar');
+      const imbalancePct = ((imbalance + 1) / 2) * 100; // Map -1..1 to 0..100
+      imbalanceBar.style.width = `${imbalancePct}%`;
+      imbalanceBar.style.background = imbalance > 0 ? 'var(--bullish)' : 'var(--bearish)';
+
+      document.getElementById('toxicity-bar').style.width = `${toxicity * 100}%`;
+      document.getElementById('spoofing-bar').style.width = `${spoofing * 100}%`;
+    }
+
+    // Render asks (top 15)
+    const asksContainer = document.getElementById('ob-asks');
+    asksContainer.innerHTML = '';
+
+    const topAsks = asks.slice(0, 15);
+    const maxAskSize = Math.max(...topAsks.map(a => parseFloat(a[1])));
+
+    topAsks.forEach(([price, size]) => {
+      const priceFloat = parseFloat(price);
+      const sizeFloat = parseFloat(size);
+      const total = priceFloat * sizeFloat;
+      const sizePct = (sizeFloat / maxAskSize) * 100;
+
+      const level = document.createElement('div');
+      level.className = 'ob-level ask';
+      level.innerHTML = `
+        <div class="ob-level-bg" style="width: ${sizePct}%"></div>
+        <span class="ob-level-price">${priceFloat.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+        <span class="ob-level-size">${sizeFloat.toFixed(6)}</span>
+        <span class="ob-level-total">${total.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</span>
+      `;
+      asksContainer.appendChild(level);
+    });
+
+    // Render bids (top 15)
+    const bidsContainer = document.getElementById('ob-bids');
+    bidsContainer.innerHTML = '';
+
+    const topBids = bids.slice(0, 15);
+    const maxBidSize = Math.max(...topBids.map(b => parseFloat(b[1])));
+
+    topBids.forEach(([price, size]) => {
+      const priceFloat = parseFloat(price);
+      const sizeFloat = parseFloat(size);
+      const total = priceFloat * sizeFloat;
+      const sizePct = (sizeFloat / maxBidSize) * 100;
+
+      const level = document.createElement('div');
+      level.className = 'ob-level bid';
+      level.innerHTML = `
+        <div class="ob-level-bg" style="width: ${sizePct}%"></div>
+        <span class="ob-level-price">${priceFloat.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+        <span class="ob-level-size">${sizeFloat.toFixed(6)}</span>
+        <span class="ob-level-total">${total.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</span>
+      `;
+      bidsContainer.appendChild(level);
+    });
+
+    // Calculate liquidity
+    const bidLiquidity = bids.slice(0, 50).reduce((sum, [price, size]) => sum + (parseFloat(price) * parseFloat(size)), 0);
+    const askLiquidity = asks.slice(0, 50).reduce((sum, [price, size]) => sum + (parseFloat(price) * parseFloat(size)), 0);
+
+    document.getElementById('bid-liquidity').textContent = `$${(bidLiquidity / 1000000).toFixed(1)}M`;
+    document.getElementById('ask-liquidity').textContent = `$${(askLiquidity / 1000000).toFixed(1)}M`;
+  }
+
+  // Initialize
+  const data = await fetchOrderBookData();
+  renderOrderBook(data);
+
+  // Update every 5 seconds (order book changes fast)
+  setInterval(async () => {
+    const data = await fetchOrderBookData();
+    renderOrderBook(data);
+  }, 5000);
+}
+
+// Auto-init when loaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initOrderBookHeatmap);
+} else {
+  initOrderBookHeatmap();
+}
+</script>

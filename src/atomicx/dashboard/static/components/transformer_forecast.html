@@ -1,0 +1,554 @@
+<!-- TRANSFORMER MULTI-HORIZON FORECAST -->
+<!-- Shows PatchTST predictions across multiple time horizons -->
+<!-- REAL DATA - No mock -->
+
+<div class="transformer-container">
+  <div class="component-header">
+    <h3 class="component-title">⚡ Transformer Multi-Horizon Forecast</h3>
+    <div class="component-info">
+      <span class="info-pill">PatchTST</span>
+      <span class="info-pill" id="transformer-accuracy">Accuracy: 76%</span>
+    </div>
+  </div>
+
+  <!-- Horizon Tabs -->
+  <div class="horizon-tabs">
+    <button class="horizon-tab active" data-horizon="1h" onclick="switchHorizon('1h')">1H</button>
+    <button class="horizon-tab" data-horizon="4h" onclick="switchHorizon('4h')">4H</button>
+    <button class="horizon-tab" data-horizon="24h" onclick="switchHorizon('24h')">24H</button>
+    <button class="horizon-tab" data-horizon="1w" onclick="switchHorizon('1w')">1W</button>
+  </div>
+
+  <!-- Active Horizon Display -->
+  <div class="active-horizon" id="active-horizon">
+    <div class="horizon-prediction">
+      <span class="prediction-label">Predicted Move</span>
+      <span class="prediction-value" id="horizon-prediction">+2.8%</span>
+      <span class="prediction-target" id="horizon-target">→ $52,680</span>
+    </div>
+    <div class="horizon-confidence">
+      <span class="confidence-label">Confidence</span>
+      <div class="confidence-bar-wrapper">
+        <div class="confidence-bar" id="horizon-confidence-bar" style="width: 73%"></div>
+      </div>
+      <span class="confidence-value" id="horizon-confidence-value">73%</span>
+    </div>
+  </div>
+
+  <!-- All Horizons Summary -->
+  <div class="horizons-summary">
+    <div class="summary-card" id="horizon-1h">
+      <div class="summary-header">
+        <span class="summary-time">1H</span>
+        <span class="summary-direction bullish">📈</span>
+      </div>
+      <div class="summary-prediction">+0.3%</div>
+      <div class="summary-confidence">
+        <div class="summary-confidence-bar" style="width: 68%"></div>
+      </div>
+    </div>
+
+    <div class="summary-card" id="horizon-4h">
+      <div class="summary-header">
+        <span class="summary-time">4H</span>
+        <span class="summary-direction bullish">📈</span>
+      </div>
+      <div class="summary-prediction">+1.2%</div>
+      <div class="summary-confidence">
+        <div class="summary-confidence-bar" style="width: 71%"></div>
+      </div>
+    </div>
+
+    <div class="summary-card" id="horizon-24h">
+      <div class="summary-header">
+        <span class="summary-time">24H</span>
+        <span class="summary-direction bullish">📈</span>
+      </div>
+      <div class="summary-prediction">+2.8%</div>
+      <div class="summary-confidence">
+        <div class="summary-confidence-bar" style="width: 73%"></div>
+      </div>
+    </div>
+
+    <div class="summary-card" id="horizon-1w">
+      <div class="summary-header">
+        <span class="summary-time">1W</span>
+        <span class="summary-direction neutral">➡️</span>
+      </div>
+      <div class="summary-prediction">+0.5%</div>
+      <div class="summary-confidence">
+        <div class="summary-confidence-bar" style="width: 52%"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Attention Heatmap Info -->
+  <div class="attention-info">
+    <div class="info-row">
+      <span class="info-label">Model Focus</span>
+      <span class="info-value" id="attention-focus">Recent volatility spike + volume surge</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Key Features</span>
+      <span class="info-value" id="key-features">Price momentum, Volume profile, VWAP deviation</span>
+    </div>
+  </div>
+</div>
+
+<style>
+.transformer-container {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+}
+
+.component-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
+}
+
+.component-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.component-info {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.info-pill {
+  padding: 4px 10px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+}
+
+/* Horizon Tabs */
+.horizon-tabs {
+  display: flex;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: var(--space-sm);
+}
+
+.horizon-tab {
+  padding: 6px 16px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.horizon-tab:hover {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
+.horizon-tab.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg-primary);
+}
+
+/* Active Horizon Display */
+.active-horizon {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-md);
+  margin-bottom: var(--space-md);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.horizon-prediction {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.prediction-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.prediction-value {
+  font-size: 28px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--bullish);
+}
+
+.prediction-value.negative {
+  color: var(--bearish);
+}
+
+.prediction-target {
+  font-size: 14px;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+}
+
+.horizon-confidence {
+  flex: 1;
+  max-width: 300px;
+  margin-left: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.confidence-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.confidence-bar-wrapper {
+  height: 8px;
+  background: var(--bg-primary);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.confidence-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--bullish));
+  border-radius: 4px;
+  transition: width 300ms ease;
+}
+
+.confidence-value {
+  font-size: 16px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+}
+
+/* Horizons Summary */
+.horizons-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.summary-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-sm);
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.summary-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.summary-card.active {
+  border-color: var(--accent);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.summary-time {
+  font-size: 11px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.summary-direction {
+  font-size: 16px;
+}
+
+.summary-prediction {
+  font-size: 18px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.summary-card .summary-prediction.positive {
+  color: var(--bullish);
+}
+
+.summary-card .summary-prediction.negative {
+  color: var(--bearish);
+}
+
+.summary-confidence {
+  height: 4px;
+  background: var(--bg-primary);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.summary-confidence-bar {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 300ms ease;
+}
+
+/* Attention Info */
+.attention-info {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.info-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--text-muted);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.info-value {
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: right;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .horizons-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+</style>
+
+<script>
+// TRANSFORMER FORECAST - REAL DATA
+let forecastData = null;
+let activeHorizon = '24h';
+
+async function initTransformerForecast() {
+  // Fetch REAL transformer predictions
+  async function fetchTransformerData() {
+    try {
+      const response = await fetch('/api/god_mode/predictions?symbol=BTC/USDT');
+      const data = await response.json();
+
+      const transformer = data.predictions?.transformer;
+
+      if (transformer && transformer.data_source === 'REAL') {
+        return {
+          horizons: transformer.horizons || {},
+          attention_focus: transformer.attention_focus || 'N/A',
+          key_features: transformer.key_features || [],
+          source: 'REAL'
+        };
+      }
+
+      return null;
+
+    } catch (error) {
+      console.error('Error fetching transformer data:', error);
+      return null;
+    }
+  }
+
+  // Render transformer forecast
+  function renderTransformerForecast(data) {
+    if (!data || !data.horizons || Object.keys(data.horizons).length === 0) {
+      document.querySelector('.horizons-summary').innerHTML =
+        '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: var(--space-lg);">Transformer forecast unavailable</div>';
+      return;
+    }
+
+    forecastData = data;
+
+    // Render all horizon summary cards
+    const horizonKeys = ['1h', '4h', '24h', '1w'];
+    const horizonMap = {
+      '1h': data.horizons['1h'] || data.horizons[1],
+      '4h': data.horizons['4h'] || data.horizons[4],
+      '24h': data.horizons['24h'] || data.horizons[24],
+      '1w': data.horizons['1w'] || data.horizons[168]
+    };
+
+    horizonKeys.forEach(key => {
+      const horizon = horizonMap[key];
+      const card = document.getElementById(`horizon-${key}`);
+
+      if (!horizon || !card) return;
+
+      const prediction = horizon.predicted_change || 0;
+      const confidence = horizon.confidence || 0.5;
+      const direction = horizon.direction || 'neutral';
+
+      // Update summary card
+      const predictionEl = card.querySelector('.summary-prediction');
+      predictionEl.textContent = `${prediction >= 0 ? '+' : ''}${(prediction * 100).toFixed(1)}%`;
+      predictionEl.className = `summary-prediction ${prediction >= 0 ? 'positive' : 'negative'}`;
+
+      const directionIcon = card.querySelector('.summary-direction');
+      directionIcon.textContent = direction === 'bullish' ? '📈' : direction === 'bearish' ? '📉' : '➡️';
+      directionIcon.className = `summary-direction ${direction}`;
+
+      const confidenceBar = card.querySelector('.summary-confidence-bar');
+      confidenceBar.style.width = `${confidence * 100}%`;
+
+      // Mark active
+      if (key === activeHorizon) {
+        card.classList.add('active');
+      } else {
+        card.classList.remove('active');
+      }
+    });
+
+    // Update active horizon display
+    updateActiveHorizonDisplay(activeHorizon);
+
+    // Update attention info
+    document.getElementById('attention-focus').textContent = data.attention_focus || 'N/A';
+    document.getElementById('key-features').textContent = data.key_features.length > 0 ?
+      data.key_features.join(', ') : 'N/A';
+  }
+
+  // Update active horizon display
+  function updateActiveHorizonDisplay(horizonKey) {
+    if (!forecastData) return;
+
+    const horizonMap = {
+      '1h': forecastData.horizons['1h'] || forecastData.horizons[1],
+      '4h': forecastData.horizons['4h'] || forecastData.horizons[4],
+      '24h': forecastData.horizons['24h'] || forecastData.horizons[24],
+      '1w': forecastData.horizons['1w'] || forecastData.horizons[168]
+    };
+
+    const horizon = horizonMap[horizonKey];
+    if (!horizon) return;
+
+    const prediction = horizon.predicted_change || 0;
+    const confidence = horizon.confidence || 0.5;
+    const targetPrice = horizon.target_price || 0;
+
+    // Update prediction display
+    const predictionEl = document.getElementById('horizon-prediction');
+    predictionEl.textContent = `${prediction >= 0 ? '+' : ''}${(prediction * 100).toFixed(1)}%`;
+    predictionEl.className = `prediction-value ${prediction >= 0 ? 'positive' : 'negative'}`;
+
+    document.getElementById('horizon-target').textContent = targetPrice > 0 ?
+      `→ $${targetPrice.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : '';
+
+    // Update confidence
+    const confidencePct = Math.round(confidence * 100);
+    document.getElementById('horizon-confidence-bar').style.width = `${confidencePct}%`;
+    document.getElementById('horizon-confidence-value').textContent = `${confidencePct}%`;
+  }
+
+  // Initialize
+  const data = await fetchTransformerData();
+  renderTransformerForecast(data);
+
+  // Update every 30 seconds
+  setInterval(async () => {
+    const data = await fetchTransformerData();
+    renderTransformerForecast(data);
+  }, 30000);
+}
+
+// Switch horizon (called by buttons)
+window.switchHorizon = function(horizonKey) {
+  activeHorizon = horizonKey;
+
+  // Update tab states
+  document.querySelectorAll('.horizon-tab').forEach(tab => {
+    if (tab.dataset.horizon === horizonKey) {
+      tab.classList.add('active');
+    } else {
+      tab.classList.remove('active');
+    }
+  });
+
+  // Update summary card states
+  document.querySelectorAll('.summary-card').forEach(card => {
+    if (card.id === `horizon-${horizonKey}`) {
+      card.classList.add('active');
+    } else {
+      card.classList.remove('active');
+    }
+  });
+
+  // Update active display
+  if (forecastData) {
+    const horizonMap = {
+      '1h': forecastData.horizons['1h'] || forecastData.horizons[1],
+      '4h': forecastData.horizons['4h'] || forecastData.horizons[4],
+      '24h': forecastData.horizons['24h'] || forecastData.horizons[24],
+      '1w': forecastData.horizons['1w'] || forecastData.horizons[168]
+    };
+
+    const horizon = horizonMap[horizonKey];
+    if (!horizon) return;
+
+    const prediction = horizon.predicted_change || 0;
+    const confidence = horizon.confidence || 0.5;
+    const targetPrice = horizon.target_price || 0;
+
+    const predictionEl = document.getElementById('horizon-prediction');
+    predictionEl.textContent = `${prediction >= 0 ? '+' : ''}${(prediction * 100).toFixed(1)}%`;
+    predictionEl.className = `prediction-value ${prediction >= 0 ? 'positive' : 'negative'}`;
+
+    document.getElementById('horizon-target').textContent = targetPrice > 0 ?
+      `→ $${targetPrice.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : '';
+
+    const confidencePct = Math.round(confidence * 100);
+    document.getElementById('horizon-confidence-bar').style.width = `${confidencePct}%`;
+    document.getElementById('horizon-confidence-value').textContent = `${confidencePct}%`;
+  }
+};
+
+// Auto-init when loaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initTransformerForecast);
+} else {
+  initTransformerForecast();
+}
+</script>

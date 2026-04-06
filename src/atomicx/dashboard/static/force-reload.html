@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Force Reload Dashboard</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <style>
+        body {
+            background: #000;
+            color: #0f0;
+            font-family: monospace;
+            padding: 40px;
+            text-align: center;
+        }
+        .message {
+            font-size: 24px;
+            margin: 40px 0;
+        }
+        .spinner {
+            font-size: 48px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="spinner">⟳</div>
+    <div class="message">Clearing cache and loading fresh dashboard...</div>
+    <div style="color: #666; margin-top: 20px;">This will redirect in 2 seconds</div>
+
+    <script>
+        // Force clear any cached versions
+        if ('caches' in window) {
+            caches.keys().then(names => {
+                names.forEach(name => caches.delete(name));
+            });
+        }
+
+        // Get the symbol from URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const symbol = urlParams.get('symbol') || 'BTC/USDT';
+
+        // Wait 2 seconds then redirect with cache buster
+        setTimeout(() => {
+            const timestamp = Date.now();
+            window.location.replace(`/dashboard.html?symbol=${encodeURIComponent(symbol)}&_v=${timestamp}`);
+        }, 2000);
+    </script>
+</body>
+</html>

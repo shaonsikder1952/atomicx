@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Causality & Decision Audit - AtomicX</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles/core.css">
+    <style>
+        /* Page-specific styles */
+
+        .page-header {
+            margin-bottom: var(--space-10);
+            padding-bottom: var(--space-6);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .page-title {
+            font-size: clamp(2rem, 4vw, 2.5rem);
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            margin-bottom: var(--space-3);
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-subtitle {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .nav {
+            display: flex;
+            gap: var(--space-3);
+            margin-bottom: var(--space-8);
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-4);
+            margin-bottom: var(--space-8);
+        }
+
+        .filters {
+            display: flex;
+            gap: var(--space-3);
+            margin-bottom: var(--space-6);
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: var(--space-2) var(--space-4);
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-family: var(--font-sans);
+            font-size: var(--text-sm);
+            font-weight: var(--font-medium);
+            transition: all 150ms ease;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--border-medium);
+            background: var(--bg-card);
+        }
+
+        .filter-btn.active {
+            background: var(--accent-dim);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .decision-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--space-4);
+            overflow: hidden;
+            transition: all 150ms ease;
+        }
+
+        .decision-card:hover {
+            border-color: var(--border-medium);
+        }
+
+        .decision-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-5);
+            cursor: pointer;
+            transition: background 150ms ease;
+        }
+
+        .decision-header:hover {
+            background: var(--bg-primary);
+        }
+
+        .decision-title {
+            font-size: var(--text-lg);
+            font-weight: var(--font-semibold);
+            color: var(--text-primary);
+            margin-bottom: var(--space-1);
+        }
+
+        .decision-subtitle {
+            font-size: var(--text-sm);
+            color: var(--text-muted);
+        }
+
+        .decision-status {
+            display: flex;
+            gap: var(--space-3);
+            align-items: center;
+        }
+
+        .badge-correct { background: var(--success-dim); color: var(--success); border: 1px solid rgba(34, 197, 94, 0.3); }
+        .badge-incorrect { background: var(--error-dim); color: var(--error); border: 1px solid rgba(239, 68, 68, 0.3); }
+        .badge-pending { background: var(--warning-dim); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); }
+
+        .expand-icon {
+            color: var(--text-secondary);
+            font-size: var(--text-2xl);
+            line-height: 1;
+            transition: transform 150ms ease;
+        }
+
+        .expand-icon.expanded { transform: rotate(180deg); }
+
+        .decision-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 300ms ease;
+        }
+
+        .decision-details.expanded { max-height: 10000px; }
+
+        .detail-section {
+            margin: 0 var(--space-5) var(--space-5) var(--space-5);
+            padding: var(--space-4);
+            background: var(--bg-primary);
+            border-left: 2px solid var(--accent);
+            border-radius: var(--radius);
+        }
+
+        .detail-section h3 {
+            color: var(--accent);
+            font-size: var(--text-base);
+            font-weight: var(--font-semibold);
+            margin-bottom: var(--space-3);
+        }
+
+        .causal-step {
+            padding: var(--space-3);
+            margin: var(--space-2) 0;
+            background: var(--bg-elevated);
+            border-left: 2px solid var(--accent);
+            border-radius: var(--radius-sm);
+        }
+
+        .causal-step-number {
+            color: var(--accent);
+            font-weight: var(--font-semibold);
+            font-family: var(--font-mono);
+            font-size: var(--text-xs);
+            margin-right: var(--space-2);
+        }
+
+        .causal-step-title {
+            color: var(--text-primary);
+            font-weight: var(--font-medium);
+            margin-bottom: var(--space-2);
+        }
+
+        .causal-step-data {
+            color: var(--text-secondary);
+            font-size: var(--text-sm);
+            font-family: var(--font-mono);
+            margin-left: var(--space-4);
+        }
+
+        .reasoning-root {
+            color: var(--success);
+            font-size: var(--text-base);
+            font-weight: var(--font-semibold);
+            margin-bottom: var(--space-3);
+            padding: var(--space-3);
+            background: var(--success-dim);
+            border-radius: var(--radius);
+        }
+
+        .reasoning-branch {
+            padding: var(--space-3);
+            margin: var(--space-2) 0;
+            background: var(--bg-elevated);
+            border-left: 2px solid var(--text-muted);
+            border-radius: var(--radius-sm);
+        }
+
+        .branch-factor { color: var(--warning); font-weight: var(--font-medium); }
+        .branch-weight { color: var(--accent); font-size: var(--text-sm); font-family: var(--font-mono); margin-left: var(--space-2); }
+        .branch-details { color: var(--text-secondary); margin-top: var(--space-2); font-size: var(--text-sm); font-family: var(--font-mono); }
+
+        .thinking-entry {
+            padding: var(--space-3);
+            margin: var(--space-2) 0;
+            background: rgba(139, 92, 246, 0.1);
+            border-left: 2px solid #8b5cf6;
+            border-radius: var(--radius-sm);
+        }
+
+        .thinking-thought { color: #c4b5fd; font-style: italic; }
+        .thinking-result { color: var(--text-secondary); margin-top: var(--space-1); font-size: var(--text-sm); }
+
+        .loading, .error, .empty {
+            text-align: center;
+            padding: var(--space-12);
+            color: var(--text-secondary);
+        }
+
+        .error {
+            background: var(--error-dim);
+            border: 1px solid var(--error);
+            border-radius: var(--radius-lg);
+            color: var(--error);
+        }
+
+        details { cursor: pointer; }
+        details summary {
+            color: var(--accent);
+            font-weight: var(--font-medium);
+            padding: var(--space-2);
+            border-radius: var(--radius-sm);
+            transition: background 150ms ease;
+        }
+
+        details summary:hover { background: var(--bg-primary); }
+        details[open] summary { margin-bottom: var(--space-3); }
+
+        /* Data Tables */
+        table {
+            width: 100%;
+            font-family: var(--font-mono);
+            font-size: var(--text-sm);
+            border-collapse: collapse;
+        }
+
+        table td {
+            padding: var(--space-2);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Special sections styling */
+        .section-swarm {
+            background: rgba(139, 92, 246, 0.05);
+            border-left-color: #8b5cf6;
+        }
+
+        .section-news {
+            background: rgba(34, 197, 94, 0.05);
+            border-left-color: var(--success);
+        }
+
+        .section-agents {
+            background: rgba(245, 158, 11, 0.05);
+            border-left-color: var(--warning);
+        }
+
+        .section-variables {
+            background: rgba(16, 185, 129, 0.05);
+            border-left-color: var(--accent);
+        }
+
+        .agent-item {
+            padding: var(--space-2);
+            margin: var(--space-1) 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: var(--radius-sm);
+        }
+
+        .agent-item-bullish {
+            border-left: 2px solid var(--success);
+        }
+
+        .agent-item-bearish {
+            border-left: 2px solid var(--error);
+        }
+
+        .agent-item-neutral {
+            border-left: 2px solid var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="page-header">
+            <h1 class="page-title">🧠 Causality & Decision Audit</h1>
+            <p class="page-subtitle">Complete transparency: Every decision, every reason, every lesson learned</p>
+        </div>
+
+        <nav class="nav">
+            <a href="/">← Dashboard</a>
+            <a href="/database.html">📊 Database</a>
+            <a href="/memory.html">🧠 Memory</a>
+            <a href="/causality.html">🔍 Causality</a>
+        </nav>
+
+        <!-- Stats -->
+        <div class="stats-grid" id="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Decisions</div>
+                <div class="stat-value" id="stat-total">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Correct Predictions</div>
+                <div class="stat-value" id="stat-correct">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Accuracy</div>
+                <div class="stat-value" id="stat-accuracy">0%</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Patterns Used</div>
+                <div class="stat-value" id="stat-patterns">0</div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters">
+            <button class="filter-btn active" onclick="filterDecisions('all')">All</button>
+            <button class="filter-btn" onclick="filterDecisions('correct')">Correct Only</button>
+            <button class="filter-btn" onclick="filterDecisions('incorrect')">Incorrect Only</button>
+            <button class="filter-btn" onclick="filterDecisions('pending')">Pending</button>
+        </div>
+
+        <!-- Decisions -->
+        <div id="decisions-container">
+            <div class="loading">Loading decision audits...</div>
+        </div>
+    </div>
+
+    <script>
+        let allDecisions = [];
+        let currentFilter = 'all';
+
+        async function loadData() {
+            try {
+                const response = await fetch('/api/causality');
+                const data = await response.json();
+
+                if (data.error) {
+                    document.getElementById('decisions-container').innerHTML = `
+                        <div class="error">Error loading data: ${data.error}</div>
+                    `;
+                    return;
+                }
+
+                // Update stats
+                const stats = data.learning_stats || {};
+                document.getElementById('stat-total').textContent = stats.total_decisions || 0;
+                document.getElementById('stat-correct').textContent = stats.correct_decisions || 0;
+                document.getElementById('stat-accuracy').textContent = (stats.accuracy || 0).toFixed(1) + '%';
+                document.getElementById('stat-patterns').textContent = stats.patterns_used || 0;
+
+                // Store decisions
+                allDecisions = data.decisions || [];
+
+                // Render decisions
+                renderDecisions();
+            } catch (error) {
+                document.getElementById('decisions-container').innerHTML = `
+                    <div class="error">Error loading data: ${error.message}</div>
+                `;
+            }
+        }
+
+        function filterDecisions(filter) {
+            currentFilter = filter;
+
+            // Update button states
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            renderDecisions();
+        }
+
+        function renderDecisions() {
+            const container = document.getElementById('decisions-container');
+
+            // Filter decisions
+            let decisions = allDecisions;
+            if (currentFilter === 'correct') {
+                decisions = allDecisions.filter(d => d.was_correct === true);
+            } else if (currentFilter === 'incorrect') {
+                decisions = allDecisions.filter(d => d.was_correct === false);
+            } else if (currentFilter === 'pending') {
+                decisions = allDecisions.filter(d => d.was_correct === null);
+            }
+
+            if (decisions.length === 0) {
+                container.innerHTML = '<div class="empty">No decisions found</div>';
+                return;
+            }
+
+            container.innerHTML = decisions.map((decision, idx) => renderDecision(decision, idx)).join('');
+        }
+
+        function renderDecision(decision, idx) {
+            const statusBadge = decision.was_correct === null ?
+                '<span class="badge badge-pending">PENDING</span>' :
+                decision.was_correct ?
+                '<span class="badge badge-correct">✓ CORRECT</span>' :
+                '<span class="badge badge-incorrect">✗ INCORRECT</span>';
+
+            const timestamp = decision.decision_timestamp ?
+                new Date(decision.decision_timestamp).toLocaleString() : 'Unknown';
+
+            return `
+                <div class="decision-card fade-in">
+                    <div class="decision-header" onclick="toggleDecision(${idx})">
+                        <div>
+                            <div class="decision-title">
+                                ${decision.news_title || decision.pred_symbol || decision.decision_type || 'Decision'}
+                            </div>
+                            <div class="decision-subtitle">
+                                ${decision.decision_type} • ${timestamp}
+                            </div>
+                        </div>
+                        <div class="decision-status">
+                            ${statusBadge}
+                            <span class="expand-icon" id="icon-${idx}">▼</span>
+                        </div>
+                    </div>
+
+                    <div class="decision-details" id="details-${idx}">
+                        ${renderCausalChain(decision)}
+                        ${renderReasoningTree(decision)}
+                        ${renderThinkingLog(decision)}
+                        ${renderSwarmOutput(decision)}
+                        ${renderNewsContent(decision)}
+                        ${renderAllAgents(decision)}
+                        ${renderCompleteVariables(decision)}
+                        ${renderRawData(decision)}
+                        ${renderVariablesChanged(decision)}
+                        ${renderProblems(decision)}
+                        ${renderLearningInsights(decision)}
+                        ${renderSystemImprovements(decision)}
+                        ${renderLearningIterations(decision)}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderCausalChain(decision) {
+            if (!decision.causal_chain || decision.causal_chain.length === 0) return '';
+
+            const steps = decision.causal_chain.map(step => `
+                <div class="causal-step">
+                    <span class="causal-step-number">Step ${step.step}</span>
+                    <span class="causal-step-title">${step.what}</span>
+                    <pre class="causal-step-data">${JSON.stringify(step.data, null, 2)}</pre>
+                </div>
+            `).join('');
+
+            return `
+                <div class="detail-section">
+                    <h3>📊 Causal Chain</h3>
+                    ${steps}
+                </div>
+            `;
+        }
+
+        function renderReasoningTree(decision) {
+            if (!decision.reasoning_tree) return '';
+
+            const tree = decision.reasoning_tree;
+            const branches = (tree.branches || []).map(branch => `
+                <div class="reasoning-branch">
+                    <span class="branch-factor">${branch.factor}</span>
+                    <span class="branch-weight">Weight: ${(branch.weight * 100).toFixed(0)}%</span>
+                    <pre class="branch-details">${JSON.stringify(branch.details, null, 2)}</pre>
+                </div>
+            `).join('');
+
+            return `
+                <div class="detail-section">
+                    <h3>🌳 Reasoning Tree</h3>
+                    <div class="reasoning-root">Root: ${tree.root}</div>
+                    ${branches}
+                </div>
+            `;
+        }
+
+        function renderThinkingLog(decision) {
+            if (!decision.thinking_log || decision.thinking_log.length === 0) return '';
+
+            const entries = decision.thinking_log.map(entry => `
+                <div class="thinking-entry">
+                    <div class="thinking-thought">"${entry.thought}"</div>
+                    <div class="thinking-result">→ ${entry.result}</div>
+                </div>
+            `).join('');
+
+            return `
+                <div class="detail-section">
+                    <h3>💭 Thinking Process</h3>
+                    ${entries}
+                </div>
+            `;
+        }
+
+        function renderSwarmOutput(decision) {
+            if (!decision.raw_data || !decision.raw_data.layer_states_raw || !decision.raw_data.layer_states_raw.swarm) return '';
+
+            const swarm = decision.raw_data.layer_states_raw.swarm;
+            const swarmRaw = swarm.raw_result || {};
+
+            return `
+                <div class="detail-section section-swarm">
+                    <h3>🐝 Swarm Simulation Output</h3>
+                    <div style="margin-bottom: var(--space-3);">
+                        <div><strong>Consensus Direction:</strong> ${swarmRaw.consensus_direction || swarm.direction || 'N/A'}</div>
+                        <div><strong>Consensus Strength:</strong> ${((swarmRaw.consensus_strength || swarm.confidence || 0) * 100).toFixed(1)}%</div>
+                        <div><strong>Agent Count:</strong> ${swarmRaw.agent_count || 'N/A'}</div>
+                        <div><strong>Simulation Tier:</strong> ${swarmRaw.simulation_tier || 'N/A'}</div>
+                        <div><strong>Volatility Forecast:</strong> ${(swarmRaw.volatility_forecast || 0).toFixed(2)}</div>
+                        <div><strong>Regime Shift Probability:</strong> ${((swarmRaw.regime_shift_probability || 0) * 100).toFixed(1)}%</div>
+                    </div>
+                    ${swarmRaw.metadata ? `
+                        <details>
+                            <summary>Agent Positions & Metadata</summary>
+                            <pre>${JSON.stringify(swarmRaw.metadata, null, 2)}</pre>
+                        </details>
+                    ` : ''}
+                    ${swarmRaw.price_trajectory && swarmRaw.price_trajectory.length > 0 ? `
+                        <details>
+                            <summary>Price Trajectory (Last 20 steps)</summary>
+                            <div style="color: var(--text-secondary); margin-top: var(--space-2); font-family: var(--font-mono); font-size: var(--text-xs);">${swarmRaw.price_trajectory.map((p, i) => `${i+1}: $${p.toFixed(2)}`).join(' → ')}</div>
+                        </details>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function renderNewsContent(decision) {
+            if (!decision.news_article_full && !decision.news_title) return '';
+
+            const sentiment = decision.news_sentiment || 'N/A';
+            const people = decision.news_people || [];
+            const entities = decision.news_entities || [];
+
+            return `
+                <div class="detail-section section-news">
+                    <h3>📰 News Content & Analysis</h3>
+                    <div style="margin-bottom: var(--space-3);">
+                        <div><strong>Title:</strong> ${decision.news_title || 'N/A'}</div>
+                        <div><strong>Sentiment:</strong> ${sentiment}</div>
+                        ${people.length > 0 ? `<div><strong>People Mentioned:</strong> ${people.join(', ')}</div>` : ''}
+                        ${entities.length > 0 ? `<div><strong>Entities:</strong> ${entities.join(', ')}</div>` : ''}
+                    </div>
+                    ${decision.news_article_full ? `
+                        <details>
+                            <summary>Full Article Text</summary>
+                            <div style="color: var(--text-secondary); margin-top: var(--space-3); line-height: 1.6;">${decision.news_article_full}</div>
+                        </details>
+                    ` : ''}
+                    ${decision.decision_reasoning ? `
+                        <details>
+                            <summary>Decision Reasoning from News</summary>
+                            <pre>${JSON.stringify(decision.decision_reasoning, null, 2)}</pre>
+                        </details>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function renderAllAgents(decision) {
+            if (!decision.raw_data || !decision.raw_data.all_agents_raw || decision.raw_data.all_agents_raw.length === 0) return '';
+
+            const agents = decision.raw_data.all_agents_raw;
+            const bullishAgents = agents.filter(a => a.sig === 'BULLISH').length;
+            const bearishAgents = agents.filter(a => a.sig === 'BEARISH').length;
+            const neutralAgents = agents.filter(a => a.sig === 'NEUTRAL').length;
+
+            const agentList = agents.map(agent => {
+                const typeClass = agent.cls === 'ar-long' ? 'agent-item-bullish' :
+                                 agent.cls === 'ar-short' ? 'agent-item-bearish' :
+                                 'agent-item-neutral';
+                return `
+                    <div class="agent-item ${typeClass}">
+                        <div><strong>${agent.name}</strong> → ${agent.sig} (${agent.acc})</div>
+                        ${agent.logic ? `<div style="color: var(--text-muted); font-size: var(--text-sm); margin-top: var(--space-1);">${agent.logic}</div>` : ''}
+                    </div>
+                `;
+            }).join('');
+
+            return `
+                <div class="detail-section section-agents">
+                    <h3>🤖 All Agent Signals (${agents.length} agents)</h3>
+                    <div style="margin-bottom: var(--space-3);">
+                        <strong>Summary:</strong> 🟢 ${bullishAgents} Bullish | 🔴 ${bearishAgents} Bearish | ⚪ ${neutralAgents} Neutral
+                    </div>
+                    <details>
+                        <summary>View all ${agents.length} agent signals</summary>
+                        <div style="margin-top: var(--space-3); max-height: 400px; overflow-y: auto;">
+                            ${agentList}
+                        </div>
+                    </details>
+                </div>
+            `;
+        }
+
+        function renderCompleteVariables(decision) {
+            if (!decision.raw_data || !decision.raw_data.complete_variables) return '';
+
+            const vars = decision.raw_data.complete_variables;
+            const varCount = Object.keys(vars).length;
+
+            // Sort variables by absolute value
+            const sortedVars = Object.entries(vars).sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]));
+            const top20 = sortedVars.slice(0, 20);
+
+            const varTable = top20.map(([name, value]) => `
+                <tr>
+                    <td>${name}</td>
+                    <td style="text-align: right; color: ${value > 0 ? 'var(--success)' : value < 0 ? 'var(--error)' : 'var(--text-muted)'};">${typeof value === 'number' ? value.toFixed(6) : value}</td>
+                </tr>
+            `).join('');
+
+            return `
+                <div class="detail-section section-variables">
+                    <h3>📊 Complete Variable Snapshot (${varCount} variables)</h3>
+                    <div style="margin-bottom: var(--space-3);"><strong>Top 20 by magnitude:</strong></div>
+                    <table>
+                        ${varTable}
+                    </table>
+                    <details style="margin-top: var(--space-3);">
+                        <summary>View all ${varCount} variables (JSON)</summary>
+                        <pre style="margin-top: var(--space-3); max-height: 400px; overflow-y: auto;">${JSON.stringify(vars, null, 2)}</pre>
+                    </details>
+                </div>
+            `;
+        }
+
+        function renderRawData(decision) {
+            if (!decision.raw_data || Object.keys(decision.raw_data).length === 0) return '';
+
+            return `
+                <div class="detail-section">
+                    <h3>📦 Complete Raw Data</h3>
+                    <details>
+                        <summary>Click to expand full raw data...</summary>
+                        <pre style="margin-top: var(--space-3);">${JSON.stringify(decision.raw_data, null, 2)}</pre>
+                    </details>
+                </div>
+            `;
+        }
+
+        function renderVariablesChanged(decision) {
+            if (!decision.variables_changed || Object.keys(decision.variables_changed).length === 0) return '';
+
+            const variables = Object.entries(decision.variables_changed).map(([name, change]) => `
+                <div style="padding: var(--space-2); margin: var(--space-1) 0; background: rgba(255, 165, 0, 0.05); border-left: 2px solid var(--warning); border-radius: var(--radius-sm);">
+                    <div style="color: var(--warning); font-weight: var(--font-medium);">${name}</div>
+                    <div style="color: var(--text-secondary); margin-top: var(--space-1);">${change.old} → ${change.new}</div>
+                    <div style="color: var(--text-muted); font-size: var(--text-sm); margin-top: var(--space-1);">Why: ${change.why}</div>
+                </div>
+            `).join('');
+
+            return `
+                <div class="detail-section">
+                    <h3>⚙️ Variables Changed</h3>
+                    ${variables}
+                </div>
+            `;
+        }
+
+        function renderProblems(decision) {
+            if (!decision.problems_found || decision.problems_found.length === 0) return '';
+
+            const problems = decision.problems_found.map(problem => `
+                <div style="padding: var(--space-3); margin: var(--space-2) 0; background: var(--error-dim); border: 1px solid var(--error); border-radius: var(--radius);">
+                    <div style="color: var(--error); font-weight: var(--font-medium); margin-bottom: var(--space-2);">Problem: ${problem.problem}</div>
+                    ${(problem.attempted_solutions || []).map(sol => `<div style="color: var(--text-secondary); margin: var(--space-1) 0; padding-left: var(--space-4);">→ ${sol}</div>`).join('')}
+                    <div style="color: var(--success); font-weight: var(--font-medium); margin-top: var(--space-2);">✓ What Worked: ${problem.what_worked}</div>
+                    <div style="color: var(--warning); font-style: italic; margin-top: var(--space-1);">Learned: ${problem.learned}</div>
+                </div>
+            `).join('');
+
+            return `
+                <div class="detail-section">
+                    <h3>🔧 Problems & Solutions</h3>
+                    ${problems}
+                </div>
+            `;
+        }
+
+        function renderLearningInsights(decision) {
+            if (!decision.learning_insights || decision.learning_insights.length === 0) return '';
+
+            const insights = decision.learning_insights.map(insight => `
+                <div style="padding: var(--space-3); margin: var(--space-2) 0; background: var(--success-dim); border-left: 2px solid var(--success); border-radius: var(--radius);">
+                    <div style="color: var(--success); font-weight: var(--font-medium);">💡 ${insight.insight}</div>
+                    <div style="color: var(--accent); margin-top: var(--space-2);">Will Change: ${insight.will_change}</div>
+                    <div style="color: var(--text-secondary); font-size: var(--text-sm); margin-top: var(--space-1);">Expected: ${insight.expected_improvement}</div>
+                </div>
+            `).join('');
+
+            return `
+                <div class="detail-section">
+                    <h3>💡 Learning Insights</h3>
+                    ${insights}
+                </div>
+            `;
+        }
+
+        function renderSystemImprovements(decision) {
+            if (!decision.system_improvements || decision.system_improvements.length === 0) return '';
+
+            const improvements = decision.system_improvements.map(imp => `
+                <div style="padding: var(--space-3); margin: var(--space-2) 0; background: var(--accent-dim); border-left: 2px solid var(--accent); border-radius: var(--radius);">
+                    <span style="color: var(--accent); font-weight: var(--font-medium);">${imp.improvement}</span>
+                    <span class="badge ${imp.implemented ? 'badge-success' : 'badge-warning'}" style="margin-left: var(--space-2);">
+                        ${imp.implemented ? '✓ Implemented' : '⏳ Pending'}
+                    </span>
+                    <div style="color: var(--text-secondary); font-size: var(--text-sm); margin-top: var(--space-2);">Impact: ${imp.impact}</div>
+                </div>
+            `).join('');
+
+            return `
+                <div class="detail-section">
+                    <h3>🚀 System Improvements</h3>
+                    ${improvements}
+                </div>
+            `;
+        }
+
+        function renderLearningIterations(decision) {
+            if (!decision.learning_iterations || decision.learning_iterations.length === 0) return '';
+
+            const iterations = decision.learning_iterations.slice(-5).map((iter, idx) => `
+                <div class="causal-step">
+                    <span class="causal-step-number">Iteration ${idx + 1}</span>
+                    <div style="color: var(--text-secondary); font-family: var(--font-mono); font-size: var(--text-sm); margin-top: var(--space-2);">
+                        <div><strong>Timestamp:</strong> ${iter.timestamp}</div>
+                        <div><strong>Modification:</strong> ${iter.modification}</div>
+                        <div><strong>Result:</strong> ${iter.result}</div>
+                        <div><strong>Decision:</strong> ${iter.decision}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            return `
+                <div class="detail-section">
+                    <h3>📈 Learning Iterations</h3>
+                    ${iterations}
+                </div>
+            `;
+        }
+
+        function toggleDecision(idx) {
+            const details = document.getElementById(`details-${idx}`);
+            const icon = document.getElementById(`icon-${idx}`);
+
+            if (details.classList.contains('expanded')) {
+                details.classList.remove('expanded');
+                icon.classList.remove('expanded');
+            } else {
+                details.classList.add('expanded');
+                icon.classList.add('expanded');
+            }
+        }
+
+        // Load data on page load
+        loadData();
+
+        // Auto-refresh every 30 seconds
+        setInterval(loadData, 30000);
+    </script>
+</body>
+</html>
